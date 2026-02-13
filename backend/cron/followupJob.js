@@ -21,7 +21,7 @@ const runFollowUpCheck = async () => {
         // 4. Não agendaram (seguiu_fluxo_agendamento = false)
         
         const query = `
-            SELECT id, cliente, telefone, data_inicio 
+            SELECT id, telefone_cliente, data_inicio 
             FROM tb_atendimentos 
             WHERE 
                 data_inicio < NOW() - INTERVAL '24 hours'
@@ -43,10 +43,13 @@ const runFollowUpCheck = async () => {
         // Processar cada atendimento
         for (const atendimento of rows) {
             // AQUI: Integrar com API de envio de mensagem se existir
-            // ex: await whatsappService.sendMessage(atendimento.telefone, message);
+            // ex: await whatsappService.sendMessage(atendimento.telefone_cliente, message);
             
-            const message = messageTemplate.replace('{cliente}', atendimento.cliente);
-            console.log(`[Cron] Enviando follow-up simulado para: ${atendimento.cliente} (${atendimento.id})`);
+            // Como não temos a coluna nome, usamos "Cliente" ou o próprio número
+            const nomeCliente = "Cliente"; 
+            const message = messageTemplate ? messageTemplate.replace('{cliente}', nomeCliente) : "Olá, podemos ajudar?";
+            
+            console.log(`[Cron] Enviando follow-up simulado para: ${atendimento.telefone_cliente} (${atendimento.id})`);
             console.log(`[Mensagem]: "${message}"`);
 
             // Atualizar status no banco
