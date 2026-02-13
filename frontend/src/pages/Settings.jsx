@@ -6,7 +6,21 @@ import { createAtendimento, fetchSettings, saveSettings } from '../lib/api';
 
 export default function Settings() {
     const [activeTab, setActiveTab] = useState('profile');
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(() => {
+        return localStorage.getItem('theme') === 'dark' || 
+               (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    });
+
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [darkMode]);
+
     const [notifications, setNotifications] = useState({
         email: true,
         push: true,
@@ -302,7 +316,7 @@ export default function Settings() {
                                     <h3 className="font-medium text-zinc-900 dark:text-white mb-4">Aparência</h3>
                                     <div className="flex items-center gap-4">
                                         <button 
-                                            onClick={() => { setDarkMode(false); document.documentElement.classList.remove('dark'); }}
+                                            onClick={() => setDarkMode(false)}
                                             className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
                                                 !darkMode 
                                                     ? 'border-red-600 bg-red-50 dark:bg-red-900/10' 
@@ -313,7 +327,7 @@ export default function Settings() {
                                             <span className={`font-medium ${!darkMode ? 'text-red-700' : 'text-zinc-600'}`}>Modo Claro</span>
                                         </button>
                                         <button 
-                                            onClick={() => { setDarkMode(true); document.documentElement.classList.add('dark'); }}
+                                            onClick={() => setDarkMode(true)}
                                             className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
                                                 darkMode 
                                                     ? 'border-red-600 bg-red-50 dark:bg-red-900/10' 
