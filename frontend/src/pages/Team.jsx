@@ -3,16 +3,27 @@ import { Sidebar } from '../components/Sidebar';
 import { fetchTeam } from '../lib/api';
 import { Plus, Search, Filter, MoreVertical, Shield, User, Mail, Calendar } from 'lucide-react';
 
+import React, { useState, useEffect } from 'react';
+import { Sidebar } from '../components/Sidebar';
+import { fetchTeam, createUser, updateUser, deleteUser } from '../lib/api';
+import { Plus, Search, Filter, MoreVertical, Shield, User, Mail, Trash2, Edit } from 'lucide-react';
+import { toast } from 'sonner';
+
 export default function Team() {
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
+    
+    // Form State
     const [formData, setFormData] = useState({
         nome: '',
         email: '',
         cargo: 'Vendedor',
-        status: 'Ativo'
+        status: 'Ativo',
+        senha: ''
     });
 
     useEffect(() => {
@@ -21,13 +32,38 @@ export default function Team() {
 
     const loadTeam = async () => {
         try {
+            setLoading(true);
             const data = await fetchTeam();
-            setMembers(data);
+            // Map backend roles to frontend display
+            const mappedData = data.map(user => ({
+                ...user,
+                cargo: mapRoleToLabel(user.role)
+            }));
+            setMembers(mappedData);
         } catch (error) {
             console.error('Erro ao carregar equipe:', error);
+            toast.error('Erro ao carregar equipe.');
         } finally {
             setLoading(false);
         }
+    };
+
+    const mapRoleToLabel = (role) => {
+        const map = {
+            'admin': 'Administrador',
+            'gestor': 'Gerente',
+            'vendedor': 'Vendedor'
+        };
+        return map[role] || role;
+    };
+
+    const mapLabelToRole = (label) => {
+        const map = {
+            'Administrador': 'admin',
+            'Gerente': 'gestor',
+            'Vendedor': 'vendedor'
+        };
+        return map[label] || 'vendedor';
     };
 
     const handleInputChange = (e) => {
@@ -35,16 +71,72 @@ export default function Team() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleEdit = (member) => {
+        setIsEditing(true);
+        setSelectedMember(member);
+        setFormData({
+            nome: member.nome,
+            email: member.email,
+            cargo: member.cargo,
+            status: member.status || 'Ativo',
+            senha: '' // Password is empty on edit (optional to change)
+        });
+        setShowModal(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Tem certeza que deseja remover este usuário?')) return;
+        
+        try {
+            await deleteUser(id);
+            toast.success('Usuário removido com sucesso!');
+            loadTeam();
+        } catch (error) {
+            console.error('Erro ao remover usuário:', error);
+            toast.error('Erro ao remover usuário.');
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const newMember = {
-            id: members.length + 1,
-            ...formData,
-            role: formData.cargo === 'Administrador' ? 'admin' : 'sales'
+        
+        // Prepare payload
+        const payload = {
+            nome: formData.nome,
+            email: formData.email,
+            role: mapLabelToRole(formData.cargo),
+            status: formData.status,
+            senha: formData.senha
         };
-        setMembers([...members, newMember]);
-        setShowModal(false);
-        setFormData({ nome: '', email: '', cargo: 'Vendedor', status: 'Ativo' });
+
+        try {
+            if (isEditing) {
+                if (!payload.senha) delete payload.senha; // Don't send empty password on update
+                await updateUser(selectedMember.id, payload);
+                toast.success('Usuário atualizado com sucesso!');
+            } else {
+                if (!payload.senha) {
+                    toast.error('A senha é obrigatória para novos usuários.');
+                    return;
+                }
+                await createUser(payload);
+                toast.success('Usuário criado com sucesso!');
+            }
+            
+            setShowModal(false);
+            resetForm();
+            loadTeam();
+
+        } catch (error) {
+            console.error('Erro ao salvar usuário:', error);
+            toast.error(error.response?.data?.message || 'Erro ao salvar usuário.');
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({ nome: '', email: '', cargo: 'Vendedor', status: 'Ativo', senha: '' });
+        setIsEditing(false);
+        setSelectedMember(null);
     };
 
     const filteredMembers = members.filter(member => 
@@ -61,7 +153,7 @@ export default function Team() {
                         <p className="text-zinc-500 dark:text-zinc-400">Gerencie o acesso e funções dos colaboradores</p>
                     </div>
                     <button 
-                        onClick={() => setShowModal(true)}
+                        onClick={() => { resetForm(); setShowModal(true); }}
                         className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm"
                     >
                         <Plus size={20} />
@@ -81,10 +173,6 @@ export default function Team() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                        <Filter size={18} />
-                        <span>Filtros</span>
-                    </button>
                 </div>
 
                 {/* Table */}
@@ -138,9 +226,22 @@ export default function Team() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <button className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
-                                                    <MoreVertical size={18} />
-                                                </button>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button 
+                                                        onClick={() => handleEdit(member)}
+                                                        className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-blue-500"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit size={18} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDelete(member.id)}
+                                                        className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-red-500"
+                                                        title="Remover"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -151,12 +252,14 @@ export default function Team() {
                 </div>
             </div>
 
-            {/* Modal Novo Membro */}
+            {/* Modal Novo/Editar Membro */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
                     <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Adicionar Membro</h2>
+                            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+                                {isEditing ? 'Editar Membro' : 'Adicionar Membro'}
+                            </h2>
                             <button onClick={() => setShowModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
                                 <span className="sr-only">Fechar</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -219,6 +322,25 @@ export default function Team() {
                                     </select>
                                 </div>
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                                    {isEditing ? 'Nova Senha (opcional)' : 'Senha'}
+                                </label>
+                                <input
+                                    type="password"
+                                    name="senha"
+                                    value={formData.senha}
+                                    onChange={handleInputChange}
+                                    placeholder={isEditing ? "Deixe em branco para manter" : "Senha de acesso"}
+                                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                />
+                                {isEditing && (
+                                    <p className="text-xs text-zinc-500 mt-1">
+                                        Preencha apenas se quiser alterar a senha do usuário.
+                                    </p>
+                                )}
+                            </div>
                             
                             <div className="pt-2 flex gap-3">
                                 <button
@@ -232,7 +354,7 @@ export default function Team() {
                                     type="submit"
                                     className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
                                 >
-                                    Salvar Membro
+                                    {isEditing ? 'Atualizar' : 'Criar Usuário'}
                                 </button>
                             </div>
                         </form>

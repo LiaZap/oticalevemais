@@ -14,7 +14,7 @@ const api = axios.create({
 });
 
 // Flag to force mock mode if backend is down
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // Interceptor para adicionar o token JWT em todas as requisições
 api.interceptors.request.use((config) => {
@@ -117,13 +117,40 @@ export const saveSettings = async (key, value) => {
 };
 
 export const fetchTeam = async () => {
-    if (USE_MOCK) return mockFetchTeam();
+    // if (USE_MOCK) return mockFetchTeam(); // Disable mock for real user management
     try {
-        const response = await api.get('/team');
+        const response = await api.get('/users'); // Changed from /team to /users
         return response.data;
     } catch (error) {
         console.warn("Backend failed, falling back to mock");
         return mockFetchTeam();
+    }
+};
+
+export const createUser = async (userData) => {
+    try {
+        const response = await api.post('/users', userData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updateUser = async (id, userData) => {
+    try {
+        const response = await api.put(`/users/${id}`, userData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteUser = async (id) => {
+    try {
+        const response = await api.delete(`/users/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error;
     }
 };
 
