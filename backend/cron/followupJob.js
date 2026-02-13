@@ -1,4 +1,6 @@
 const configStore = require('../configStore');
+const cron = require('node-cron');
+const db = require('../db');
 
 // Configuração do Cron Job
 // Para demonstração, roda a cada 1 minuto: '* * * * *'
