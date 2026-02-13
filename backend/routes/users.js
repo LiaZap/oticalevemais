@@ -16,16 +16,18 @@ router.get('/', async (req, res) => {
 
 // Criar novo usuário
 router.post('/', async (req, res) => {
-    const { nome, email, senha, role, status } = req.body;
+    // Trim basic fields
+    const cleanEmail = email ? email.trim() : '';
+    const cleanNome = nome ? nome.trim() : '';
 
     // Validação básica
-    if (!nome || !email || !senha || !role) {
+    if (!cleanNome || !cleanEmail || !senha || !role) {
         return res.status(400).json({ message: 'Preencha todos os campos obrigatórios.' });
     }
 
     try {
         // Verificar se usuário já existe
-        const userExist = await db.query('SELECT * FROM tb_usuarios WHERE email = $1', [email]);
+        const userExist = await db.query('SELECT * FROM tb_usuarios WHERE email = $1', [cleanEmail]);
         if (userExist.rows.length > 0) {
             return res.status(400).json({ message: 'Usuário já cadastrado com este email.' });
         }
@@ -35,20 +37,22 @@ router.post('/', async (req, res) => {
         const senhaHash = await bcrypt.hash(senha, salt);
 
         // Inserir no banco
-        // Nota: Assumo que a tabela tb_usuarios tenha a coluna 'status'. Se não tiver, precisaremos criar.
-        // Vou verificar o schema primeiro ou adicionar a coluna se falhar, mas o user pediu "status" no frontend.
-        // O schema original não tinha status, então vou adicionar essa coluna no banco também.
-        
         const newUser = await db.query(
             'INSERT INTO tb_usuarios (nome, email, senha_hash, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id, nome, email, role, status',
-            [nome, email, senhaHash, role, status || 'Ativo']
+            [cleanNome, cleanEmail, senhaHash, role, status || 'Ativo']
         );
 
         res.json(newUser.rows[0]);
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Erro ao criar usuário');
+        if (err.code === '23505') { // Unique violation
+            return res.status(400).json({ message: 'Usuário já cadastrado com este email.' });
+        }
+        if (err.code === '42703') { // Undefined column
+            return res.status(500).json({ message: 'Erro de banco de dados: Coluna ausente. Verifique as migrações.' });
+        }
+        res.status(500).json({ message: 'Erro ao criar usuário: ' + err.message });
     }
 });
 
