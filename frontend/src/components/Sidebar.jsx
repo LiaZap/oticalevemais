@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Home, BarChart2, Users, Settings, LogOut, Menu, X, HelpCircle, Activity, Download } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import logo from '../assets/logo_white.png';
 import { Logo } from './Logo';
 
 export function Sidebar({ children }) {
