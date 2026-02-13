@@ -1,7 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { Sidebar } from '../components/Sidebar';
-import { fetchTeam } from '../lib/api';
-import { Plus, Search, Filter, MoreVertical, Shield, User, Mail, Calendar } from 'lucide-react';
 
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
