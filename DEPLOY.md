@@ -11,10 +11,7 @@ Crie um serviço do tipo **App** ou **Docker Image** apontando para o diretório
 Você DEVE configurar as seguintes variáveis de ambiente:
 
 - `PORT`: `80` (O Easypanel gerencia isso, mas garanta que a porta interna do container seja 5000)
-- `DB_HOST`: Host do seu banco PostgreSQL
-- `DB_USER`: Usuário do banco
-- `DB_PASSWORD`: Senha do banco
-- `DB_NAME`: Nome do banco
+- `DATABASE_URL`: A URL de conexão interna do seu banco PostgreSQL (ex: `postgres://user:pass@host:5432/db`)
 - `JWT_SECRET`: Uma string secreta e longa para segurança
 - `FRONTEND_URL`: A URL onde seu frontend estará rodando (ex: `https://app.oticalevemais.com`). Importante para o CORS.
 
