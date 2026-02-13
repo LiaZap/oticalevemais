@@ -1,0 +1,9 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="#9c0102">
+    <g transform="translate(100, 200) scale(0.8)">
+        <path d="M50,50 Q50,0 100,0 L200,0 Q250,0 250,50 L250,150 Q250,200 200,200 L100,200 Q50,200 50,150 Z M80,50 L80,150 Q80,170 100,170 L200,170 Q220,170 220,150 L220,50 Q220,30 200,30 L100,30 Q80,30 80,50 Z" />
+        <rect x="250" y="80" width="40" height="20" />
+        <rect x="300" y="0" width="10" height="250" /> 
+        <text x="330" y="80" font-family="Futura, Century Gothic, sans-serif" font-size="60" font-weight="300">Óticas</text>
+        <text x="330" y="180" font-family="Arial Black, Gadget, sans-serif" font-size="90" font-weight="900">LEVE+</text>
+    </g>
+</svg>
