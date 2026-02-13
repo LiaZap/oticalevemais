@@ -4,7 +4,13 @@ O projeto foi preparado para ser implantado usando Docker. Siga os passos abaixo
 
 ## 1. Backend (Node.js)
 
-Crie um serviço do tipo **App** ou **Docker Image** apontando para o diretório `backend`.
+Crie um serviço do tipo **App** (Source: GitHub).
+
+**Configuração Obrigatória na aba Source:**
+
+- **Repository:** `LiaZap/oticalevemais`
+- **Branch:** `main`
+- **Root Directory:** `backend` (Isso é CRUCIAL, senão ele não acha o Dockerfile)
 
 ### Environment Variables
 
@@ -17,7 +23,11 @@ Você DEVE configurar as seguintes variáveis de ambiente:
 
 ## 2. Frontend (React + Nginx)
 
-Crie um serviço do tipo **App** ou **Docker Image** apontando para o diretório `frontend`.
+Crie um serviço do tipo **App** (Source: GitHub).
+
+**Configuração Obrigatória na aba Source:**
+
+- **Root Directory:** `frontend`
 
 ### Build Args / Environment Variables
 
