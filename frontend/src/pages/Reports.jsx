@@ -7,6 +7,8 @@ import {
     PieChart, Pie, Cell, Legend,
     BarChart, Bar
 } from 'recharts';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function Reports() {
     const [data, setData] = useState(null);
@@ -28,8 +30,7 @@ export default function Reports() {
         }
     };
 
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+
 
 // ... (existing imports)
 
