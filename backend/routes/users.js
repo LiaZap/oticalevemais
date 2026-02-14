@@ -16,6 +16,8 @@ router.get('/', async (req, res) => {
 
 // Criar novo usuário
 router.post('/', async (req, res) => {
+    const { nome, email, senha, role, status } = req.body;
+
     // Trim basic fields
     const cleanEmail = email ? email.trim() : '';
     const cleanNome = nome ? nome.trim() : '';
