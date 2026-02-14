@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
-import { fetchAtendimentos } from '../lib/api';
+import { fetchAtendimentos, createAtendimento } from '../lib/api';
 import { Search, Filter, Plus, Phone, Calendar, User, MessageCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { sendToN8N } from '../lib/n8n';
 import { KanbanBoard } from '../components/KanbanBoard';
@@ -75,7 +76,8 @@ export default function Atendimentos() {
         cliente: '',
         telefone: '',
         canal: 'WhatsApp',
-        tipo: 'Orçamento'
+        tipo: 'Orçamento',
+        data_nascimento: ''
     });
 
     const handleInputChange = (e) => {
@@ -85,18 +87,33 @@ export default function Atendimentos() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const newAtendimento = {
-            id: atendimentos.length + 1,
-            ...formData,
-            data_inicio: new Date().toISOString(),
-            status: 'Pendente'
-        };
-        setAtendimentos([newAtendimento, ...atendimentos]);
-        setShowModal(false);
-        setFormData({ cliente: '', telefone: '', canal: 'WhatsApp', tipo: 'Orçamento' });
+        try {
+            // Using the real API via createAtendimento imported from ../lib/api helpers (which we need to import or ensure logic matches)
+            // Wait, we need to import createAtendimento. 
+            // Checking imports... createAtendimento is not imported in original file.
+            // But let's assume we will fix imports. 
+            // For now, let's just make sure we send the data.
+            
+            // Actually, looking at original file, it was manually constructing the object and setting state.
+            // We need to change this to call the API.
+            
+            const newAtendimento = {
+                ...formData,
+                status: 'Pendente'
+            };
+            
+            // Call API
+            const savedAtendimento = await createAtendimento(newAtendimento);
+            
+            setAtendimentos([savedAtendimento, ...atendimentos]);
+            setShowModal(false);
+            setFormData({ cliente: '', telefone: '', canal: 'WhatsApp', tipo: 'Orçamento', data_nascimento: '' });
 
-        // Dispara Webhook
-        await sendToN8N('NEW_ATENDIMENTO', newAtendimento);
+            toast.success('Atendimento criado com sucesso!');
+        } catch (error) {
+            console.error(error);
+            toast.error('Erro ao criar atendimento.');
+        }
     };
 
     return (
@@ -182,6 +199,7 @@ export default function Atendimentos() {
                                         <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Contato</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Canal</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Lente</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Data</th>
                                     </tr>
                                 </thead>
@@ -233,6 +251,17 @@ export default function Atendimentos() {
                                                         <option value="Finalizado" className="bg-white text-zinc-900">Finalizado</option>
                                                         <option value="Cancelado" className="bg-white text-zinc-900">Cancelado</option>
                                                     </select>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {atendimento.classificacao_lente && (
+                                                        <span className={`text-xs font-medium px-2 py-1 rounded-md border ${
+                                                            atendimento.classificacao_lente === 'Multifocal' 
+                                                                ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800' 
+                                                                : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
+                                                        }`}>
+                                                            {atendimento.classificacao_lente}
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <button className="text-zinc-400 hover:text-red-600 transition-colors">
@@ -293,6 +322,19 @@ export default function Atendimentos() {
                                     className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
                                     placeholder="Ex: 11999887766"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Data de Nascimento</label>
+                                <input
+                                    type="date"
+                                    name="data_nascimento"
+                                    value={formData.data_nascimento}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                />
+                                <p className="text-xs text-zinc-500 mt-1">Necessário para classificação automática (Simples/Multifocal)</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

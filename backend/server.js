@@ -23,6 +23,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/users', require('./routes/users'));
+app.use('/api/atendimentos', require('./routes/atendimentos'));
 
 app.get('/api/test-cron', async (req, res) => {
     try {

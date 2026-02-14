@@ -28,6 +28,25 @@ export default function Reports() {
         }
     };
 
+    const handleExport = () => {
+        if (!data) return;
+
+        // Create CSV content
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + "Data,Atendimentos,Vendas\n"
+            + data.evolucao.map(e => `${e.data},${e.atendimentos},${e.vendas}`).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "relatorio_vendas.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+
+
     if (loading) {
         return (
             <Sidebar>
@@ -60,9 +79,13 @@ export default function Reports() {
                             </select>
                             <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={18} />
                         </div>
-                        <button className="flex justify-center items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                        </div>
+                        <button 
+                            onClick={handleExport}
+                            className="flex justify-center items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                        >
                             <Download size={18} />
-                            <span>Exportar</span>
+                            <span>Exportar CSV</span>
                         </button>
                     </div>
                 </div>

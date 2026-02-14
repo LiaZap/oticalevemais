@@ -60,12 +60,25 @@ router.get('/kpis', auth, async (req, res) => {
             LIMIT 50;
         `;
 
+        // KPI 6: Vendas por Tipo de Lente (Multifocal vs Simples)
+        const salesByTypeQuery = `
+            SELECT 
+                COALESCE(classificacao_lente, 'Não Classificado') AS tipo,
+                COUNT(*) AS quantidade
+            FROM tb_atendimentos
+            WHERE data_inicio >= CURRENT_DATE - INTERVAL '30 days'
+            AND status = 'Finalizado'
+            GROUP BY 1
+            ORDER BY 2 DESC;
+        `;
+
         const [volume, intent, followup, conversion, retention] = await Promise.all([
             db.query(volumeQuery),
             db.query(intentQuery),
             db.query(followupQuery),
             db.query(conversionQuery),
-            db.query(retentionQuery)
+            db.query(retentionQuery),
+            db.query(salesByTypeQuery)
         ]);
 
         res.json({
@@ -73,7 +86,8 @@ router.get('/kpis', auth, async (req, res) => {
             intencao: intent.rows,
             followup: followup.rows[0],
             conversao: conversion.rows[0],
-            retencao: retention.rows
+            retencao: retention.rows,
+            vendas_por_tipo: salesByType.rows
         });
 
     } catch (err) {

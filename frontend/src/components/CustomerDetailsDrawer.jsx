@@ -59,9 +59,22 @@ export default function CustomerDetailsDrawer({ atendimento, onClose, onUpdate }
           </div>
 
           <div className="flex gap-2">
-            <button className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm shadow-green-500/20">
-                <MessageCircle size={18} /> Iniciar Conversa no WhatsApp
-            </button>
+            <a 
+                href={`https://wa.me/${atendimento.telefone ? atendimento.telefone.replace(/\D/g, '') : ''}`}
+                target="_blank" 
+                rel="noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm shadow-green-500/20"
+            >
+                <MessageCircle size={18} /> WhatsApp
+            </a>
+            <a 
+                href={`https://instagram.com/`}
+                target="_blank" 
+                rel="noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 hover:opacity-90 text-white rounded-lg text-sm font-medium transition-opacity shadow-sm"
+            >
+                <MessageCircle size={18} /> Instagram
+            </a>
           </div>
         </div>
 

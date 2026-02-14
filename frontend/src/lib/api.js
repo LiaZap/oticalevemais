@@ -51,35 +51,32 @@ export const fetchDashboardKPIs = async () => {
 };
 
 export const fetchAtendimentos = async () => {
-    if (USE_MOCK) return mockFetchAtendimentos();
     try {
         const response = await api.get('/atendimentos');
         return response.data;
     } catch (error) {
-        console.warn("Backend failed, falling back to mock");
-        return mockFetchAtendimentos();
+        console.error("Backend failed to fetch atendimentos", error);
+        throw error;
     }
 };
 
 export const createAtendimento = async (atendimento) => {
-    if (USE_MOCK) return addMockAtendimento(atendimento);
     try {
         const response = await api.post('/atendimentos', atendimento);
         return response.data;
     } catch (error) {
-         console.warn("Backend failed, falling back to mock");
-         return addMockAtendimento(atendimento);
+        console.error("Backend failed to create atendimento", error);
+        throw error;
     }
 }
 
 export const updateAtendimentoStatus = async (id, status) => {
-    if (USE_MOCK) return updateMockAtendimentoStatus(id, status);
     try {
-        const response = await api.patch(`/atendimentos/${id}/status`, { status });
+        const response = await api.put(`/atendimentos/${id}`, { status });
         return response.data;
     } catch (error) {
-        console.warn("Backend failed, falling back to mock");
-        return updateMockAtendimentoStatus(id, status);
+        console.error("Backend failed to update status", error);
+        throw error;
     }
 }
 
