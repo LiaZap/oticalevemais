@@ -72,7 +72,7 @@ router.get('/kpis', auth, async (req, res) => {
             ORDER BY 2 DESC;
         `;
 
-        const [volume, intent, followup, conversion, retention] = await Promise.all([
+        const [volume, intent, followup, conversion, retention, salesByType] = await Promise.all([
             db.query(volumeQuery),
             db.query(intentQuery),
             db.query(followupQuery),

@@ -28,14 +28,23 @@ export default function Reports() {
         }
     };
 
-    const handleExport = () => {
-        if (!data) return;
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
-        // Create CSV content
+// ... (existing imports)
+
+    const handleExport = () => {
+        // ... (CSV export logic remains or can be separated, but let's keep it simple for now or create a dropdown for export type)
+        // User asked for "poder baixar o relatorio em pdf"
+        // I will add a separate button or change the existing one to a dropdown. 
+        // For simplicity, I will add a second button "Exportar PDF".
+    };
+
+    const handleExportCSV = () => {
+        if (!data) return;
         const csvContent = "data:text/csv;charset=utf-8," 
             + "Data,Atendimentos,Vendas\n"
             + data.evolucao.map(e => `${e.data},${e.atendimentos},${e.vendas}`).join("\n");
-
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -43,6 +52,33 @@ export default function Reports() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const handleExportPDF = () => {
+        if (!data) return;
+        const doc = new jsPDF();
+        
+        doc.text("Relatório Gerencial - Ótica Leve+", 14, 20);
+        doc.text(`Período: ${dateRange}`, 14, 30);
+        
+        // Table for Evolution
+        doc.autoTable({
+            startY: 40,
+            head: [['Data', 'Atendimentos', 'Vendas']],
+            body: data.evolucao.map(row => [row.data, row.atendimentos, row.vendas]),
+        });
+        
+        // Add summary of sales by type
+        const finalY = doc.lastAutoTable.finalY + 10;
+        doc.text("Vendas por Tipo de Lente:", 14, finalY);
+        
+        let yPos = finalY + 10;
+        data.vendas_por_tipo?.forEach(item => {
+            doc.text(`- ${item.tipo}: ${item.quantidade}`, 20, yPos);
+            yPos += 7;
+        });
+
+        doc.save("relatorio_otica.pdf");
     };
 
 
@@ -81,11 +117,18 @@ export default function Reports() {
                         </div>
 
                         <button 
-                            onClick={handleExport}
-                            className="flex justify-center items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                            onClick={handleExportCSV}
+                            className="flex justify-center items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-3 py-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm"
                         >
-                            <Download size={18} />
-                            <span>Exportar CSV</span>
+                            <Download size={16} />
+                            <span>CSV</span>
+                        </button>
+                        <button 
+                            onClick={handleExportPDF}
+                            className="flex justify-center items-center gap-2 bg-red-600 border border-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                        >
+                            <Download size={16} />
+                            <span>PDF</span>
                         </button>
                     </div>
                 </div>
@@ -147,6 +190,35 @@ export default function Reports() {
                                     >
                                         {data?.canais.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Vendas por Tipo de Lente */}
+                    <div className="bg-white dark:bg-zinc-900 p-4 md:p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 lg:col-span-1">
+                        <h2 className="text-base md:text-lg font-semibold text-zinc-900 dark:text-white mb-6 flex items-center gap-2">
+                            <Users className="text-blue-600" size={20} />
+                            Vendas por Tipo de Lente
+                        </h2>
+                        <div className="h-64 flex items-center justify-center">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={data?.vendas_por_tipo}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={80}
+                                        dataKey="quantidade"
+                                        nameKey="tipo"
+                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    >
+                                        {data?.vendas_por_tipo?.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.tipo === 'Multifocal' ? '#7c3aed' : '#2563eb'} />
                                         ))}
                                     </Pie>
                                     <Tooltip />
