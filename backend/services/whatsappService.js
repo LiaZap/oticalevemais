@@ -335,7 +335,9 @@ const processWebhook = async (data) => {
     let content;
     if (isMediaContent) {
         if (mediaMimetype.startsWith('audio/') || msg.content.PTT) {
-            content = '[Áudio]';
+            // Include audio URL if available from webhook payload for frontend playback
+            const audioUrl = msg.content.URL || msg.content.url || msg.file || msg.fileUrl || msg.media || '';
+            content = audioUrl ? `[Áudio] ${audioUrl}` : '[Áudio]';
         } else if (mediaMimetype.startsWith('image/')) {
             // Save initially as [Imagem] with optional caption
             // The Uazapi fileURL will be added later by handleIncomingImage
@@ -693,7 +695,7 @@ async function handleIncomingAudio(chatId, messageId, contactName) {
 
         // Transcribe audio via Uazapi (uses their Whisper integration)
         console.log(`[AI] Transcribing audio via Uazapi for ${chatId}, msgId=${messageId}`);
-        const mediaData = await downloadMedia(messageId, { transcribe: true, return_link: true });
+        const mediaData = await downloadMedia(messageId, { transcribe: true, return_link: true, generate_mp3: true });
 
         if (!mediaData) {
             console.log('[AI] Failed to download/transcribe audio from Uazapi');
