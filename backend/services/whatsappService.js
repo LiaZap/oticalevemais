@@ -249,10 +249,15 @@ const processWebhook = async (data) => {
     const messageId = msg.messageid || msg.id || `uaz_${Date.now()}`;
     const messageType = msg.type || msg.messageType || 'text';
 
-    // Skip non-text messages for AI processing (but still save them)
+    // Detect message types
     const isTextMessage = messageType === 'text' || messageType === 'Conversation' || messageType === 'extendedText';
+    const isImageMessage = messageType === 'image' || messageType === 'ImageMessage';
 
-    console.log(`[Webhook] ${isFromMe ? 'SENT' : 'RECEIVED'} from ${sender}: "${content.substring(0, 50)}"`);
+    // Get image URL if it's an image message (Uazapi sends base64 or file URL)
+    const imageUrl = msg.file || msg.fileUrl || msg.media || msg.base64 || null;
+    const imageCaption = msg.caption || msg.text || '';
+
+    console.log(`[Webhook] ${isFromMe ? 'SENT' : 'RECEIVED'} from ${sender}: type=${messageType}, "${content.substring(0, 50)}"${isImageMessage ? ` [IMG: ${imageUrl ? 'has URL' : 'no URL'}]` : ''}`);
 
     try {
         // 1. Upsert Chat
@@ -283,13 +288,18 @@ const processWebhook = async (data) => {
             });
         }
 
-        // 4. AI Handling — only for incoming customer TEXT messages
-        if (!isFromMe && isTextMessage && content !== '[Midia]') {
-            // Marcar mensagem como lida (visualizada) imediatamente
-            markAsRead(sender);
-
-            // Usa buffer para acumular mensagens antes de responder (15s)
-            bufferMessage(sender, content, contactName);
+        // 4. AI Handling — incoming customer messages
+        if (!isFromMe) {
+            if (isTextMessage && content !== '[Midia]') {
+                // Texto: usa buffer para acumular mensagens antes de responder (15s)
+                markAsRead(sender);
+                bufferMessage(sender, content, contactName);
+            } else if (isImageMessage && imageUrl) {
+                // Imagem: analisa com Vision API (pode ser receita)
+                markAsRead(sender);
+                console.log(`[Webhook] Image received from ${sender}, analyzing...`);
+                handleIncomingImage(sender, imageUrl, imageCaption, contactName);
+            }
         }
 
     } catch (err) {
@@ -414,6 +424,99 @@ async function handleIncomingMessage(chatId, message, contactName) {
 
     } catch (err) {
         console.error('[AI] Error handling incoming message:', err);
+    }
+}
+
+// Handle incoming IMAGE with Vision AI (receita, etc.)
+async function handleIncomingImage(chatId, imageUrl, caption, contactName) {
+    try {
+        // Get chat mode
+        const chatRes = await db.query(
+            'SELECT atendimento_mode FROM tb_whatsapp_chats WHERE id = $1',
+            [chatId]
+        );
+        const mode = chatRes.rows[0]?.atendimento_mode || 'auto';
+
+        // Reset follow-up tier on customer response
+        await aiService.resetFollowupOnResponse(chatId);
+
+        // Decide whether AI should respond
+        let shouldRespond = false;
+        if (mode === 'human') {
+            console.log(`[AI] Chat ${chatId} is in HUMAN mode, skipping image`);
+            return;
+        } else if (mode === 'ai') {
+            shouldRespond = true;
+        } else {
+            const inHours = isBusinessHours();
+            shouldRespond = !inHours;
+        }
+
+        if (!shouldRespond) return;
+
+        console.log(`[AI] Analyzing image for ${chatId}...`);
+
+        // Analyze image with Vision API
+        const result = await aiService.analyzeImage(chatId, imageUrl, caption);
+        if (!result || !result.reply) {
+            console.log('[AI] No response from image analysis');
+            return;
+        }
+
+        // Split and send response
+        const messageParts = splitMessageForHumanLike(result.reply);
+        console.log(`[AI] Image analysis response in ${messageParts.length} part(s)`);
+
+        for (let i = 0; i < messageParts.length; i++) {
+            const part = messageParts[i];
+
+            if (i > 0) {
+                const interDelay = Math.min(Math.max(part.length * 35, 2000), 6000);
+                await sleep(interDelay);
+            }
+
+            await sendMessage(chatId, part);
+
+            await db.query(`
+                INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
+                VALUES ($1, $2, 'me', $3, NOW())
+                ON CONFLICT (whatsapp_id) DO NOTHING
+            `, [`ai_img_${Date.now()}_${i}`, chatId, part]);
+
+            if (io) {
+                io.emit('wa.message', {
+                    chatId,
+                    content: part,
+                    sender: 'me',
+                    timestamp: new Date()
+                });
+            }
+        }
+
+        // Update chat
+        const lastPart = messageParts[messageParts.length - 1];
+        await db.query(`
+            UPDATE tb_whatsapp_chats SET
+                last_message_content = $1,
+                last_message_timestamp = NOW()
+            WHERE id = $2
+        `, [lastPart, chatId]);
+
+        // Save prescription data if extracted
+        if (result.prescriptionData) {
+            const telefone = chatId.replace('@s.whatsapp.net', '');
+            await aiService.upsertAtendimento(chatId, telefone, {
+                ...result.prescriptionData,
+                tem_receita: true,
+                nome: contactName
+            });
+            console.log(`[AI] Prescription data saved for ${chatId}`);
+        }
+
+        console.log(`[AI] Image analyzed for ${chatId}: "${result.reply.substring(0, 80)}..."`);
+
+    } catch (err) {
+        console.error('[AI] Error handling incoming image:', err);
     }
 }
 

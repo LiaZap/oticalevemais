@@ -129,6 +129,14 @@ FLUXO DE ATENDIMENTO (avance 1 passo por vez):
 ATALHO CONSERTO:
 "Entendi! É conserto de qual parte: haste, plaqueta, parafuso, lente riscada ou óculos torto? Se puder, me manda uma foto que eu já te digo o caminho mais rápido 😊"
 
+FOTOS E RECEITAS:
+- Quando o cliente mandar foto da receita, você vai receber os dados analisados automaticamente
+- Confirme os dados da receita de forma resumida e amigável
+- Identifique se é lente simples (sem adição) ou multifocal (com adição/ADD)
+- Ofereça orçamento baseado nos dados
+- Se a foto estiver ruim, peça para enviar novamente com melhor iluminação
+- Incentive o cliente a enviar a receita: "Se tiver sua receita aí, pode me mandar uma foto que já faço o orçamento! 📋"
+
 TRANSFERIR PARA HUMANO quando detectar:
 - Reclamação ou insatisfação do cliente
 - Pedido explícito de atendente humano
@@ -342,6 +350,7 @@ async function upsertAtendimento(chatId, telefone, extractedData) {
         const temReceita = extractedData.tem_receita ?? null;
         const tipoLente = extractedData.tipo_lente || null;
         const agendou = extractedData.agendou || false;
+        const receitaDados = extractedData.receita_dados || null;
 
         if (existing.rows.length > 0) {
             // Update existing — never overwrite non-null with null
@@ -355,18 +364,19 @@ async function upsertAtendimento(chatId, telefone, extractedData) {
                     classificacao_lente = COALESCE($5, classificacao_lente),
                     seguiu_fluxo_agendamento = CASE WHEN $6 = true THEN true ELSE seguiu_fluxo_agendamento END,
                     ultima_interacao = NOW(),
-                    followup_tier = 0
+                    followup_tier = 0,
+                    receita_dados = COALESCE($8, receita_dados)
                  WHERE id = $7`,
-                [nome, cidade, intencao, temReceita, tipoLente, agendou, row.id]
+                [nome, cidade, intencao, temReceita, tipoLente, agendou, row.id, receitaDados]
             );
         } else {
             // Create new atendimento
             await db.query(
                 `INSERT INTO tb_atendimentos
                     (telefone_cliente, cliente, cidade, intencao_detectada, tem_receita,
-                     classificacao_lente, chat_id, canal_entrada, status, ultima_interacao)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'WhatsApp', 'Pendente', NOW())`,
-                [telefone, nome, cidade, intencao, temReceita, tipoLente, chatId]
+                     classificacao_lente, chat_id, canal_entrada, status, ultima_interacao, receita_dados)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'WhatsApp', 'Pendente', NOW(), $8)`,
+                [telefone, nome, cidade, intencao, temReceita, tipoLente, chatId, receitaDados]
             );
         }
     } catch (err) {
@@ -388,4 +398,159 @@ async function resetFollowupOnResponse(chatId) {
     }
 }
 
-module.exports = { initialize, generateResponse, upsertAtendimento, resetFollowupOnResponse };
+// =============================================
+// ANALYZE IMAGE — Receita / Fotos do cliente
+// Usa OpenAI Vision para interpretar imagens
+// =============================================
+async function analyzeImage(chatId, imageUrl, caption) {
+    if (!openai) {
+        console.warn('[AI] OpenAI not initialized, skipping image analysis');
+        return null;
+    }
+
+    try {
+        // Get conversation history for context
+        const history = await getChatHistory(chatId, 10);
+
+        // Build conversation context
+        const convoContext = history.map(m =>
+            `${m.sender_id === 'me' ? 'Íris' : 'Cliente'}: ${m.content}`
+        ).join('\n');
+
+        // Determine if image is base64 or URL
+        let imageContent;
+        if (imageUrl.startsWith('data:') || imageUrl.startsWith('/9j/') || imageUrl.length > 500) {
+            // Base64
+            const base64Data = imageUrl.startsWith('data:') ? imageUrl : `data:image/jpeg;base64,${imageUrl}`;
+            imageContent = { type: 'image_url', image_url: { url: base64Data } };
+        } else {
+            // URL
+            imageContent = { type: 'image_url', image_url: { url: imageUrl } };
+        }
+
+        const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+        console.log(`[AI] Analyzing image with ${model} for ${chatId}`);
+
+        const completion = await openai.chat.completions.create({
+            model,
+            messages: [
+                {
+                    role: 'system',
+                    content: `Você é a Íris, atendente da Ótica Leve Mais em Dourados-MS.
+O cliente acabou de enviar uma IMAGEM. Analise a imagem e responda de forma natural.
+
+SE FOR UMA RECEITA OFTALMOLÓGICA:
+- Leia os dados: OD (olho direito), OE (olho esquerdo), Esférico, Cilíndrico, Eixo, Adição/ADD, DNP/DP
+- Confirme os dados com o cliente de forma amigável
+- Identifique se é lente simples (sem ADD) ou multifocal (com ADD)
+- Pergunte se quer um orçamento
+- Formato da resposta: comece com "Recebi sua receita! 📋" e liste os dados de forma clara
+
+SE FOR OUTRA IMAGEM (óculos quebrado, armação, etc.):
+- Descreva o que vê
+- Ofereça ajuda adequada (conserto, orçamento, etc.)
+
+SE NÃO CONSEGUIR LER A IMAGEM:
+- Peça para o cliente enviar novamente com melhor qualidade/iluminação
+
+REGRAS:
+- Tom: acolhedor, profissional
+- Use "aqui na loja", "aqui na Ótica Leve Mais" (você é de Dourados)
+- 0-2 emojis
+- Responda em texto puro
+- Máximo 5 linhas${caption ? `\n\nO cliente enviou com a legenda: "${caption}"` : ''}
+
+Contexto da conversa até agora:
+${convoContext || '(primeira mensagem)'}`
+                },
+                {
+                    role: 'user',
+                    content: [
+                        imageContent,
+                        { type: 'text', text: caption || 'O cliente enviou esta imagem.' }
+                    ]
+                }
+            ],
+            temperature: 0.5,
+            max_tokens: 600
+        });
+
+        const reply = completion.choices[0]?.message?.content?.trim();
+        if (!reply) return null;
+
+        // Now try to extract prescription data if it looks like a prescription
+        let prescriptionData = null;
+        if (reply.includes('receita') || reply.includes('OD') || reply.includes('OE') ||
+            reply.includes('esférico') || reply.includes('grau') || reply.includes('Esf')) {
+            prescriptionData = await extractPrescriptionData(chatId, imageUrl, imageContent);
+        }
+
+        return { reply, prescriptionData };
+    } catch (err) {
+        console.error('[AI] Error analyzing image:', err.message);
+        return null;
+    }
+}
+
+// Extract structured prescription data from image
+async function extractPrescriptionData(chatId, imageUrl, imageContent) {
+    if (!openai) return null;
+
+    try {
+        const completion = await openai.chat.completions.create({
+            model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Analise esta receita oftalmológica e extraia os dados em JSON puro.
+Retorne APENAS o JSON, sem texto extra. Se não conseguir ler algum campo, use null.
+
+Formato:
+{
+  "od_esferico": "+2.00 ou -1.50 etc",
+  "od_cilindrico": "-0.75 etc ou null",
+  "od_eixo": "180 etc ou null",
+  "oe_esferico": "+2.00 ou -1.50 etc",
+  "oe_cilindrico": "-0.75 etc ou null",
+  "oe_eixo": "180 etc ou null",
+  "adicao": "+2.00 etc ou null (ADD, Adição)",
+  "dnp": "32/30 etc ou null (DNP, DP, distância pupilar)",
+  "tipo_lente": "Simples ou Multifocal (Multifocal se tem ADD/Adição)",
+  "medico": "nome do médico ou null",
+  "crm": "número CRM ou null",
+  "validade": "data de validade ou null",
+  "observacoes": "qualquer observação relevante ou null"
+}`
+                },
+                {
+                    role: 'user',
+                    content: [
+                        imageContent,
+                        { type: 'text', text: 'Extraia os dados desta receita oftalmológica em JSON.' }
+                    ]
+                }
+            ],
+            temperature: 0,
+            max_tokens: 400,
+            response_format: { type: 'json_object' }
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return null;
+
+        const data = JSON.parse(content);
+        console.log(`[AI] Prescription data extracted:`, JSON.stringify(data).substring(0, 200));
+
+        return {
+            tem_receita: true,
+            tipo_lente: data.tipo_lente || (data.adicao ? 'Multifocal' : 'Simples'),
+            intencao: 'Orçamento',
+            receita_dados: JSON.stringify(data) // Salva os dados completos como JSON string
+        };
+    } catch (err) {
+        console.error('[AI] Error extracting prescription data:', err.message);
+        return null;
+    }
+}
+
+module.exports = { initialize, generateResponse, analyzeImage, upsertAtendimento, resetFollowupOnResponse };
