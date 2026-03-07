@@ -2,7 +2,19 @@ const OpenAI = require('openai');
 const db = require('../db');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const configStore = require('../configStore');
+
+// Polyfill File for Node.js < 20 (needed by OpenAI SDK for file uploads)
+if (typeof globalThis.File === 'undefined') {
+    try {
+        const { File } = require('node:buffer');
+        globalThis.File = File;
+        console.log('[AI] File polyfill applied for Node < 20');
+    } catch (e) {
+        console.warn('[AI] Could not polyfill File — audio transcription may not work');
+    }
+}
 
 let openai = null;
 let knowledgeBase = '';
@@ -434,7 +446,16 @@ async function analyzeImage(chatId, imageUrl, caption) {
                     timeout: 30000
                 });
                 const base64 = Buffer.from(imgResponse.data).toString('base64');
-                const mime = imgResponse.headers['content-type'] || 'image/jpeg';
+                // Force correct MIME — WhatsApp CDN often returns application/octet-stream
+                let mime = imgResponse.headers['content-type'] || 'image/jpeg';
+                if (mime === 'application/octet-stream' || !mime.startsWith('image/')) {
+                    // Detect from URL or default to jpeg
+                    if (imageUrl.includes('.png')) mime = 'image/png';
+                    else if (imageUrl.includes('.webp')) mime = 'image/webp';
+                    else if (imageUrl.includes('.gif')) mime = 'image/gif';
+                    else mime = 'image/jpeg';
+                    console.log(`[AI] Forced MIME to ${mime} (server returned ${imgResponse.headers['content-type']})`);
+                }
                 imageContent = { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } };
                 console.log(`[AI] Image downloaded: ${imgResponse.data.length} bytes, mime=${mime}`);
             } catch (dlErr) {
@@ -578,9 +599,6 @@ async function transcribeAudio(audioUrl) {
         return null;
     }
 
-    const fs = require('fs');
-    const path = require('path');
-    const os = require('os');
     let tmpFile = null;
 
     try {

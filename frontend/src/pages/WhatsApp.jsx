@@ -528,17 +528,24 @@ const WhatsApp = () => {
                     <div className="flex-1 overflow-y-auto p-4 space-y-3">
                         {messages.map((msg, index) => {
                             const isMe = msg.sender_id === 'me' || msg.sender === 'me';
-                            const content = msg.content || '';
+                            let content = msg.content || '';
+
+                            // Handle [object Object] from old messages saved with object content
+                            if (content === '[object Object]') content = '[Midia]';
 
                             // Detect media content
-                            const isImage = content.startsWith('[Imagem]') || content === '[Midia]' && msg.media_type === 'image';
+                            const isImage = content.startsWith('[Imagem]');
                             const isAudio = content.startsWith('[Áudio]') || content.startsWith('🎤 ');
                             const isVideo = content.startsWith('[Vídeo]');
                             const isDocument = content.startsWith('[Arquivo]');
+                            const isGenericMedia = content === '[Midia]';
 
-                            // Check if content contains image URL (uploads)
-                            const imageUrlMatch = content.match(/https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp)/i);
-                            const hasImageUrl = imageUrlMatch !== null;
+                            // Check if content contains image URL (mmg.whatsapp.net or direct image links)
+                            const imageUrlMatch = content.match(/https?:\/\/[^\s]+/i);
+                            const hasImageUrl = imageUrlMatch !== null && (
+                                imageUrlMatch[0].match(/\.(jpg|jpeg|png|gif|webp)/i) ||
+                                imageUrlMatch[0].includes('mmg.whatsapp.net')
+                            );
 
                             return (
                                 <div key={msg.id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
@@ -547,18 +554,29 @@ const WhatsApp = () => {
                                         {/* Image message */}
                                         {(isImage || hasImageUrl) && (
                                             <div className="mb-2">
-                                                <img
-                                                    src={imageUrlMatch ? imageUrlMatch[0] : ''}
-                                                    alt="Imagem"
-                                                    className="rounded-lg max-w-full max-h-64 cursor-pointer"
-                                                    onClick={(e) => window.open(e.target.src, '_blank')}
-                                                    onError={(e) => { e.target.style.display = 'none'; }}
-                                                />
-                                                {content.replace(/\[Imagem\]\s?/, '').replace(imageUrlMatch?.[0] || '', '').trim() && (
-                                                    <p className="text-sm mt-1 whitespace-pre-wrap">
-                                                        {content.replace(/\[Imagem\]\s?/, '').replace(imageUrlMatch?.[0] || '', '').trim()}
-                                                    </p>
+                                                {imageUrlMatch && (
+                                                    <img
+                                                        src={imageUrlMatch[0]}
+                                                        alt="Imagem"
+                                                        className="rounded-lg max-w-full max-h-64 cursor-pointer"
+                                                        onClick={(e) => window.open(e.target.src, '_blank')}
+                                                        onError={(e) => { e.target.parentNode.innerHTML = '<div class="flex items-center gap-2 p-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span class="text-sm text-zinc-500">📷 Imagem</span></div>'; }}
+                                                    />
                                                 )}
+                                                {!imageUrlMatch && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Image size={16} className="text-zinc-500" />
+                                                        <p className="text-sm text-zinc-500">📷 Imagem recebida</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Generic media (old [object Object] or [Midia]) */}
+                                        {isGenericMedia && !isImage && !hasImageUrl && (
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Image size={16} className="text-zinc-500" />
+                                                <p className="text-sm text-zinc-500 italic">Mídia recebida</p>
                                             </div>
                                         )}
 
@@ -589,7 +607,7 @@ const WhatsApp = () => {
                                         )}
 
                                         {/* Regular text message */}
-                                        {!isImage && !hasImageUrl && !isAudio && !isVideo && !isDocument && (
+                                        {!isImage && !hasImageUrl && !isAudio && !isVideo && !isDocument && !isGenericMedia && (
                                             <p className="text-sm whitespace-pre-wrap">{content}</p>
                                         )}
 
