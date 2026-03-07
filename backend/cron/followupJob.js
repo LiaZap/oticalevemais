@@ -91,6 +91,33 @@ ${convoText}`
     }
 }
 
+// Detect if a message is a conversation closer (client is done)
+function isConversationCloser(text) {
+    if (!text) return false;
+    const normalized = text.toLowerCase().trim().replace(/[!?.…]+$/, '').trim();
+    const closers = [
+        'ok', 'okay', 'tá', 'ta', 'tá bom', 'ta bom', 'tudo bem', 'blz', 'beleza',
+        'obrigado', 'obrigada', 'obg', 'brigado', 'brigada', 'valeu', 'vlw',
+        'agradeço', 'agradeco', 'muito obrigado', 'muito obrigada',
+        'ok obrigado', 'ok obrigada', 'tá obrigado', 'tá obrigada',
+        'entendi', 'entendido', 'perfeito', 'certo', 'certinho',
+        'vou pensar', 'vou ver', 'depois eu vejo', 'depois vejo',
+        'não precisa', 'nao precisa', 'não quero', 'nao quero',
+        'por enquanto é isso', 'por enquanto e isso', 'era isso', 'era só isso',
+        'até mais', 'ate mais', 'tchau', 'flw', 'falou', 'abraço', 'abraco',
+        'bom dia', 'boa tarde', 'boa noite' // closing greetings after conversation
+    ];
+    // Exact match or starts with closer + space
+    if (closers.includes(normalized)) return true;
+    // Short messages that start with a closer word
+    if (normalized.length < 30) {
+        for (const c of closers) {
+            if (normalized.startsWith(c)) return true;
+        }
+    }
+    return false;
+}
+
 const runFollowUpCheck = async () => {
     console.log(`[Followup] Check started: ${new Date().toISOString()}`);
 
@@ -140,9 +167,9 @@ const runFollowUpCheck = async () => {
         for (const atendimento of rows) {
             const currentTier = atendimento.followup_tier || 0;
 
-            // Get last customer message time for this chat
+            // Get last customer message (to check time AND content)
             const lastMsgRes = await db.query(
-                `SELECT timestamp FROM tb_whatsapp_messages
+                `SELECT timestamp, content FROM tb_whatsapp_messages
                  WHERE chat_id = $1 AND sender_id != 'me'
                  ORDER BY timestamp DESC LIMIT 1`,
                 [atendimento.chat_id]
@@ -151,7 +178,40 @@ const runFollowUpCheck = async () => {
             if (lastMsgRes.rows.length === 0) continue;
 
             const lastCustomerMsg = new Date(lastMsgRes.rows[0].timestamp);
+            const lastCustomerText = lastMsgRes.rows[0].content || '';
             const minutesSinceLastMsg = (Date.now() - lastCustomerMsg.getTime()) / (1000 * 60);
+
+            // PROTECTION: Don't send follow-up if client already closed the conversation
+            if (isConversationCloser(lastCustomerText)) {
+                // Client said "ok", "obrigada", etc. — they're done, don't bother them
+                if (currentTier < 3) {
+                    console.log(`[Followup] Skipping ${atendimento.chat_id}: client closed with "${lastCustomerText.substring(0, 30)}"`);
+                    // Mark as finalized so we don't check again
+                    await db.query(
+                        `UPDATE tb_atendimentos SET followup_tier = 3, status = 'Finalizado' WHERE id = $1`,
+                        [atendimento.id]
+                    );
+                }
+                continue;
+            }
+
+            // PROTECTION: Check if AI already responded after the last customer message
+            // If AI responded and client didn't reply → that's when follow-up makes sense
+            // But if AI was the LAST to message, don't count time from customer's message
+            const lastAnyMsgRes = await db.query(
+                `SELECT sender_id, timestamp FROM tb_whatsapp_messages
+                 WHERE chat_id = $1 ORDER BY timestamp DESC LIMIT 1`,
+                [atendimento.chat_id]
+            );
+            if (lastAnyMsgRes.rows.length > 0 && lastAnyMsgRes.rows[0].sender_id === 'me') {
+                // AI/store was last to message — count from AI's message, not customer's
+                const lastAiMsg = new Date(lastAnyMsgRes.rows[0].timestamp);
+                const minutesSinceAiMsg = (Date.now() - lastAiMsg.getTime()) / (1000 * 60);
+                // Use the AI message time for follow-up timing
+                if (minutesSinceAiMsg < (TIERS[0]?.delayMinutes || 30)) {
+                    continue; // Not enough time since AI responded
+                }
+            }
 
             // Check each tier
             for (const tierConfig of TIERS) {

@@ -232,7 +232,7 @@ async function getChatHistory(chatId, limit = 20) {
 }
 
 // Generate AI response for a chat message
-async function generateResponse(chatId, incomingMessage) {
+async function generateResponse(chatId, incomingMessage, options = {}) {
     if (!openai) {
         console.warn('[AI] OpenAI not initialized, skipping response');
         return null;
@@ -245,11 +245,22 @@ async function generateResponse(chatId, incomingMessage) {
         // Build dynamic system prompt (includes campaign info if active)
         const dynamicPrompt = await buildSystemPrompt();
 
+        // Add closing instruction if client is ending conversation
+        let closingInstruction = '';
+        if (options.isClosing) {
+            closingInstruction = `
+
+ATENÇÃO: O cliente está ENCERRANDO a conversa (disse "${incomingMessage}").
+Responda com uma despedida breve e acolhedora (1-2 linhas MAX).
+NÃO faça perguntas. NÃO ofereça mais serviços. NÃO peça mais informações.
+Exemplo: "Por nada! Qualquer coisa, é só chamar 😊" ou "Fico feliz em ajudar! Até mais 😊"`;
+        }
+
         // Build messages array for OpenAI
         const messages = [
             {
                 role: 'system',
-                content: dynamicPrompt + '\n\n--- BASE DE CONHECIMENTO ---\n' + knowledgeBase
+                content: dynamicPrompt + '\n\n--- BASE DE CONHECIMENTO ---\n' + knowledgeBase + closingInstruction
             }
         ];
 

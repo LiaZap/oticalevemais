@@ -69,6 +69,30 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Detect conversation closers — client is done, AI should not ask more questions
+function isConversationCloser(text) {
+    if (!text) return false;
+    const normalized = text.toLowerCase().trim().replace(/[!?.…,]+$/, '').trim();
+    const closers = [
+        'ok', 'okay', 'ta', 'tá', 'tá bom', 'ta bom', 'tudo bem', 'blz', 'beleza',
+        'obrigado', 'obrigada', 'obg', 'brigado', 'brigada', 'valeu', 'vlw',
+        'agradeço', 'agradeco', 'muito obrigado', 'muito obrigada',
+        'ok obrigado', 'ok obrigada', 'tá obrigado', 'tá obrigada',
+        'entendi', 'entendido', 'perfeito', 'certo', 'certinho',
+        'vou pensar', 'vou ver', 'depois eu vejo', 'depois vejo',
+        'não precisa', 'nao precisa', 'não quero', 'nao quero',
+        'por enquanto é isso', 'por enquanto e isso', 'era isso', 'era só isso',
+        'até mais', 'ate mais', 'tchau', 'flw', 'falou', 'abraço', 'abraco'
+    ];
+    if (closers.includes(normalized)) return true;
+    if (normalized.length < 30) {
+        for (const c of closers) {
+            if (normalized.startsWith(c)) return true;
+        }
+    }
+    return false;
+}
+
 function bufferMessage(chatId, message, contactName) {
     if (!messageBuffer.has(chatId)) {
         messageBuffer.set(chatId, { messages: [], timer: null });
@@ -294,6 +318,33 @@ const processWebhook = async (data) => {
     const messageId = msg.messageid || msg.id || `uaz_${Date.now()}`;
     const messageType = msg.type || msg.messageType || 'text';
 
+    // =============================================
+    // IGNORE non-message types: reactions, status, protocol, etc.
+    // =============================================
+    const ignoredTypes = [
+        'reaction', 'reactionMessage', 'protocolMessage', 'senderKeyDistributionMessage',
+        'status', 'receipt', 'call', 'callLog', 'ephemeralSetting', 'templateButtonReply',
+        'viewOnceMessageV2', 'pollCreation', 'pollUpdate', 'revoke', 'delete',
+        'contactMessage', 'locationMessage', 'liveLocationMessage', 'stickerMessage'
+    ];
+    if (ignoredTypes.includes(messageType) || ignoredTypes.includes(msg.messageType)) {
+        console.log(`[Webhook] Ignored type: ${messageType}, from ${sender}`);
+        return;
+    }
+    // Also detect reactions by checking if content is a single emoji or reaction field
+    if (msg.reaction || msg.reactionMessage) {
+        console.log(`[Webhook] Reaction detected, ignoring`);
+        return;
+    }
+    // Ignore very short emoji-only messages that look like reactions (👍, ❤️, etc.)
+    const rawTextContent = typeof msg.content === 'string' ? msg.content : (msg.text || '');
+    const emojiOnlyRegex = /^[\p{Emoji}\p{Emoji_Presentation}\p{Emoji_Modifier}\p{Emoji_Modifier_Base}\p{Emoji_Component}\s]{1,4}$/u;
+    const isEmojiOnly = rawTextContent.length <= 4 && emojiOnlyRegex.test(rawTextContent);
+    if (isEmojiOnly && rawTextContent.length > 0) {
+        console.log(`[Webhook] Emoji-only message "${rawTextContent}", saving but not processing with AI`);
+        // Save the emoji but don't trigger AI — fall through to save, but mark as non-processable
+    }
+
     // Uazapi sends content as OBJECT for media (with URL, mimetype, etc.) or STRING for text
     const isMediaContent = typeof msg.content === 'object' && msg.content !== null;
     const mediaMimetype = isMediaContent ? (msg.content.mimetype || '') : '';
@@ -359,7 +410,7 @@ const processWebhook = async (data) => {
         }
 
         // 4. AI Handling — incoming customer messages
-        if (!isFromMe) {
+        if (!isFromMe && !isEmojiOnly) {
             if (isTextMessage && content !== '[Midia]') {
                 // Texto: usa buffer para acumular mensagens antes de responder (15s)
                 markAsRead(sender);
@@ -411,9 +462,15 @@ async function handleIncomingMessage(chatId, message, contactName) {
 
         if (!shouldRespond) return;
 
+        // PROTECTION: If client sent a conversation closer, respond briefly and DON'T ask more questions
+        const isClosing = isConversationCloser(message);
+        if (isClosing) {
+            console.log(`[AI] Client closing conversation: "${message.substring(0, 30)}"`);
+        }
+
         // Generate AI response
         console.log(`[AI] Generating response for ${chatId}...`);
-        const result = await aiService.generateResponse(chatId, message);
+        const result = await aiService.generateResponse(chatId, message, { isClosing });
         if (!result || !result.reply) {
             console.log('[AI] No response generated');
             return;
