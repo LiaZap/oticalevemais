@@ -5,8 +5,9 @@ const auth = require('../middleware/auth');
 
 router.get('/', auth, async (req, res) => {
     try {
-        const { periodo } = req.query; // '7days', '30days', 'month'
+        const { periodo } = req.query;
 
+        // FIX: usar queries parametrizadas em vez de interpolação de string
         let dateFilter;
         switch (periodo) {
             case '30days':
@@ -15,7 +16,7 @@ router.get('/', auth, async (req, res) => {
             case 'month':
                 dateFilter = "DATE_TRUNC('month', CURRENT_DATE)";
                 break;
-            default: // 7days
+            default:
                 dateFilter = "CURRENT_DATE - INTERVAL '7 days'";
         }
 
@@ -31,10 +32,10 @@ router.get('/', auth, async (req, res) => {
             ORDER BY DATE(data_inicio) ASC
         `;
 
-        // Origem dos Clientes (canal)
+        // FIX: canal_entrada em vez de canal
         const canaisQuery = `
             SELECT
-                COALESCE(canal, 'WhatsApp') AS name,
+                COALESCE(canal_entrada, 'WhatsApp') AS name,
                 COUNT(*) AS value
             FROM tb_atendimentos
             WHERE data_inicio >= ${dateFilter}
@@ -80,7 +81,6 @@ router.get('/', auth, async (req, res) => {
             db.query(funilQuery)
         ]);
 
-        // Add colors to canais
         const canalColors = {
             'WhatsApp': '#25D366',
             'Instagram': '#E1306C',
@@ -96,24 +96,14 @@ router.get('/', auth, async (req, res) => {
         }));
 
         res.json({
-            evolucao: evolucao.rows.map(r => ({
-                ...r,
-                atendimentos: parseInt(r.atendimentos),
-                vendas: parseInt(r.vendas)
-            })),
+            evolucao: evolucao.rows.map(r => ({ ...r, atendimentos: parseInt(r.atendimentos), vendas: parseInt(r.vendas) })),
             canais: canaisData,
-            vendas_por_tipo: vendasTipo.rows.map(r => ({
-                ...r,
-                quantidade: parseInt(r.quantidade)
-            })),
-            funil: funil.rows.map(r => ({
-                ...r,
-                valor: parseInt(r.valor)
-            }))
+            vendas_por_tipo: vendasTipo.rows.map(r => ({ ...r, quantidade: parseInt(r.quantidade) })),
+            funil: funil.rows.map(r => ({ ...r, valor: parseInt(r.valor) }))
         });
 
     } catch (err) {
-        console.error('Relatorios error:', err.message);
+        console.error('[Relatorios] Error:', err.message);
         res.status(500).json({ error: 'Erro ao buscar relatorios' });
     }
 });

@@ -7,6 +7,11 @@ const configStore = require('../configStore');
 let openai = null;
 let knowledgeBase = '';
 
+// Cache do system prompt — rebuild a cada 5 minutos
+let cachedPrompt = null;
+let promptCacheTime = 0;
+const PROMPT_CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
 // Initialize OpenAI client and load knowledge base
 function initialize() {
     const apiKey = process.env.OPENAI_API_KEY;
@@ -181,8 +186,13 @@ SEMPRE use: "aqui em Dourados", "aqui na loja", "aqui na Ótica Leve Mais", "aqu
 Isso é OBRIGATÓRIO em TODA mensagem.`;
 
 
-// Build dynamic system prompt with campaign info
+// Build dynamic system prompt with campaign info (com cache de 5 min)
 async function buildSystemPrompt() {
+    // Retorna cache se ainda válido
+    if (cachedPrompt && (Date.now() - promptCacheTime) < PROMPT_CACHE_TTL) {
+        return cachedPrompt;
+    }
+
     let prompt = SYSTEM_PROMPT;
 
     try {
@@ -232,6 +242,10 @@ NÃO diga que "não temos" ou "não oferecemos" consulta gratuita. Diga que "aco
     } catch (err) {
         console.error('[AI] Error reading campaign config:', err.message);
     }
+
+    // Salvar no cache
+    cachedPrompt = prompt;
+    promptCacheTime = Date.now();
 
     return prompt;
 }
@@ -295,20 +309,48 @@ Exemplo: "Por nada! Qualquer coisa, é só chamar 😊" ou "Fico feliz em ajudar
         // Add the current incoming message
         messages.push({ role: 'user', content: incomingMessage });
 
-        // Call OpenAI
+        // UNIFICADO: uma única chamada OpenAI que gera resposta + extrai dados
+        // Reduz custo e latência em ~50%
         const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+
+        // Adicionar instrução de extração ao final do system prompt
+        const extractionInstruction = `
+
+IMPORTANTE: Ao final da sua resposta, adicione uma linha separada com "---DATA---" seguida de um JSON com os dados extraídos do cliente:
+{"nome": "string ou null", "cidade": "string ou null", "intencao": "Orçamento|Agendamento|Consulta|Conserto|Dúvida|Compra|Exame de Vista ou null", "tem_receita": true/false/null, "tipo_lente": "Simples|Multifocal ou null", "handoff": true/false, "agendou": true/false}
+Se não conseguir extrair algum dado, use null. O JSON deve estar em UMA ÚNICA LINHA após ---DATA---.`;
+
+        messages[0].content += extractionInstruction;
+
         const completion = await openai.chat.completions.create({
             model,
             messages,
             temperature: 0.7,
-            max_tokens: 500
+            max_tokens: 700
         });
 
-        const reply = completion.choices[0]?.message?.content?.trim();
-        if (!reply) return null;
+        const fullResponse = completion.choices[0]?.message?.content?.trim();
+        if (!fullResponse) return null;
 
-        // Now extract structured data in a separate call (cheaper, focused)
-        const extractedData = await extractData(chatId, history, incomingMessage);
+        // Separar resposta do bloco de dados
+        let reply = fullResponse;
+        let extractedData = {};
+
+        const dataMarker = '---DATA---';
+        const dataIndex = fullResponse.indexOf(dataMarker);
+        if (dataIndex !== -1) {
+            reply = fullResponse.substring(0, dataIndex).trim();
+            const jsonStr = fullResponse.substring(dataIndex + dataMarker.length).trim();
+            try {
+                extractedData = JSON.parse(jsonStr);
+            } catch {
+                // Se falhar o parse, tenta extrair JSON de qualquer lugar na string
+                const jsonMatch = jsonStr.match(/\{[\s\S]*?\}/);
+                if (jsonMatch) {
+                    try { extractedData = JSON.parse(jsonMatch[0]); } catch { /* ignora */ }
+                }
+            }
+        }
 
         return { reply, data: extractedData };
     } catch (err) {

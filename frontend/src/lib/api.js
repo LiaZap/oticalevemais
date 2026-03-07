@@ -18,6 +18,22 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
+// Interceptor de resposta — detectar token expirado e redirecionar para login
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Token expirado ou inválido
+            const currentPath = window.location.pathname;
+            if (currentPath !== '/' && currentPath !== '/login') {
+                localStorage.removeItem('token');
+                window.location.href = '/';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const loginUser = async (credentials) => {
     const response = await api.post('/auth/login', credentials);
     return response.data;
@@ -40,9 +56,14 @@ export const fetchDashboardKPIs = async () => {
     }
 };
 
-export const fetchAtendimentos = async () => {
-    const response = await api.get('/atendimentos');
-    return response.data;
+// Atendimentos agora retorna objeto paginado { data, total, page, limit, totalPages }
+export const fetchAtendimentos = async (page = 1, limit = 50) => {
+    const response = await api.get(`/atendimentos?page=${page}&limit=${limit}`);
+    // Compatibilidade: se backend retorna array (antigo), wrappa
+    if (Array.isArray(response.data)) {
+        return response.data;
+    }
+    return response.data.data || [];
 };
 
 export const createAtendimento = async (atendimento) => {

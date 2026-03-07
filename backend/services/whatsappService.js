@@ -2,6 +2,7 @@ const axios = require('axios');
 const db = require('../db');
 const aiService = require('./aiService');
 const { isBusinessHours } = require('./businessHours');
+const { isConversationCloser } = require('../utils/conversationUtils');
 
 let io;
 
@@ -69,29 +70,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Detect conversation closers — client is done, AI should not ask more questions
-function isConversationCloser(text) {
-    if (!text) return false;
-    const normalized = text.toLowerCase().trim().replace(/[!?.…,]+$/, '').trim();
-    const closers = [
-        'ok', 'okay', 'ta', 'tá', 'tá bom', 'ta bom', 'tudo bem', 'blz', 'beleza',
-        'obrigado', 'obrigada', 'obg', 'brigado', 'brigada', 'valeu', 'vlw',
-        'agradeço', 'agradeco', 'muito obrigado', 'muito obrigada',
-        'ok obrigado', 'ok obrigada', 'tá obrigado', 'tá obrigada',
-        'entendi', 'entendido', 'perfeito', 'certo', 'certinho',
-        'vou pensar', 'vou ver', 'depois eu vejo', 'depois vejo',
-        'não precisa', 'nao precisa', 'não quero', 'nao quero',
-        'por enquanto é isso', 'por enquanto e isso', 'era isso', 'era só isso',
-        'até mais', 'ate mais', 'tchau', 'flw', 'falou', 'abraço', 'abraco'
-    ];
-    if (closers.includes(normalized)) return true;
-    if (normalized.length < 30) {
-        for (const c of closers) {
-            if (normalized.startsWith(c)) return true;
-        }
-    }
-    return false;
-}
+// isConversationCloser importado de ../utils/conversationUtils
 
 function bufferMessage(chatId, message, contactName) {
     if (!messageBuffer.has(chatId)) {
@@ -192,8 +171,8 @@ const sendMedia = async (jid, type, fileUrl, caption) => {
 
     const number = jid.replace('@s.whatsapp.net', '');
 
-    // Delay para simular digitação antes de enviar mídia
-    const dynamicDelay = Math.min(Math.max(2000), 4000);
+    // FIX: delay dinâmico baseado no tipo de mídia (era Math.min(Math.max(2000), 4000) = sempre 2000)
+    const dynamicDelay = type === 'image' ? 3000 : type === 'video' ? 4000 : 2500;
 
     const body = {
         number: number,
@@ -234,9 +213,11 @@ const downloadMedia = async (messageId, options = {}) => {
         download_quoted: false
     };
 
-    // Se for transcrição, passa a chave da OpenAI
-    if (options.transcribe && process.env.OPENAI_API_KEY) {
-        body.openai_apikey = process.env.OPENAI_API_KEY;
+    // Transcrição via Uazapi: usa a chave da Uazapi para whisper
+    // SEGURANÇA: NÃO envia nossa API key OpenAI para terceiros
+    if (options.transcribe) {
+        // Uazapi faz a transcrição internamente se transcribe=true
+        // Não precisamos enviar openai_apikey
     }
 
     try {
@@ -422,12 +403,12 @@ const processWebhook = async (data) => {
                 // Imagem: baixa via Uazapi e analisa com Vision API
                 markAsRead(sender);
                 console.log(`[Webhook] Image received from ${sender}, msgId=${messageId}`);
-                handleIncomingImage(sender, messageId, imageCaption, contactName);
+                handleIncomingImage(sender, messageId, imageCaption, contactName).catch(err => console.error('[Webhook] Image handler error:', err.message));
             } else if (isAudioMessage) {
                 // Áudio: transcreve via Uazapi + Whisper
                 markAsRead(sender);
                 console.log(`[Webhook] Audio received from ${sender}, msgId=${messageId}`);
-                handleIncomingAudio(sender, messageId, contactName);
+                handleIncomingAudio(sender, messageId, contactName).catch(err => console.error('[Webhook] Audio handler error:', err.message));
             }
         }
 

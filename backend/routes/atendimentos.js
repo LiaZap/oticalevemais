@@ -1,129 +1,101 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const auth = require('../middleware/auth');
 
-// Helper to calculate age and lens classification
 const calculateLensType = (dataNascimento) => {
     if (!dataNascimento) return null;
-    
     const birthDate = new Date(dataNascimento);
     const today = new Date();
-    
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
     return age >= 40 ? 'Multifocal' : 'Simples';
 };
 
-// LISTAR todos os atendimentos
-router.get('/', async (req, res) => {
+// LISTAR atendimentos — PROTEGIDO + Paginação
+router.get('/', auth, async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM tb_atendimentos ORDER BY data_inicio DESC');
-        res.json(result.rows);
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+        const offset = (page - 1) * limit;
+
+        const [dataResult, countResult] = await Promise.all([
+            db.query('SELECT * FROM tb_atendimentos ORDER BY data_inicio DESC LIMIT $1 OFFSET $2', [limit, offset]),
+            db.query('SELECT COUNT(*) FROM tb_atendimentos')
+        ]);
+
+        res.json({
+            data: dataResult.rows,
+            total: parseInt(countResult.rows[0].count),
+            page, limit,
+            totalPages: Math.ceil(parseInt(countResult.rows[0].count) / limit)
+        });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Erro no servidor');
+        console.error('[Atendimentos] List error:', err.message);
+        res.status(500).json({ message: 'Erro ao listar atendimentos' });
     }
 });
 
-// CRIAR novo atendimento
-router.post('/', async (req, res) => {
+// CRIAR — PROTEGIDO
+router.post('/', auth, async (req, res) => {
     const { cliente, telefone, canal, tipo, data_nascimento, status } = req.body;
-
-    // Calcular classificação automática
     const classificacao_lente = calculateLensType(data_nascimento);
 
     try {
-        const query = `
-            INSERT INTO tb_atendimentos 
-            (cliente, telefone_cliente, canal_entrada, tipo_servico, data_nascimento, classificacao_lente, status, data_inicio) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
-            RETURNING *
-        `;
-        
-        const values = [
-            cliente, 
-            telefone, 
-            canal || 'WhatsApp', 
-            tipo || 'Orçamento', 
-            data_nascimento || null, 
-            classificacao_lente, 
-            status || 'Pendente'
-        ];
-
-        const newAtendimento = await db.query(query, values);
+        const newAtendimento = await db.query(`
+            INSERT INTO tb_atendimentos
+            (cliente, telefone_cliente, canal_entrada, tipo_servico, data_nascimento, classificacao_lente, status, data_inicio)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *
+        `, [cliente, telefone, canal || 'WhatsApp', tipo || 'Orçamento', data_nascimento || null, classificacao_lente, status || 'Pendente']);
         res.json(newAtendimento.rows[0]);
-
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Erro ao criar atendimento: ' + err.message });
+        console.error('[Atendimentos] Create error:', err.message);
+        res.status(500).json({ message: 'Erro ao criar atendimento' });
     }
 });
 
-// ATUALIZAR status ou detalhes
-router.put('/:id', async (req, res) => {
+// ATUALIZAR — PROTEGIDO + Validação dinâmica
+router.put('/:id', auth, async (req, res) => {
     const { id } = req.params;
-    const { status, classificacao_lente } = req.body;
+    const { status, classificacao_lente, cliente, telefone_cliente, intencao_detectada, cidade } = req.body;
 
     try {
-        let query = 'UPDATE tb_atendimentos SET ';
+        const updates = [];
         const values = [];
-        let paramCount = 1;
+        let p = 1;
 
-        if (status) {
-            query += `status = $${paramCount}, `;
-            values.push(status);
-            paramCount++;
-        }
+        if (status !== undefined) { updates.push(`status = $${p}`); values.push(status); p++; }
+        if (classificacao_lente !== undefined) { updates.push(`classificacao_lente = $${p}`); values.push(classificacao_lente); p++; }
+        if (cliente !== undefined) { updates.push(`cliente = $${p}`); values.push(cliente); p++; }
+        if (telefone_cliente !== undefined) { updates.push(`telefone_cliente = $${p}`); values.push(telefone_cliente); p++; }
+        if (intencao_detectada !== undefined) { updates.push(`intencao_detectada = $${p}`); values.push(intencao_detectada); p++; }
+        if (cidade !== undefined) { updates.push(`cidade = $${p}`); values.push(cidade); p++; }
 
-        if (classificacao_lente) {
-            query += `classificacao_lente = $${paramCount}, `;
-            values.push(classificacao_lente);
-            paramCount++;
-        }
+        if (updates.length === 0) return res.status(400).json({ message: 'Nenhum campo para atualizar' });
 
-        // Remove trailing comma and space
-        query = query.slice(0, -2);
-        
-        query += ` WHERE id = $${paramCount} RETURNING *`;
+        const query = `UPDATE tb_atendimentos SET ${updates.join(', ')} WHERE id = $${p} RETURNING *`;
         values.push(id);
 
         const update = await db.query(query, values);
-        
-        if (update.rows.length === 0) {
-            return res.status(404).json({ message: 'Atendimento não encontrado' });
-        }
-
+        if (update.rows.length === 0) return res.status(404).json({ message: 'Atendimento não encontrado' });
         res.json(update.rows[0]);
-
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Erro ao atualizar atendimento');
+        console.error('[Atendimentos] Update error:', err.message);
+        res.status(500).json({ message: 'Erro ao atualizar atendimento' });
     }
 });
 
-// EXCLUIR atendimento
-router.delete('/:id', async (req, res) => {
+// EXCLUIR — PROTEGIDO
+router.delete('/:id', auth, async (req, res) => {
     const { id } = req.params;
-
     try {
-        const result = await db.query(
-            'DELETE FROM tb_atendimentos WHERE id = $1 RETURNING *',
-            [id]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Atendimento não encontrado' });
-        }
-
+        const result = await db.query('DELETE FROM tb_atendimentos WHERE id = $1 RETURNING *', [id]);
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Atendimento não encontrado' });
         res.json({ message: 'Atendimento excluído com sucesso', atendimento: result.rows[0] });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Erro ao excluir atendimento: ' + err.message });
+        console.error('[Atendimentos] Delete error:', err.message);
+        res.status(500).json({ message: 'Erro ao excluir atendimento' });
     }
 });
 

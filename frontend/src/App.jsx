@@ -5,9 +5,30 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import { Atendimentos, Reports, Team, Settings, Help, WhatsApp } from './pages/Pages';
 
-const ProtectedRoute = ({ children }) => {
+// Verificar se token existe E não está expirado
+const isTokenValid = () => {
     const token = localStorage.getItem('token');
-    if (!token) {
+    if (!token) return false;
+
+    try {
+        // Decodificar JWT payload (parte 2, base64)
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const now = Math.floor(Date.now() / 1000);
+        // Token expirado?
+        if (payload.exp && payload.exp < now) {
+            localStorage.removeItem('token');
+            return false;
+        }
+        return true;
+    } catch {
+        // Token malformado
+        localStorage.removeItem('token');
+        return false;
+    }
+};
+
+const ProtectedRoute = ({ children }) => {
+    if (!isTokenValid()) {
         return <Navigate to="/" replace />;
     }
     return children;
@@ -19,13 +40,13 @@ function App() {
             <Toaster position="top-right" richColors />
             <Routes>
                 <Route path="/" element={<Login />} />
-                <Route 
-                    path="/dashboard" 
+                <Route
+                    path="/dashboard"
                     element={
                         <ProtectedRoute>
                             <Dashboard />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
                 <Route path="/atendimentos" element={<ProtectedRoute><Atendimentos /></ProtectedRoute>} />
                 <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />

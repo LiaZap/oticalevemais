@@ -43,8 +43,14 @@ export default function Settings() {
         CAMPANHA_SAUDE_VISUAL_DESCRICAO: 'Consulta na ótica com condições especiais para quem vai fazer os óculos na loja.'
     });
 
+    const [maskedApiKey, setMaskedApiKey] = useState('');
+
     useEffect(() => {
         fetchSettings().then(data => {
+            // Guardar API key mascarada do servidor para comparação
+            if (data.OPENAI_API_KEY) {
+                setMaskedApiKey(data.OPENAI_API_KEY);
+            }
             setConfig(prev => ({ ...prev, ...data }));
         });
     }, []);
@@ -58,6 +64,10 @@ export default function Settings() {
                     'CAMPANHA_SAUDE_VISUAL_ATIVA', 'CAMPANHA_SAUDE_VISUAL_INICIO', 'CAMPANHA_SAUDE_VISUAL_FIM', 'CAMPANHA_SAUDE_VISUAL_DESCRICAO'];
                 for (const key of keys) {
                     if (config[key] !== undefined && config[key] !== '') {
+                        // Não enviar API key mascarada de volta para o servidor
+                        if (key === 'OPENAI_API_KEY' && config[key] === maskedApiKey) {
+                            continue; // pula — não mudou
+                        }
                         await saveSettings(key, config[key]);
                     }
                 }

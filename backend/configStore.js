@@ -17,6 +17,9 @@ const DEFAULTS = {
     CAMPANHA_SAUDE_VISUAL_DESCRICAO: "Consulta na ótica com condições especiais para quem vai fazer os óculos na loja."
 };
 
+// Simple lock to prevent concurrent writes
+let writeLock = Promise.resolve();
+
 // Helper to ensure file exists
 const ensureFile = async () => {
     try {
@@ -32,16 +35,26 @@ const getAll = async () => {
     return JSON.parse(data);
 };
 
+// FIX: usar operador nullish (??) em vez de || para preservar valores falsy ("", 0, false)
 const get = async (key) => {
     const config = await getAll();
-    return config[key] || DEFAULTS[key];
+    return config[key] ?? DEFAULTS[key];
 };
 
+// FIX: write com lock para evitar race condition
 const set = async (key, value) => {
-    const config = await getAll();
-    config[key] = value;
-    await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2));
-    return config;
+    // Queue write operations sequentially
+    writeLock = writeLock.then(async () => {
+        const config = await getAll();
+        config[key] = value;
+        await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2));
+        return config;
+    }).catch(err => {
+        console.error('[ConfigStore] Write error:', err.message);
+        throw err;
+    });
+
+    return writeLock;
 };
 
 module.exports = {

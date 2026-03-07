@@ -2,6 +2,8 @@ import io from 'socket.io-client';
 
 class SocketService {
   socket;
+  reconnectAttempts = 0;
+  maxReconnectAttempts = 10;
 
   connect() {
     if (this.socket) return;
@@ -11,14 +13,28 @@ class SocketService {
     let BASE = RUNTIME_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
     // Socket.IO needs the base URL without /api
     if (BASE.endsWith('/api')) BASE = BASE.slice(0, -4);
-    this.socket = io(BASE);
 
-    this.socket.on('connect', () => {
-      console.log('Socket connected');
+    this.socket = io(BASE, {
+      reconnection: true,
+      reconnectionAttempts: this.maxReconnectAttempts,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 30000,
+      timeout: 20000,
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('Socket disconnected');
+    this.socket.on('connect', () => {
+      this.reconnectAttempts = 0;
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      if (reason === 'io server disconnect') {
+        // Server disconnected — try to reconnect
+        this.socket.connect();
+      }
+    });
+
+    this.socket.on('reconnect_failed', () => {
+      console.error('[Socket] Reconnection failed after max attempts');
     });
   }
 
