@@ -562,15 +562,27 @@ async function transcribeAudio(audioUrl) {
         return null;
     }
 
+    const fs = require('fs');
+    const path = require('path');
+    const os = require('os');
+    let tmpFile = null;
+
     try {
+        console.log(`[AI] Downloading audio from: ${audioUrl.substring(0, 100)}...`);
+
         // Download the audio file
         const response = await require('axios').get(audioUrl, {
             responseType: 'arraybuffer',
             timeout: 30000
         });
 
-        // Create a file-like object for the API
         const audioBuffer = Buffer.from(response.data);
+        console.log(`[AI] Audio downloaded: ${audioBuffer.length} bytes`);
+
+        if (audioBuffer.length < 1000) {
+            console.log('[AI] Audio file too small, skipping');
+            return null;
+        }
 
         // Detect format from URL or content-type
         let ext = 'ogg';
@@ -578,14 +590,15 @@ async function transcribeAudio(audioUrl) {
         else if (audioUrl.includes('.m4a')) ext = 'm4a';
         else if (audioUrl.includes('.wav')) ext = 'wav';
         else if (audioUrl.includes('.webm')) ext = 'webm';
+        else if (audioUrl.includes('.opus')) ext = 'ogg';
 
-        // Use OpenAI Whisper to transcribe
-        const file = new File([audioBuffer], `audio.${ext}`, {
-            type: ext === 'ogg' ? 'audio/ogg' : ext === 'mp3' ? 'audio/mpeg' : `audio/${ext}`
-        });
+        // Write to temp file (compatible with all Node.js versions)
+        tmpFile = path.join(os.tmpdir(), `whisper_${Date.now()}.${ext}`);
+        fs.writeFileSync(tmpFile, audioBuffer);
 
+        // Use OpenAI Whisper to transcribe via file stream
         const transcription = await openai.audio.transcriptions.create({
-            file: file,
+            file: fs.createReadStream(tmpFile),
             model: 'whisper-1',
             language: 'pt',
             response_format: 'text'
@@ -604,6 +617,11 @@ async function transcribeAudio(audioUrl) {
     } catch (err) {
         console.error('[AI] Error transcribing audio:', err.message);
         return null;
+    } finally {
+        // Cleanup temp file
+        if (tmpFile) {
+            try { require('fs').unlinkSync(tmpFile); } catch (e) {}
+        }
     }
 }
 
