@@ -1,0 +1,299 @@
+const OpenAI = require('openai');
+const db = require('../db');
+const path = require('path');
+const fs = require('fs');
+
+let openai = null;
+let knowledgeBase = '';
+
+// Initialize OpenAI client and load knowledge base
+function initialize() {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        console.warn('[AI] OPENAI_API_KEY not configured — AI responses disabled');
+        return;
+    }
+    openai = new OpenAI({ apiKey });
+    console.log('[AI] OpenAI client initialized');
+
+    // Load knowledge base
+    try {
+        const kbPath = path.join(__dirname, '..', 'data', 'knowledge-base.json');
+        const data = JSON.parse(fs.readFileSync(kbPath, 'utf-8'));
+        // Build compact text for system prompt
+        const categories = {};
+        for (const item of data) {
+            if (!categories[item.category]) categories[item.category] = [];
+            categories[item.category].push(`P: ${item.q}\nR: ${item.a}`);
+        }
+        const parts = [];
+        for (const [cat, items] of Object.entries(categories)) {
+            parts.push(`=== ${cat} ===\n${items.join('\n\n')}`);
+        }
+        knowledgeBase = parts.join('\n\n');
+        console.log(`[AI] Knowledge base loaded: ${data.length} Q&A pairs`);
+    } catch (err) {
+        console.error('[AI] Failed to load knowledge base:', err.message);
+    }
+}
+
+// System prompt for Íris
+const SYSTEM_PROMPT = `Você é a Íris, assistente virtual da Ótica Leve Mais, em Dourados-MS.
+
+REGRAS DE COMPORTAMENTO:
+- Tom: acolhedor, consultivo, leve e profissional
+- Responda em 2 a 5 linhas, máximo
+- Faça apenas 1 pergunta por mensagem
+- Use 0 a 2 emojis por mensagem
+- Não use tabelas, listas longas ou blocos grandes de texto
+- Responda APENAS em texto puro (sem JSON, sem markdown, sem tags)
+- SEMPRE termine com 1 pergunta curta para avançar o atendimento
+- Avance apenas 1 passo por mensagem no fluxo
+
+ESCOPO PERMITIDO:
+- Óculos de grau, armações, óculos de sol
+- Lentes (simples/multifocal e tratamentos)
+- Lentes de contato
+- Consertos, ajustes, limpeza, manutenção, garantia
+- Prazos e pagamentos
+- Agendamento de consulta (oftalmo/optometrista/consulta na ótica)
+- Dúvidas gerais de saúde visual (sem diagnóstico)
+
+FORA DO ESCOPO — responda:
+"Oi! Sou a Íris, da Ótica Leve Mais 😊 Consigo te ajudar com óculos, lentes, consertos e cuidados com a visão. Me conta: você precisa de óculos de grau, solar ou conserto?"
+
+SEGURANÇA MÉDICA:
+Se o cliente mencionar dor forte, perda súbita de visão, trauma no olho, flashes/luzes repentinas, muitas moscas volantes de repente ou secreção intensa:
+"Entendi. Como isso pode precisar de avaliação, o ideal é procurar um oftalmologista o quanto antes. Se quiser, eu te ajudo a agendar uma consulta agora. Qual dia/turno você prefere?"
+
+INFORMAÇÕES DA LOJA:
+- Endereço: Rua dos Missionários, 910 — em frente à porta principal do Hospital Cassems — Dourados-MS
+- Horário: Seg–Sex 08h–18h (sem fechar almoço) | Sáb 08h–12h | Dom/feriados fechado
+- Atendimento presencial e WhatsApp
+
+REGRA DE OURO: Entender a necessidade antes de falar valores.
+
+PREÇOS (fale "a partir de" e só após entender a necessidade):
+- Lentes visão simples: a partir de R$ 290
+- Lentes multifocais: a partir de R$ 490
+- Lentes simples antirreflexo: a partir de R$ 390
+- Lentes multifocais antirreflexo: a partir de R$ 590
+- Lentes simples com luz azul: a partir de R$ 490
+- Lentes multifocais com luz azul: a partir de R$ 690
+- Consulta oftalmologista: a partir de R$ 150
+- Consulta optometrista: R$ 80
+- Consulta na ótica: para quem vai fazer os óculos
+- Óculos de sol: a partir de R$ 190
+
+PAGAMENTO:
+- Cartão: até 10x sem juros
+- PIX/dinheiro: condição à vista com desconto
+- Link de pagamento online
+- Entrada no PIX + restante no cartão
+- Dois cartões
+
+PRAZOS:
+- Lentes simples: mesmo dia até 2 dias (depende do grau)
+- Multifocal simples: mesmo dia até 2 dias
+- Multifocal especial: 7 a 10 dias úteis
+- Grau alto: sob consulta
+
+FLUXO DE ATENDIMENTO (avance 1 passo por vez):
+1. Acolher e pedir nome + cidade
+2. Descobrir (sem valores): receita? primeiro óculos? trocar lentes/armação/ambos? usa muito tela?
+3. Educar com 1 dica curta se fizer sentido
+4. Recomendar 1 caminho (orçamento/consulta/loja/conserto)
+5. Só então falar valores "a partir de" + forma de pagamento
+6. Fechar com 1 pergunta de próximo passo
+
+ATALHO CONSERTO:
+"Entendi! É conserto de qual parte (haste, plaqueta, parafuso, lente riscada ou óculos torto)? Se puder, me manda uma foto que eu já te digo o caminho mais rápido 😊"
+
+TRANSFERIR PARA HUMANO quando detectar:
+- Reclamação/insatisfação
+- Pedido de atendente humano
+- Negociação especial
+- 3 tentativas sem avançar
+- Dúvida de garantia/política fora do padrão
+Responda: "Perfeito — pra te ajudar da melhor forma, vou chamar um atendente humano aqui com a gente 😊 Me confirma seu nome e o que você precisa?"
+
+MENSAGEM FORA DE HORÁRIO (quando aplicável):
+"No momento nossa equipe de vendas não está disponível, mas já vou adiantar algumas informações e iniciar seu atendimento. O que você gostaria de saber agora?"`;
+
+// Get chat history for context
+async function getChatHistory(chatId, limit = 20) {
+    const res = await db.query(
+        `SELECT sender_id, content, timestamp
+         FROM tb_whatsapp_messages
+         WHERE chat_id = $1
+         ORDER BY timestamp DESC
+         LIMIT $2`,
+        [chatId, limit]
+    );
+    // Reverse so oldest first
+    return res.rows.reverse();
+}
+
+// Generate AI response for a chat message
+async function generateResponse(chatId, incomingMessage) {
+    if (!openai) {
+        console.warn('[AI] OpenAI not initialized, skipping response');
+        return null;
+    }
+
+    try {
+        // Get conversation history for context
+        const history = await getChatHistory(chatId);
+
+        // Build messages array for OpenAI
+        const messages = [
+            {
+                role: 'system',
+                content: SYSTEM_PROMPT + '\n\n--- BASE DE CONHECIMENTO ---\n' + knowledgeBase
+            }
+        ];
+
+        // Add conversation history (skip the very last one since that's the incoming message)
+        for (const msg of history) {
+            if (msg.content === incomingMessage && msg === history[history.length - 1]) continue;
+            messages.push({
+                role: msg.sender_id === 'me' ? 'assistant' : 'user',
+                content: msg.content
+            });
+        }
+
+        // Add the current incoming message
+        messages.push({ role: 'user', content: incomingMessage });
+
+        // Call OpenAI
+        const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+        const completion = await openai.chat.completions.create({
+            model,
+            messages,
+            temperature: 0.7,
+            max_tokens: 500
+        });
+
+        const reply = completion.choices[0]?.message?.content?.trim();
+        if (!reply) return null;
+
+        // Now extract structured data in a separate call (cheaper, focused)
+        const extractedData = await extractData(chatId, history, incomingMessage);
+
+        return { reply, data: extractedData };
+    } catch (err) {
+        console.error('[AI] Error generating response:', err.message);
+        return null;
+    }
+}
+
+// Extract structured data from conversation
+async function extractData(chatId, history, latestMessage) {
+    if (!openai) return {};
+
+    try {
+        // Build conversation text for extraction
+        const convoText = history.map(m =>
+            `${m.sender_id === 'me' ? 'Íris' : 'Cliente'}: ${m.content}`
+        ).join('\n') + `\nCliente: ${latestMessage}`;
+
+        const completion = await openai.chat.completions.create({
+            model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Analise a conversa abaixo e extraia dados do CLIENTE em JSON.
+Retorne APENAS o JSON, sem texto extra. Campos:
+- "nome": nome do cliente (string ou null)
+- "cidade": cidade do cliente (string ou null)
+- "intencao": intenção principal: "Orçamento", "Agendamento", "Consulta", "Conserto", "Dúvida", "Compra", "Exame de Vista" ou null
+- "tem_receita": se o cliente mencionou ter receita (true/false/null)
+- "tipo_lente": "Simples", "Multifocal" ou null (baseado no contexto)
+- "handoff": true se o cliente pediu atendente humano, fez reclamação ou a conversa está travada; false caso contrário
+- "agendou": true se o cliente confirmou agendamento; false caso contrário
+
+Conversa:
+${convoText}`
+                }
+            ],
+            temperature: 0,
+            max_tokens: 200,
+            response_format: { type: 'json_object' }
+        });
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) return {};
+        return JSON.parse(content);
+    } catch (err) {
+        console.error('[AI] Error extracting data:', err.message);
+        return {};
+    }
+}
+
+// Create or update atendimento from extracted data
+async function upsertAtendimento(chatId, telefone, extractedData) {
+    if (!extractedData || Object.keys(extractedData).length === 0) return;
+
+    try {
+        // Check if there's an open atendimento for this chat
+        const existing = await db.query(
+            `SELECT id, cliente, cidade, intencao_detectada, tem_receita, classificacao_lente, seguiu_fluxo_agendamento
+             FROM tb_atendimentos
+             WHERE chat_id = $1 AND status NOT IN ('Finalizado', 'Cancelado')
+             ORDER BY data_inicio DESC LIMIT 1`,
+            [chatId]
+        );
+
+        const nome = extractedData.nome || null;
+        const cidade = extractedData.cidade || null;
+        const intencao = extractedData.intencao || null;
+        const temReceita = extractedData.tem_receita ?? null;
+        const tipoLente = extractedData.tipo_lente || null;
+        const agendou = extractedData.agendou || false;
+
+        if (existing.rows.length > 0) {
+            // Update existing — never overwrite non-null with null
+            const row = existing.rows[0];
+            await db.query(
+                `UPDATE tb_atendimentos SET
+                    cliente = COALESCE($1, cliente),
+                    cidade = COALESCE($2, cidade),
+                    intencao_detectada = COALESCE($3, intencao_detectada),
+                    tem_receita = COALESCE($4, tem_receita),
+                    classificacao_lente = COALESCE($5, classificacao_lente),
+                    seguiu_fluxo_agendamento = CASE WHEN $6 = true THEN true ELSE seguiu_fluxo_agendamento END,
+                    ultima_interacao = NOW(),
+                    followup_tier = 0
+                 WHERE id = $7`,
+                [nome, cidade, intencao, temReceita, tipoLente, agendou, row.id]
+            );
+        } else {
+            // Create new atendimento
+            await db.query(
+                `INSERT INTO tb_atendimentos
+                    (telefone_cliente, cliente, cidade, intencao_detectada, tem_receita,
+                     classificacao_lente, chat_id, canal_entrada, status, ultima_interacao)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'WhatsApp', 'Pendente', NOW())`,
+                [telefone, nome, cidade, intencao, temReceita, tipoLente, chatId]
+            );
+        }
+    } catch (err) {
+        console.error('[AI] Error upserting atendimento:', err.message);
+    }
+}
+
+// Reset follow-up tier when customer responds (called from webhook)
+async function resetFollowupOnResponse(chatId) {
+    try {
+        await db.query(
+            `UPDATE tb_atendimentos
+             SET followup_tier = 0, ultima_interacao = NOW(), respondeu_followup = TRUE
+             WHERE chat_id = $1 AND status NOT IN ('Finalizado', 'Cancelado')`,
+            [chatId]
+        );
+    } catch (err) {
+        console.error('[AI] Error resetting followup tier:', err.message);
+    }
+}
+
+module.exports = { initialize, generateResponse, upsertAtendimento, resetFollowupOnResponse };

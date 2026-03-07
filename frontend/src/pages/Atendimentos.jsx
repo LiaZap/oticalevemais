@@ -4,7 +4,6 @@ import { fetchAtendimentos, createAtendimento } from '../lib/api';
 import { Search, Filter, Plus, Phone, Calendar, User, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { sendToN8N } from '../lib/n8n';
 import { KanbanBoard } from '../components/KanbanBoard';
 import { LayoutGrid, List } from 'lucide-react';
 import CustomerDetailsDrawer from '../components/CustomerDetailsDrawer';
@@ -54,13 +53,13 @@ export default function Atendimentos() {
         );
         setAtendimentos(updatedAtendimentos);
 
-        // Dispara Webhook
-        await sendToN8N('STATUS_UPDATE', { 
-            id, 
-            cliente: atendimento.cliente,
-            old_status: atendimento.status, 
-            new_status: newStatus 
-        });
+        // Update status via API
+        try {
+            const { updateAtendimentoStatus } = await import('../lib/api');
+            await updateAtendimentoStatus(id, newStatus);
+        } catch (err) {
+            console.error('Erro ao atualizar status:', err);
+        }
     };
 
     const [lensFilter, setLensFilter] = useState('Todos');

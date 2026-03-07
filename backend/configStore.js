@@ -5,7 +5,12 @@ const CONFIG_FILE = path.join(__dirname, 'config.json');
 
 // Default configuration
 const DEFAULTS = {
-    FOLLOWUP_MSG: "Olá {cliente}, tudo bem? Vi que você entrou em contato conosco recentemente. Ficou alguma dúvida ou gostaria de agendar um horário?"
+    FOLLOWUP_MSG: "Olá {cliente}, tudo bem? Vi que você entrou em contato conosco recentemente. Ficou alguma dúvida ou gostaria de agendar um horário?",
+    AI_ENABLED: "true",
+    FOLLOWUP_ENABLED: "true",
+    FOLLOWUP_TIER1_MINUTES: "30",
+    FOLLOWUP_TIER2_MINUTES: "120",
+    FOLLOWUP_TIER3_MINUTES: "1440"
 };
 
 // Helper to ensure file exists

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
-import { User, Bell, Monitor, Moon, Sun, Shield, Save, Camera, PlayCircle, Bot } from 'lucide-react';
+import { User, Bell, Monitor, Moon, Sun, Save, Camera, Bot, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { createAtendimento, fetchSettings, saveSettings } from '../lib/api';
+import { fetchSettings, saveSettings } from '../lib/api';
 
 export default function Settings() {
     const [activeTab, setActiveTab] = useState('profile');
     const [darkMode, setDarkMode] = useState(() => {
-        return localStorage.getItem('theme') === 'dark' || 
-               (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        return localStorage.getItem('theme') === 'dark' ||
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
     });
+    const [showApiKey, setShowApiKey] = useState(false);
 
     useEffect(() => {
         if (darkMode) {
@@ -27,41 +28,47 @@ export default function Settings() {
         marketing: false
     });
 
-    const [n8nConfig, setN8nConfig] = useState({
-        NEW_ATENDIMENTO: '',
-        STATUS_UPDATE: ''
-    });
-
-    const [automationConfig, setAutomationConfig] = useState({
+    const [config, setConfig] = useState({
+        AI_ENABLED: 'true',
+        OPENAI_API_KEY: '',
+        OPENAI_MODEL: 'gpt-4.1-mini',
+        FOLLOWUP_ENABLED: 'true',
+        FOLLOWUP_TIER1_MINUTES: '30',
+        FOLLOWUP_TIER2_MINUTES: '120',
+        FOLLOWUP_TIER3_MINUTES: '1440',
         FOLLOWUP_MSG: ''
     });
 
     useEffect(() => {
-        fetchSettings().then(setAutomationConfig);
+        fetchSettings().then(data => {
+            setConfig(prev => ({ ...prev, ...data }));
+        });
     }, []);
 
-    useEffect(() => {
-        const savedN8n = localStorage.getItem('n8n_config');
-        if (savedN8n) {
-            setN8nConfig(JSON.parse(savedN8n));
-        }
-    }, []);
-
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        if (activeTab === 'integrations') {
-            localStorage.setItem('n8n_config', JSON.stringify(n8nConfig));
+        try {
+            if (activeTab === 'automation') {
+                const keys = ['AI_ENABLED', 'OPENAI_API_KEY', 'OPENAI_MODEL', 'FOLLOWUP_ENABLED',
+                    'FOLLOWUP_TIER1_MINUTES', 'FOLLOWUP_TIER2_MINUTES', 'FOLLOWUP_TIER3_MINUTES', 'FOLLOWUP_MSG'];
+                for (const key of keys) {
+                    if (config[key] !== undefined && config[key] !== '') {
+                        await saveSettings(key, config[key]);
+                    }
+                }
+            }
+            toast.success('Configurações salvas com sucesso!');
+        } catch (err) {
+            toast.error('Erro ao salvar configurações');
         }
-        if (activeTab === 'automation') {
-            saveSettings('FOLLOWUP_MSG', automationConfig.FOLLOWUP_MSG);
-        }
-        toast.success('Configurações salvas com sucesso!');
     };
 
-    const toggleTheme = () => {
-        setDarkMode(!darkMode);
-        document.documentElement.classList.toggle('dark');
-    };
+    const ToggleSwitch = ({ checked, onChange }) => (
+        <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" checked={checked} onChange={onChange} className="sr-only peer" />
+            <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-red-600"></div>
+        </label>
+    );
 
     return (
         <Sidebar>
@@ -74,66 +81,30 @@ export default function Settings() {
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Navigation Tabs */}
                     <div className="w-full md:w-64 flex flex-col gap-1">
-                        <button
-                            onClick={() => setActiveTab('profile')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                                activeTab === 'profile' 
-                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400' 
+                        {[
+                            { id: 'profile', label: 'Meu Perfil', icon: <User size={18} /> },
+                            { id: 'automation', label: 'IA & Automação', icon: <Bot size={18} /> },
+                            { id: 'notifications', label: 'Notificações', icon: <Bell size={18} /> },
+                            { id: 'system', label: 'Sistema', icon: <Monitor size={18} /> },
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === tab.id
+                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400'
                                     : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                            }`}
-                        >
-                            <User size={18} />
-                            Meu Perfil
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('notifications')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                                activeTab === 'notifications' 
-                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400' 
-                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                            }`}
-                        >
-                            <Bell size={18} />
-                            Notificações
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('integrations')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                                activeTab === 'integrations' 
-                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400' 
-                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                            }`}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            Integrações (n8n)
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('system')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                                activeTab === 'system' 
-                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400' 
-                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                            }`}
-                        >
-                            <Monitor size={18} />
-                            Sistema
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('automation')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                                activeTab === 'automation' 
-                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400' 
-                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                            }`}
-                        >
-                            <Bot size={18} />
-                            Automação
-                        </button>
+                                    }`}
+                            >
+                                {tab.icon}
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
 
                     {/* Content Area */}
                     <div className="flex-1 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
+
+                        {/* Profile Tab */}
                         {activeTab === 'profile' && (
                             <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                                 <div>
@@ -154,7 +125,7 @@ export default function Settings() {
                                             <p className="text-xs text-zinc-500 mt-2">JPG ou PNG. Max 1MB.</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Nome Completo</label>
@@ -163,14 +134,6 @@ export default function Settings() {
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Email</label>
                                             <input type="email" defaultValue="admin@oticalevemais.com.br" className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Telefone</label>
-                                            <input type="tel" defaultValue="(11) 99999-8888" className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Cargo</label>
-                                            <input type="text" defaultValue="Administrador" disabled className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 cursor-not-allowed" />
                                         </div>
                                     </div>
                                 </div>
@@ -198,171 +161,116 @@ export default function Settings() {
                             </form>
                         )}
 
-                        {activeTab === 'integrations' && (
-                            <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Webhooks (n8n)</h2>
-                                    <p className="text-sm text-zinc-500 mb-6">Configure as URLs para onde os eventos do sistema serão enviados.</p>
-                                    
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Novo Atendimento</label>
-                                            <input 
-                                                type="url" 
-                                                placeholder="https://seu-n8n.com/webhook/..." 
-                                                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
-                                                value={n8nConfig.NEW_ATENDIMENTO}
-                                                onChange={(e) => setN8nConfig({...n8nConfig, NEW_ATENDIMENTO: e.target.value})}
-                                            />
-                                            <p className="text-xs text-zinc-500 mt-1">Disparado quando um novo atendimento é cadastrado.</p>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Atualização de Status</label>
-                                            <input 
-                                                type="url" 
-                                                placeholder="https://seu-n8n.com/webhook/..." 
-                                                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
-                                                value={n8nConfig.STATUS_UPDATE}
-                                                onChange={(e) => setN8nConfig({...n8nConfig, STATUS_UPDATE: e.target.value})}
-                                            />
-                                            <p className="text-xs text-zinc-500 mt-1">Disparado quando o status de um atendimento muda (ex: Pendente &rarr; Agendado).</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
-                                        <h3 className="text-sm font-medium text-zinc-900 dark:text-white mb-4">Teste de Integração</h3>
-                                        <button 
-                                            type="button"
-                                            onClick={async () => {
-                                                const fakeLead = {
-                                                    cliente: 'Lead Simulado ' + Math.floor(Math.random() * 1000),
-                                                    telefone: '(11) 99999-' + Math.floor(Math.random() * 9000 + 1000),
-                                                    canal: 'Site',
-                                                    tipo: 'Dúvida',
-                                                    data_inicio: new Date().toISOString(),
-                                                    status: 'Pendente'
-                                                };
-                                                await createAtendimento(fakeLead);
-                                                toast.info(`🔔 Novo Lead Recebido: ${fakeLead.cliente}`, {
-                                                    description: 'Simulação de recebimento via Webhook do n8n',
-                                                    duration: 5000,
-                                                });
-                                            }}
-                                            className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                                        >
-                                            <PlayCircle size={16} />
-                                            Simular Recebimento de Lead (Webhook de Entrada)
-                                        </button>
-                                        <p className="text-xs text-zinc-500 mt-2">Clique para simular um lead chegando do n8n (ele aparecerá na tela de Atendimentos automaticamente).</p>
-                                    </div>
-                                </div>
-
-                                <div className="pt-4 flex justify-end">
-                                    <button type="submit" className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors font-medium shadow-sm">
-                                        <Save size={18} />
-                                        Salvar Integrações
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-
-
-                        {activeTab === 'notifications' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Preferências de Notificação</h2>
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
-                                        <div>
-                                            <h3 className="font-medium text-zinc-900 dark:text-white">Notificações por Email</h3>
-                                            <p className="text-sm text-zinc-500">Receba atualizações importantes via email.</p>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" checked={notifications.email} onChange={() => setNotifications({...notifications, email: !notifications.email})} className="sr-only peer" />
-                                            <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-red-600"></div>
-                                        </label>
-                                    </div>
-
-                                    <div className="flex items-center justify-between p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
-                                        <div>
-                                            <h3 className="font-medium text-zinc-900 dark:text-white">Push Notifications</h3>
-                                            <p className="text-sm text-zinc-500">Alertas no navegador sobre novos atendimentos.</p>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" checked={notifications.push} onChange={() => setNotifications({...notifications, push: !notifications.push})} className="sr-only peer" />
-                                            <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-red-600"></div>
-                                        </label>
-                                    </div>
-
-                                    <div className="flex items-center justify-between p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
-                                        <div>
-                                            <h3 className="font-medium text-zinc-900 dark:text-white">Marketing e Novidades</h3>
-                                            <p className="text-sm text-zinc-500">Novas funcionalidades e dicas de uso.</p>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" checked={notifications.marketing} onChange={() => setNotifications({...notifications, marketing: !notifications.marketing})} className="sr-only peer" />
-                                            <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-red-600"></div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'system' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Sistema</h2>
-                                
-                                <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
-                                    <h3 className="font-medium text-zinc-900 dark:text-white mb-4">Aparência</h3>
-                                    <div className="flex items-center gap-4">
-                                        <button 
-                                            onClick={() => setDarkMode(false)}
-                                            className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
-                                                !darkMode 
-                                                    ? 'border-red-600 bg-red-50 dark:bg-red-900/10' 
-                                                    : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                                            }`}
-                                        >
-                                            <Sun size={24} className={!darkMode ? 'text-red-600' : 'text-zinc-500'} />
-                                            <span className={`font-medium ${!darkMode ? 'text-red-700' : 'text-zinc-600'}`}>Modo Claro</span>
-                                        </button>
-                                        <button 
-                                            onClick={() => setDarkMode(true)}
-                                            className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${
-                                                darkMode 
-                                                    ? 'border-red-600 bg-red-50 dark:bg-red-900/10' 
-                                                    : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                                            }`}
-                                        >
-                                            <Moon size={24} className={darkMode ? 'text-red-600' : 'text-zinc-500'} />
-                                            <span className={`font-medium ${darkMode ? 'text-red-700' : 'text-zinc-600'}`}>Modo Escuro</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg opacity-60">
-                                    <h3 className="font-medium text-zinc-900 dark:text-white mb-2">Versão do Sistema</h3>
-                                    <p className="text-sm text-zinc-500">v1.2.0 (Build 3042)</p>
-                                </div>
-                            </div>
-                        )}
-
+                        {/* IA & Automation Tab */}
                         {activeTab === 'automation' && (
                             <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                {/* AI Section */}
                                 <div>
-                                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Automação de Follow-up</h2>
-                                    <p className="text-sm text-zinc-500 mb-6">Configure as mensagens automáticas enviadas pelo sistema.</p>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Mensagem de Recuperação (24h)</label>
-                                        <textarea 
-                                            rows={4}
-                                            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
-                                            value={automationConfig.FOLLOWUP_MSG}
-                                            onChange={(e) => setAutomationConfig({...automationConfig, FOLLOWUP_MSG: e.target.value})}
-                                            placeholder="Digite a mensagem..."
-                                        />
-                                        <p className="text-xs text-zinc-500 mt-1">Use <strong>{'{cliente}'}</strong> para inserir o nome do cliente automaticamente.</p>
+                                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Inteligência Artificial (Íris)</h2>
+                                    <p className="text-sm text-zinc-500 mb-6">Configure a IA que responde automaticamente fora do horário comercial.</p>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                            <div>
+                                                <h3 className="font-medium text-zinc-900 dark:text-white">IA Habilitada</h3>
+                                                <p className="text-sm text-zinc-500">Quando ativada, a Íris responde clientes fora do horário comercial.</p>
+                                            </div>
+                                            <ToggleSwitch
+                                                checked={config.AI_ENABLED === 'true'}
+                                                onChange={() => setConfig({ ...config, AI_ENABLED: config.AI_ENABLED === 'true' ? 'false' : 'true' })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">API Key (OpenAI)</label>
+                                            <div className="relative">
+                                                <input
+                                                    type={showApiKey ? 'text' : 'password'}
+                                                    className="w-full px-3 py-2 pr-10 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white font-mono text-sm"
+                                                    value={config.OPENAI_API_KEY || ''}
+                                                    onChange={(e) => setConfig({ ...config, OPENAI_API_KEY: e.target.value })}
+                                                    placeholder="sk-..."
+                                                />
+                                                <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                                                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                </button>
+                                            </div>
+                                            <p className="text-xs text-zinc-500 mt-1">Chave da API OpenAI. Configurada via .env ou aqui.</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Modelo</label>
+                                            <select
+                                                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                                value={config.OPENAI_MODEL || 'gpt-4.1-mini'}
+                                                onChange={(e) => setConfig({ ...config, OPENAI_MODEL: e.target.value })}
+                                            >
+                                                <option value="gpt-4.1-mini">GPT-4.1 Mini (Recomendado)</option>
+                                                <option value="gpt-4.1-nano">GPT-4.1 Nano (Mais barato)</option>
+                                                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Follow-up Section */}
+                                <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
+                                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Follow-up Automático</h2>
+                                    <p className="text-sm text-zinc-500 mb-6">Mensagens de recuperação enviadas quando o cliente para de responder. A IA gera mensagens contextuais baseadas na conversa.</p>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                            <div>
+                                                <h3 className="font-medium text-zinc-900 dark:text-white">Follow-up Habilitado</h3>
+                                                <p className="text-sm text-zinc-500">Envia lembretes automáticos para clientes inativos.</p>
+                                            </div>
+                                            <ToggleSwitch
+                                                checked={config.FOLLOWUP_ENABLED === 'true'}
+                                                onChange={() => setConfig({ ...config, FOLLOWUP_ENABLED: config.FOLLOWUP_ENABLED === 'true' ? 'false' : 'true' })}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Tier 1 - Gentil</h4>
+                                                <label className="block text-xs text-zinc-500 mb-1">Tempo (minutos)</label>
+                                                <input
+                                                    type="number"
+                                                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                                    value={config.FOLLOWUP_TIER1_MINUTES}
+                                                    onChange={(e) => setConfig({ ...config, FOLLOWUP_TIER1_MINUTES: e.target.value })}
+                                                />
+                                                <p className="text-xs text-zinc-400 mt-1">Padrão: 30 min</p>
+                                            </div>
+                                            <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Tier 2 - Amigável</h4>
+                                                <label className="block text-xs text-zinc-500 mb-1">Tempo (minutos)</label>
+                                                <input
+                                                    type="number"
+                                                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                                    value={config.FOLLOWUP_TIER2_MINUTES}
+                                                    onChange={(e) => setConfig({ ...config, FOLLOWUP_TIER2_MINUTES: e.target.value })}
+                                                />
+                                                <p className="text-xs text-zinc-400 mt-1">Padrão: 2 horas</p>
+                                            </div>
+                                            <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Tier 3 - Encerramento</h4>
+                                                <label className="block text-xs text-zinc-500 mb-1">Tempo (minutos)</label>
+                                                <input
+                                                    type="number"
+                                                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                                    value={config.FOLLOWUP_TIER3_MINUTES}
+                                                    onChange={(e) => setConfig({ ...config, FOLLOWUP_TIER3_MINUTES: e.target.value })}
+                                                />
+                                                <p className="text-xs text-zinc-400 mt-1">Padrão: 24 horas</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
+                                            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                                                <strong>Como funciona:</strong> A IA gera mensagens contextuais baseadas na conversa que o cliente teve. Se a IA não estiver disponível, usa mensagens padrão de fallback.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -373,6 +281,69 @@ export default function Settings() {
                                     </button>
                                 </div>
                             </form>
+                        )}
+
+                        {/* Notifications Tab */}
+                        {activeTab === 'notifications' && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Preferências de Notificação</h2>
+                                <div className="space-y-4">
+                                    {[
+                                        { key: 'email', title: 'Notificações por Email', desc: 'Receba atualizações importantes via email.' },
+                                        { key: 'push', title: 'Push Notifications', desc: 'Alertas no navegador sobre novos atendimentos.' },
+                                        { key: 'marketing', title: 'Marketing e Novidades', desc: 'Novas funcionalidades e dicas de uso.' },
+                                    ].map(n => (
+                                        <div key={n.key} className="flex items-center justify-between p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                            <div>
+                                                <h3 className="font-medium text-zinc-900 dark:text-white">{n.title}</h3>
+                                                <p className="text-sm text-zinc-500">{n.desc}</p>
+                                            </div>
+                                            <ToggleSwitch
+                                                checked={notifications[n.key]}
+                                                onChange={() => setNotifications({ ...notifications, [n.key]: !notifications[n.key] })}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* System Tab */}
+                        {activeTab === 'system' && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Sistema</h2>
+
+                                <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                    <h3 className="font-medium text-zinc-900 dark:text-white mb-4">Aparência</h3>
+                                    <div className="flex items-center gap-4">
+                                        <button
+                                            onClick={() => setDarkMode(false)}
+                                            className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${!darkMode
+                                                ? 'border-red-600 bg-red-50 dark:bg-red-900/10'
+                                                : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                                                }`}
+                                        >
+                                            <Sun size={24} className={!darkMode ? 'text-red-600' : 'text-zinc-500'} />
+                                            <span className={`font-medium ${!darkMode ? 'text-red-700' : 'text-zinc-600'}`}>Modo Claro</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setDarkMode(true)}
+                                            className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${darkMode
+                                                ? 'border-red-600 bg-red-50 dark:bg-red-900/10'
+                                                : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                                                }`}
+                                        >
+                                            <Moon size={24} className={darkMode ? 'text-red-600' : 'text-zinc-500'} />
+                                            <span className={`font-medium ${darkMode ? 'text-red-700' : 'text-zinc-600'}`}>Modo Escuro</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg opacity-60">
+                                    <h3 className="font-medium text-zinc-900 dark:text-white mb-2">Versão do Sistema</h3>
+                                    <p className="text-sm text-zinc-500">v2.0.0 — IA Íris + Automação WhatsApp</p>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>

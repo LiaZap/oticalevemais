@@ -1,0 +1,1517 @@
+[
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Qual o horário de funcionamento da ótica?",
+    "a": "Funcionamos de segunda a sexta das 8h às 18h e aos sábados das 8h às 12h. Pode passar quando quiser, a porta tá sempre aberta pra você! Não fechamos para almoço."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Preciso agendar horário para ser atendido?",
+    "a": "Não precisa, não! É só chegar. Mas se quiser marcar um horário exclusivo pra não esperar, a gente agenda sim. É só avisar aqui pelo WhatsApp! Quando fica bom pra você?"
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês atendem por WhatsApp?",
+    "a": "Sim! Aqui pelo WhatsApp a gente faz orçamento, tira dúvidas sobre receita, informa prazo de entrega e muito mais. Pode mandar sua pergunta!"
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Quanto tempo demora o atendimento na loja?",
+    "a": "Em média uns 20 a 30 minutinhos. Se for só escolher armação, é mais rápido. Se precisar de medições e ajustes, pode demorar um pouquinho mais, nossa preocupação é sempre te atender da melhor forma possível."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês fazem atendimento a domicílio?",
+    "a": "Sim! Pra pessoas com dificuldade de locomoção ou que preferem o conforto de casa, a gente pode ir até você. Consulte disponibilidade!"
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Posso levar receita de outro oftalmologista?",
+    "a": "Claro! A receita é sua e vale em qualquer ótica. Pode trazer de qualquer médico — particular, convênio ou SUS — que a gente faz suas lentes normalmente."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês têm oftalmologista aqui na loja?",
+    "a": "Temos parcerias com oftalmologistas e optometristas. Clientes agendados pela ótica ganham descontos exclusivos no valor da consulta."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Posso experimentar armações sem compromisso?",
+    "a": "Com certeza! Pode provar quantas quiser, tirar selfie, levar o tempo que precisar. A gente tá aqui pra te ajudar a achar a armação perfeita, sem pressão nenhuma."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês atendem crianças?",
+    "a": "Sim! Temos armações infantis super resistentes e bonitas. O atendimento é todo especial pra deixar os pequenos confortáveis e animados com o óculos novo."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Posso enviar minha receita por foto no WhatsApp?",
+    "a": "Pode sim! Tira uma foto bem legível da receita (sem cortar nada) e manda aqui. A gente já começa a preparar seu orçamento na hora."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Como faço para reclamar de um produto ou serviço?",
+    "a": "Pode falar direto conosco por WhatsApp, telefone ou pessoalmente na loja. A gente leva toda reclamação muito a sério e vai resolver o mais rápido possível pra você."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês fazem orçamento sem compromisso?",
+    "a": "Sim! Fique à vontade pra pedir quantos orçamentos quiser. A gente passa todos os valores e você decide com calma. Sem pressão! Traga o orçamento que já tiver e cobrimos o valor da concorrência."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Preciso levar algum documento para comprar óculos?",
+    "a": "Precisamos basicamente de dados cadastrais, nome completo, data de nascimento, cpf e endereço, se tiver tudo isso decorado não precisa nos apresentar documento."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês entregam o óculos pronto em casa?",
+    "a": "Sim! Quando seu óculos ficar pronto, a gente pode combinar de entregar no endereço que preferir. Consulte a disponibilidade e a taxa pra sua localidade."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "O que devo levar na minha primeira visita à ótica?",
+    "a": "Leve sua receita do oftalmologista (se tiver). Só isso! Se não tiver receita, a gente pode indicar um médico parceiro."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Como funciona a garantia dos óculos?",
+    "a": "A garantia cobre defeitos de fabricação na armação e nas lentes. O prazo varia: geralmente 6 meses a 1 ano, dependendo do produto. Se tiver qualquer problema, traga aqui!"
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Posso trocar a armação se não gostar depois?",
+    "a": "Dentro do prazo de troca (geralmente 7 dias) e com a armação em perfeito estado, sim! Consulte as condições na hora da compra."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês atendem pessoas com necessidades especiais?",
+    "a": "Claro! Nossa loja é acessível e nosso atendimento é adaptado. Se precisar de alguma atenção especial, nos avise que a gente prepara tudo pra te receber da melhor forma."
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Posso comprar óculos para presentear alguém?",
+    "a": "Pode sim! Pra armação solar, é tranquilo. Pra óculos de grau, o ideal é a pessoa vir na loja pra tirar as medidas. Mas a gente pode montar um vale-presente também!"
+  },
+  {
+    "category": "ATENDIMENTO AO CLIENTE",
+    "q": "Vocês dão certificado de garantia por escrito?",
+    "a": "Sim! Junto com seu óculos, você recebe o certificado de garantia com todas as informações: prazo, o que cobre e como acionar. Tudo certinho e documentado."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Quais marcas de armação vocês trabalham?",
+    "a": "Trabalhamos com marca própria (Charlotte - Crystal Vision – Coccinelle - Hoover) e peças importadas — das mais acessíveis até as de grife. Tem opção pra todos os gostos e bolsos!"
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Qual a diferença entre armação de acetato e de metal?",
+    "a": "Acetato é aquele material mais encorpado, colorido e resistente. Metal é fininho e discreto. É como escolher entre um relógio esportivo e um social — cada um tem seu estilo!"
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Armação de titânio vale a pena?",
+    "a": "Muito! Titânio é leve como uma pena e super resistente. Não enferruja e aguenta anos de uso. O preço é um pouco mais alto, mas o custo-benefício compensa pela durabilidade."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "O que é armação de TR-90?",
+    "a": "TR-90 é um material plástico super flexível e leve. Você pode torcer a armação que ela volta ao normal! É ótima pra crianças e pra quem quer conforto com resistência."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Vocês têm armação infantil?",
+    "a": "Sim! Modelos coloridos, flexíveis e resistentes, feitos pra aguentar a energia da criançada."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Qual formato de armação combina com meu rosto?",
+    "a": "Regra básica: rosto redondo combina com armação quadrada e vice-versa. O contraste entre o formato do rosto e da armação é o que harmoniza! Mas o ideal é vir experimentar — aqui a gente te ajuda com uma consultoria exclusiva que te ajuda a escolher o que melhor combina com seu rosto e estilo.."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Vocês vendem óculos multifocal?",
+    "a": "Claro! Multifocal é um dos nossos produtos mais procurados. Temos desde opções básicas até lentes premium com campo de visão bem amplo e adaptação rápida."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Tem óculos de grau esportivo?",
+    "a": "Sim! Armações com encaixe emborrachado, mais firmes no rosto, que não escorregam com suor. Perfeitas pra quem corre, pedala, joga bola..."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Tem óculos pronto pra levar na hora?",
+    "a": "Temos óculos de leitura prontos pra graus mais simples. Mas o ideal é sempre fazer sob medida com sua receita — fica muito mais preciso e confortável pros seus olhos."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Vocês vendem lentes de contato?",
+    "a": "Sim! Temos lentes descartáveis diárias, mensais, coloridas e com grau. A gente te ajuda a encontrar a opção ideal pro seu caso."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Vocês vendem acessórios para óculos?",
+    "a": "Sim! Cordões, correntes, estojos, flanelas de microfibra, spray de limpeza... Tudo que seu óculos precisa pra ficar bem cuidado e estiloso."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Vocês trabalham com lentes Transitions?",
+    "a": "Sim! As lentes Transitions escurecem no sol e clareiam em ambiente fechado. É como ter óculos de grau e óculos solar num produto só — super prático!"
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Tem diferença entre óculos feminino e masculino?",
+    "a": "Existem modelos com design mais feminino ou mais masculino, sim. Mas muitos modelos são unissex! O importante é o que fica bonito e confortável em VOCÊ."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Por que comprar na ótica e não na internet?",
+    "a": "Na ótica a gente mede seu rosto, ajusta a armação no formato da sua cabeça e garante que as lentes ficam centralizadas certinho nos seus olhos. Na internet, é como comprar sapato sem experimentar — pode dar certo, mas o risco é grande."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Vocês vendem clipon (lente solar de encaixe)?",
+    "a": "Sim! Clipon é aquela lente solar que gruda por imã ou encaixe por cima do óculos de grau. Super prático pra quem não quer carregar dois óculos! Temos diversas opções de modelos."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Quanto tempo dura uma armação?",
+    "a": "Uma boa armação dura em média de 2 a 4 anos com uso diário. Depende do material e de como você cuida — guardar no estojo e não sentar em cima ajuda muito! 😄 Aqui na ótica damos higienização e manutenção gratuita nas armações de clientes, tudo para ajudar no tempo de uso do cliente."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Posso colocar minhas lentes antigas em uma armação nova?",
+    "a": "Às vezes sim, se o formato e tamanho forem compatíveis. Aqui na ótica fazemos a análise e dando certo fazemos na hora pra você."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "Vocês têm armação pra rosto grande/pequeno?",
+    "a": "Sim! Armações vêm com medidas em milímetros (52, 54, 56, 58...). A gente encontra o tamanho perfeito pro seu rosto — grande, pequeno, estreito ou largo."
+  },
+  {
+    "category": "VENDAS E PRODUTOS",
+    "q": "O que é armação fio de nylon (parafusada)?",
+    "a": "É aquela armação onde a lente é presa por um fio de nylon fininho na parte de baixo, dando um visual mais discreto. Também chamada de \"semi-aro\" ou \"balgriff\". Bem elegante!"
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Qual a validade da receita de óculos?",
+    "a": "Geralmente 1 ano. Se passar disso, é importante voltar ao oftalmologista pra conferir se o grau mudou. É como revisão do carro — de tempos em tempos, precisa checar!"
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que significa OD e OE na receita?",
+    "a": "Bem simples: OD = Olho Direito, OE = Olho Esquerdo. O médico usa essas siglas pra não confundir qual grau é de qual olho."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que é o 'Esférico' na receita?",
+    "a": "É o grau principal do seu olho. Se o número for negativo (ex: -2,00), você tem miopia (dificuldade pra longe). Se for positivo (+2,00), tem hipermetropia (dificuldade pra perto)."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que é o 'Cilíndrico' na receita?",
+    "a": "É o grau do astigmatismo. Se esse campo tiver valor, significa que sua córnea tem uma curvatura irregular — imagine uma bola de futebol americano em vez de uma bola redondinha. Esse grau corrige isso."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que é o 'Eixo' na receita?",
+    "a": "O eixo indica a POSIÇÃO do astigmatismo no olho, medido em graus de 0° a 180°. Só aparece quando tem cilíndrico. É como o ponteiro de um relógio — indica onde tá a irregularidade da córnea."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que é 'Adição' ou 'ADD' na receita?",
+    "a": "É o grau extra pra enxergar de perto, usado nos óculos multifocais ou de leitura. Aparece geralmente depois dos 40 anos, quando a vista começa a cansar pra perto."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que significa DNP na receita?",
+    "a": "DNP é a Distância Naso-Pupilar — a distância do centro do nariz até o centro da sua pupila. É essencial pra centralizar as lentes certinho nos seus olhos. Sem essa medida, o óculos pode causar desconforto."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Minha receita tem grau alto? A partir de quanto é considerado alto?",
+    "a": "De 0 a 3 graus é leve, de 3 a 6 é moderado, acima de 6 é alto. Mas não se preocupe — hoje existem lentes finíssimas mesmo pra graus altos! Nada de \"fundo de garrafa\"."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Receita de oftalmologista e de optometrista são a mesma coisa?",
+    "a": "Ambos podem receitar óculos. A diferença é que o oftalmologista é médico e pode diagnosticar e tratar doenças dos olhos (como glaucoma, catarata). O optometrista é especialista em medir a visão e prescrever lentes."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Posso usar receita do SUS?",
+    "a": "Claro! Receita é receita. Pode trazer do SUS, de convênio ou de consulta particular — a gente aceita todas normalmente."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que significa 'para longe' e 'para perto' na receita?",
+    "a": "\"Pra longe\" é o grau pra enxergar coisas distantes (TV, placa de trânsito). \"Pra perto\" é pra coisas próximas (ler, celular). Se os dois aparecem na receita, provavelmente você precisa de um multifocal."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Meu grau já estabilizou?",
+    "a": "Geralmente o grau estabiliza entre 18 e 25 anos. Mas varia de pessoa pra pessoa. Só o oftalmologista pode confirmar com exames regulares. Quem tem diabetes, por exemplo, pode ter variações em qualquer idade."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Posso usar a mesma receita do óculos pra lente de contato?",
+    "a": "Sim, porém em alguns casos, o médico já prescreve uma receita especifica para lentes de contato, com grau um pouco mais baixo, ajudando a adaptação do usuário."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Por que a receita tem valores diferentes em cada olho?",
+    "a": "Isso é super normal! Cada olho é independente, como os pés — um pode ser maior que o outro. É raríssimo os dois olhos terem exatamente o mesmo grau."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O médico não colocou a DNP na receita, e agora?",
+    "a": "Sem problema! A gente mede aqui na ótica com equipamento próprio. Na verdade, a maioria das receitas não vem com DNP — é a ótica que faz essa medição. Leva só uns minutinhos."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Perdi minha receita, vocês conseguem consultar?",
+    "a": "Se você já comprou aqui antes, temos o histórico da sua receita no nosso sistema! Se não, será necessário voltar ao oftalmologista pra fazer uma nova. Mas fique tranquilo, consulta de grau é rápida."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Posso fazer óculos sem receita?",
+    "a": "Para óculos de grau, a receita é indispensável. É como uma receita de remédio — sem ela, não tem como saber a \"dose\" certa pro seu olho. Pra solar sem grau, não precisa de receita. Caso você queria copiar o grau do seu óculos temos um aparelho aqui na ótica que fazemos a leitura e copiamos seu grau."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "O que é dioptria?",
+    "a": "Dioptria é a unidade de medida do grau. Quando alguém diz \"tenho 2 graus de miopia\", tá falando de 2 dioptrias. É como medir peso em quilos — a dioptria mede a \"força\" da lente que seu olho precisa."
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Minha receita diz 'plano' em algum campo, o que significa?",
+    "a": "\"Plano\" significa grau zero naquele campo. Por exemplo, se o cilíndrico está \"plano\", quer dizer que você não tem astigmatismo naquele olho. É uma boa notícia! 😄"
+  },
+  {
+    "category": "RECEITAS E PRESCRIÇÕES",
+    "q": "Por que minha receita nova está diferente da antiga?",
+    "a": "O grau pode mudar com o tempo — pra mais ou pra menos. Fatores como idade, uso de telas, genética e saúde geral influenciam. Por isso o acompanhamento anual é importante."
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Quanto custa um óculos de grau completo?",
+    "a": "Varia bastante! Um óculos completo simples pode sair a partir de R$300,00, e um premium com lentes especiais pode passar de R$3.000. Depende da armação e das lentes que você escolher. A gente monta opções pra todos os bolsos e necessidades!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Por que óculos de grau é tão caro?",
+    "a": "O valor vem principalmente das lentes, que passam por processos de alta tecnologia (antirreflexo, proteção UV, antirrisco). É como carro: o básico transporta, mas o com ar-condicionado, direção elétrica e airbag custa mais porque tem mais tecnologia e conforto."
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Qual a lente mais barata que vocês têm?",
+    "a": "As lentes de resina simples (CR-39) são as mais em conta. Mas atenção: lente sem tratamento risca mais fácil e não tem antirreflexo. O barato pode sair caro e precisar trocar mais rápido!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Por que lente multifocal custa mais que a simples?",
+    "a": "Porque ela tem tecnologia muito mais avançada — é como ter 3 óculos em 1 (longe, intermediário e perto). A fabricação é bem mais complexa e precisa. Por isso o investimento é maior, mas a praticidade compensa!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Quanto custa trocar só as lentes, mantendo a armação?",
+    "a": "Depende do tipo de lente e dos tratamentos que você escolher. Lentes simples custam menos, multifocais um pouco mais. Manda sua receita que a gente faz o orçamento certinho pra você!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Vocês dão desconto pra pagamento à vista?",
+    "a": "Sim! Geralmente temos condições especiais pra quem paga à vista em dinheiro ou PIX. Sempre vale perguntar — a gente faz o melhor preço possível!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "O preço da lente muda conforme o grau?",
+    "a": "Sim! Quanto maior o grau, mais cara costuma ser a lente, principalmente se quiser uma lente mais fina (alto índice). Graus mais baixos cabem nas lentes mais em conta."
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Vocês tem lentes que escurecem no sol?",
+    "a": "Sim. Lentes que escurecem no sol temos 2 opções: a fotocromática e a Transitions."
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Quanto custa lente com antirreflexo?",
+    "a": "Lentes visão simples com antirreflexo temos a partir de 390,00. Se for multifocal com antirreflexo temos a partir de 590,00. Vale muito a pena pelo conforto visual!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Óculos de grau tem preço tabelado?",
+    "a": "Não existe tabela fixa. O preço final depende de 3 coisas: a armação que você escolher, o tipo de lente e quais tratamentos adicionar. É como montar um combo — cada escolha compõe o preço."
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Quanto custa um óculos solar?",
+    "a": "A partir de R$190,00 pra modelos simples e pode chegar a R$1.500 ou mais em marcas premium. O essencial é que tenha proteção UV400 de verdade — isso sim não tem preço!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Vocês cobram pela limpeza ou ajuste do óculos?",
+    "a": "Não! Limpeza ultrassônica e ajustes simples são cortesia, mesmo que o óculos não tenha sido comprado aqui. Pode trazer quando quiser!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Tem promoção acontecendo agora?",
+    "a": "A gente tá sempre com condições especiais! Me conta o que você precisa (armação, lentes, solar) que eu vejo a melhor oferta disponível pra você nesse momento."
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Quanto custa lente com filtro de luz azul?",
+    "a": "Lentes visão simples com luz azul temos a partir de 490,00. Lentes multifocais com luz azul temos a partir de 690,00. Pra quem usa muito computador e celular, é um investimento que seu olho vai agradecer! Me manda sua receita que passo o valor certinho!"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Fazer lente mais fina custa mais caro?",
+    "a": "Sim! Quanto mais fina (maior índice de refração), mais cara. Mas esteticamente faz uma diferença enorme, principalmente em graus acima de 4. Ninguém gosta de lente grossa e pesada, né?"
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "O orçamento que vocês passam tem validade?",
+    "a": "Sim, geralmente nossos orçamentos valem por 7 a 15 dias. Depois disso, os valores podem sofrer alteração por conta de mudanças nos fornecedores."
+  },
+  {
+    "category": "PREÇOS E ORÇAMENTOS",
+    "q": "Segundo óculos tem desconto?",
+    "a": "Na maioria das vezes, sim! Quem faz mais de um óculos junto (ex: um de grau e um solar, ou dois de grau com receitas diferentes) costuma ter condição especial e as vezes até ganha o segundo par. Consulte!"
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Qual a diferença entre lente de resina e policarbonato?",
+    "a": "Resina é o material básico, bom e baratinho. Policarbonato é mais resistente a impacto — ideal pra crianças e esportistas. É como comparar vidro comum com vidro temperado: os dois funcionam, mas um aguenta mais pancada."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente antirreflexo?",
+    "a": "É um tratamento que elimina aqueles reflexos chatos que aparecem na lente (aquele brilho esverdeado ou azulado). Resultado: visão mais limpa, menos cansaço visual e óculos mais bonito na foto!"
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente com filtro de luz azul?",
+    "a": "Filtra a luz azul emitida por telas (celular, computador, TV). Ajuda a reduzir o cansaço ocular e pode até melhorar a qualidade do sono. É como colocar um \"protetor solar\" nos olhos contra a luz artificial."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Qual a diferença entre lente monofocal e multifocal?",
+    "a": "Monofocal tem um grau só — corrige longe OU perto. Multifocal tem vários graus numa lente só — corrige longe, intermediário E perto. É como uma escada rolante (monofocal = um andar) vs um elevador (multifocal = vai pra todos os andares)."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é índice de refração (1.56, 1.61, 1.67, 1.74)?",
+    "a": "É o número que indica o quanto a lente é fina. Quanto MAIOR o número, MAIS FINA a lente. Pra graus baixos, 1.56 tá ótimo. Pra graus altos, 1.67 ou 1.74 evitam aquele aspecto de \"fundo de garrafa\"."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Lente com proteção UV é importante?",
+    "a": "Muito! Os raios UV podem causar catarata e outras doenças ao longo da vida. É como protetor solar — você não vê a proteção, mas ela tá ali protegendo seus olhos todo dia."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente progressiva?",
+    "a": "É outro nome pra multifocal! Chama \"progressiva\" porque o grau muda de forma gradual (progressiva) de cima pra baixo na lente. Parte de cima = longe, meio = intermediário, parte de baixo = perto."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Lente pode riscar?",
+    "a": "Toda lente PODE riscar, sim. Mas lentes com tratamento antirrisco são muito mais resistentes. Dica de ouro: NUNCA limpe com roupa, papel toalha ou guardanapo — use sempre a flanela de microfibra!"
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente fotossensível / fotocromática (Transitions)?",
+    "a": "São lentes que escurecem automaticamente quando expostas ao sol e clareiam em ambientes fechados. Funcionam como um camaleão — se adaptam ao ambiente! Super práticas pra quem transita entre ambientes."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Lente mais fina é melhor que a mais grossa?",
+    "a": "Opticamente são equivalentes. Mas esteticamente e em conforto (peso), a fina ganha disparado, principalmente em graus altos. Pense na diferença entre um celular fininho e um tijolão — os dois funcionam, mas um é bem mais agradável de usar!"
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente asférica?",
+    "a": "É uma lente com curvatura otimizada que reduz distorções nas bordas. Resultado: visão mais nítida, lente mais plana e esteticamente mais bonita. Em graus altos, faz bastante diferença."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Quanto tempo dura uma lente?",
+    "a": "Com bom cuidado, de 1 a 2 anos. Depois disso, os tratamentos (antirreflexo, antirrisco, filtro luz azul) vão se desgastando naturalmente, mesmo com uso cuidadoso. É normal trocar junto com a revisão do grau."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Posso colocar grau em lente de óculos solar?",
+    "a": "Sim! A gente faz lentes escuras ou coloridas com seu grau exato. Assim você enxerga perfeitamente E protege os olhos do sol. Dois problemas resolvidos de uma vez!"
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é tratamento hidrofóbico/oleofóbico?",
+    "a": "É um tratamento que repele água e gordura na superfície da lente. As gotículas escorrem como numa panela antiaderente. Resultado: mais fácil de limpar e menos marcas de dedo!"
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente bifocal?",
+    "a": "É a lente com aquela \"meia-lua\" visível na parte de baixo — metade de cima pra longe, metade de baixo pra perto. É o \"avô\" do multifocal. Hoje o multifocal é mais recomendado porque não tem essa divisão visível e a transição é mais suave."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Lente de vidro ainda existe?",
+    "a": "Existe, mas é bem raro! Vidro mineral é pesado e pode estilhaçar. Hoje usamos resinas e policarbonatos que são muito mais leves e seguros. A única vantagem do vidro é que risca menos."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente surfaçada / digital / free-form?",
+    "a": "É uma lente fabricada com tecnologia digital de ponta, ponto a ponto, como uma impressora 3D de altíssima precisão. Oferece visão muito mais nítida que as lentes convencionais, especialmente nas bordas."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é altura de montagem (ou altura pupilar)?",
+    "a": "É a medida de onde seu olho (pupila) fica dentro da armação, de baixo pra cima. Super importante nos multifocais — se errar essa medida, você pode olhar \"no lugar errado\" da lente e ter dificuldade de adaptação."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "Lente com antirreflexo reflete de que cor?",
+    "a": "Depende do tipo de antirreflexo: pode ter reflexo residual verde, azul ou violeta. Isso é normal e mostra que o tratamento tá lá! O reflexo azulado geralmente indica que a lente também tem filtro de luz azul."
+  },
+  {
+    "category": "INFORMAÇÕES TÉCNICAS SOBRE LENTES",
+    "q": "O que é lente ocupacional (tipo Office)?",
+    "a": "É uma lente feita pra quem trabalha no computador. Ela corrige a visão pra perto e intermediário (40cm a 2m), mas não pra longe. É perfeita pro escritório — como uma lente multifocal, mas focada no ambiente de trabalho."
+  },
+  {
+    "category": "FORMAS DE PAGAMENTO",
+    "q": "Quais formas de pagamento vocês aceitam?",
+    "a": "Aceitamos dinheiro, PIX, cartão de débito, cartão de crédito (à vista ou parcelado)."
+  },
+  {
+    "category": "FORMAS DE PAGAMENTO",
+    "q": "Vocês parcelam no cartão de crédito? Em quantas vezes?",
+    "a": "Sim! Parcelamos no cartão de crédito. Dependendo do valor parcelamos até em 10x sem juros."
+  },
+  {
+    "category": "FORMAS DE PAGAMENTO",
+    "q": "Aceitam PIX?",
+    "a": "Sim! PIX é na hora, sem taxa, e geralmente tem as mesmas vantagens do pagamento à vista (incluindo desconto, quando disponível)."
+  },
+  {
+    "category": "FORMAS DE PAGAMENTO",
+    "q": "Vocês têm crediário próprio? Como funciona?",
+    "a": "Não temos crediário, mas em alguns casos trabalhamos com promissória, seguindo alguns critérios:"
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Posso dar uma entrada e parcelar o restante?",
+    "a": "Claro! A gente monta a melhor condição pra caber no seu bolso. Entrada no PIX/dinheiro e o resto no cartão, por exemplo. É só combinar!"
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Posso dividir o pagamento em dois cartões?",
+    "a": "Sim! Pode dividir o valor em dois cartões diferentes, sem problema nenhum. Muita gente faz isso!"
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "O parcelamento no cartão tem juros?",
+    "a": "Não."
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Tem desconto pra pagamento à vista?",
+    "a": "Sim! Quem paga à vista em dinheiro ou PIX geralmente tem condição especial. Sempre pergunte — a gente faz o melhor preço possível!"
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Posso pagar metade agora e metade na entrega?",
+    "a": "Sim, você pode dar um sinal no ato do seu pedido e pagar o restante quando vier buscar seu óculos pronto! A gente combina a forma mais confortável pra você. É só conversar com nosso time."
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Vocês emitem nota fiscal?",
+    "a": "Sim! Se precisar pra reembolso de convênio ou declaração de imposto de renda, é só pedir!"
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Posso usar o cartão de outra pessoa pra pagar?",
+    "a": "Pode, caso a pessoa não puder ir até a ótica, geramos um link para pagamento online."
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Vocês aceitam cartão por aproximação?",
+    "a": "Sim! Nossa maquininha aceita pagamento por aproximação — com cartão, celular ou relógio. Rápido e prático!"
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Consigo pagar com link de pagamento (à distância)?",
+    "a": "Sim! Pra compras pelo WhatsApp, podemos enviar um link de pagamento seguro pro seu cartão de crédito. Você paga de casa, sem precisar vir à loja."
+  },
+  {
+    "category": "Compras feitas pela promissória não participam das promoções de armações da loja",
+    "q": "Existe valor mínimo pra parcelar?",
+    "a": "Sim, acima de 100,00."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é miopia?",
+    "a": "É quando você enxerga mal de LONGE. A imagem se forma antes da retina, ficando embaçada. Imagine uma câmera com o foco errado — o que tá longe fica borrado, mas o que tá pertinho fica nítido. A lente negativa (para miopia) corrige isso."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é hipermetropia?",
+    "a": "É o contrário da miopia: dificuldade pra ver de PERTO. A imagem se forma depois da retina. Quem tem hipermetropia geralmente afasta o celular ou o livro pra conseguir ler. A lente positiva (para hipermetropia) resolve."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é astigmatismo?",
+    "a": "É quando a córnea (a \"janela\" do olho) tem formato irregular — em vez de ser redondinha como uma bola de futebol, ela é ovalada como uma bola de rugby. Isso deixa a visão embaçada e às vezes duplicada, tanto de longe quanto de perto. As imagens ficam distorcidas."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é presbiopia (vista cansada)?",
+    "a": "É a dificuldade pra enxergar de perto que aparece depois dos 40 anos. O cristalino (a \"lente natural\" do olho) vai perdendo flexibilidade — é como uma borracha que endurece com o tempo. Todo mundo vai ter, é natural! A solução é multifocal ou óculos de leitura."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Miopia tem cura?",
+    "a": "Cura natural, não. Mas pode ser perfeitamente corrigida com óculos, lentes de contato ou cirurgia refrativa (a laser). O óculos não cura, mas faz você enxergar 100%. É como o sapato ortopédico — não muda o pé, mas faz ele funcionar direitinho."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Astigmatismo piora com o tempo?",
+    "a": "Geralmente é bem estável ao longo da vida. Pode variar um pouquinho, mas raramente muda de forma drástica. O importante é acompanhar com exames regulares, sem neurose!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é catarata?",
+    "a": "É quando o cristalino (a lente natural dentro do olho) vai ficando opaco, como um vidro embaçado. A visão fica turva, amarelada e com ofuscamento. É muito comum em idosos. A solução é cirurgia — rápida, segura e com ótimos resultados."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é glaucoma?",
+    "a": "É o aumento da pressão dentro do olho que vai danificando o nervo óptico aos poucos. O perigo é que ele é SILENCIOSO — você não sente dor nem percebe no começo. Quando percebe, já perdeu parte da visão. Por isso o exame de rotina é tão importante!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é ceratocone?",
+    "a": "É quando a córnea vai afinando e ficando em formato de cone (pontuda). Causa visão muito distorcida e irregular. Em casos leves, lentes especiais resolvem. Em casos mais avançados, pode precisar de procedimentos como crosslinking (técnica que consiste na aplicação de um colírio especial à base de riboflavina (vitamina B2), que, posteriormente, é ativado por um feixe de luz ultravioleta ou até transplante de córnea)."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Ficar muito tempo no celular ou computador estraga a vista?",
+    "a": "Sim, o uso excessivo de celulares e computadores pode prejudicar a visão, causando a síndrome da visão de computador, fadiga ocular, ressecamento (pois piscamos menos) e dores de cabeça. Embora não altere o grau dos óculos diretamente, o esforço prolongado e a luz azul podem aumentar riscos de miopia e doenças oculares a longo prazo."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é olho seco?",
+    "a": "É quando o olho não produz lágrima suficiente ou ela evapora muito rápido. Causa ardência, coceira, sensação de areia nos olhos e visão embaçada. O ar-condicionado e as telas pioram muito! Piscar mais, usar colírio lubrificante e hidratar-se ajuda bastante."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Estrabismo (olho torto) tem tratamento?",
+    "a": "Sim! Pode ser tratado com óculos especiais, tampão, exercícios ortópticos ou cirurgia corretiva. Quanto mais cedo iniciar o tratamento (especialmente em crianças), melhor o resultado."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é daltonismo?",
+    "a": "É uma condição genética em que a pessoa não consegue diferenciar certas cores — geralmente confunde verde com vermelho. Não é \"cegueira pra cores\", é uma dificuldade de distinção. Não tem cura, mas existem lentes especiais que podem ajudar a melhorar a percepção."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Com que idade devo começar a cuidar da visão?",
+    "a": "Desde bebê! O primeiro exame (teste do olhinho) deve ser feito ainda na maternidade. Depois: aos 6 meses, 3 anos, antes de entrar na escola e então a cada 1-2 anos. Depois dos 40, é bom ir todo ano. Prevenção é sempre o melhor remédio!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é ambliopia (olho preguiçoso)?",
+    "a": "É quando um olho não desenvolve a visão corretamente na infância. O cérebro \"ignora\" a imagem desse olho e só usa o outro. Tratamento com tampão no olho bom + óculos funciona muito bem, mas precisa ser feito cedo (até 7-8 anos, idealmente)."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Ler no escuro faz mal pra vista?",
+    "a": "Não causa dano permanente, mas força demais os olhos e causa cansaço visual intenso, dor de cabeça e desconforto. Sempre leia com boa iluminação!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que são as \"mosquinhas\" flutuando na visão (moscas volantes)?",
+    "a": "São sombrinhas que parecem flutuar na sua visão, especialmente quando olha pro céu ou pra uma parede branca. Geralmente são partículas dentro do gel do olho e são inofensivas. MAS: se aparecerem de repente, em grande quantidade ou com flashes de luz, procure o oftalmo com urgência!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Coçar os olhos faz mal?",
+    "a": "Sim, e muito! Coçar com força pode deformar a córnea ao longo do tempo e contribuir pra ceratocone. É como amassar uma bola de plástico repetidamente — uma hora ela não volta mais ao formato normal. Se tiver coceira, use colírio antialérgico. Nunca coce!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Diabetes pode afetar a visão?",
+    "a": "Sim, bastante! O diabetes pode causar retinopatia diabética, que danifica os vasos sanguíneos do fundo do olho. Em casos de muita gravidade, pode levar à cegueira. Por isso, quem tem diabetes precisa fazer exame de fundo de olho TODO ANO, sem falta."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é degeneração macular?",
+    "a": "É o desgaste da mácula (a parte central da retina, responsável pela visão de detalhes). É mais comum em idosos e causa perda da visão central — como se tivesse uma mancha escura no meio do que você olha. Tem tratamento pra frear, mas não pra reverter totalmente."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Pressão alta pode afetar os olhos?",
+    "a": "Sim! A hipertensão pode danificar os vasos sanguíneos da retina (retinopatia hipertensiva). Mais um motivo pra controlar a pressão e fazer exame de vista regularmente."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é conjuntivite?",
+    "a": "É a inflamação da conjuntiva (a membrana transparente que cobre o branco do olho). Causa olho vermelho, coceira, lacrimejamento e secreção. Pode ser viral, bacteriana ou alérgica. É muito contagiosa nas formas viral e bacteriana! Procure o médico e lave bem as mãos."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Óculos solar precisa ter proteção UV?",
+    "a": "OBRIGATORIAMENTE! Óculos escuro SEM proteção UV é PIOR que não usar nada. Sabe por quê? A lente escura faz sua pupila dilatar (abrir mais), e sem filtro UV, entra MAIS radiação no olho. É como abrir a porta pro inimigo entrar! Sempre exija UV400."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Como saber se meu óculos solar tem proteção UV de verdade?",
+    "a": "Compre em óticas confiáveis que fornecem certificado de proteção UV400. Na ótica, temos equipamento pra testar a lente. Nunca confie só na etiqueta de óculos de camelô — a maioria não tem proteção real."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é lente polarizada?",
+    "a": "A lente polarizada tem um filtro especial que elimina reflexos de superfícies horizontais — como água, asfalto molhado, capô de carro e neve. É como tirar o \"brilho\" excessivo do mundo! Excelente pra dirigir e pra quem pesca ou vai à praia."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Qual a diferença entre lente polarizada e lente só escura?",
+    "a": "A lente só escura reduz a luminosidade geral (como fechar a cortina). A polarizada vai além: além de escurecer, ela ELIMINA os reflexos que incomodam e ofuscam. É um upgrade significativo no conforto visual."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso colocar grau no óculos solar?",
+    "a": "Sim! Fazemos lentes escuras ou coloridas com seu grau exato. Você enxerga perfeitamente E protege os olhos do sol. Dois problemas resolvidos com um óculos só!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Óculos solar mais escuro protege mais?",
+    "a": "Não! O que protege é o FILTRO UV, não a cor escura. Uma lente clara com UV400 protege mais que uma preta sem filtro. Escuridão sem proteção é armadilha pros seus olhos."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Qual a melhor cor de lente solar?",
+    "a": "Depende do uso! Cinza mantém as cores mais naturais (boa pra tudo). Marrom melhora o contraste (boa pra dirigir). Amarela/âmbar é ótima pra dias nublados e esportes. Verde é boa pra uso geral. Cada cor tem seu superpoder!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Criança precisa usar óculos solar?",
+    "a": "Sim, e muito! Os olhos das crianças são mais sensíveis ao UV porque o cristalino é mais transparente, deixando mais radiação entrar. Invista num solar infantil com proteção UV de qualidade — estará protegendo a visão pro futuro."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Óculos solar tem validade?",
+    "a": "As lentes de qualidade mantêm a proteção UV por muitos anos. Mas se estiverem riscadas, descascando ou o tratamento estiver deteriorado, é hora de trocar. A armação também sofre desgaste natural."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar óculos solar à noite?",
+    "a": "Não é recomendado e pode ser perigoso! Lentes escuras à noite reduzem a visibilidade drasticamente, especialmente ao dirigir. É como colocar óculos de mergulho pra caminhar na rua — atrapalha mais que ajuda."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é lente espelhada?",
+    "a": "É uma lente com revestimento refletivo por fora — parece um espelhinho. Além de super estilosa, reduz ainda mais a luminosidade que chega aos olhos. Ótima pra ambientes muito claros como praia e neve."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Óculos solar de farmácia ou camelô protege?",
+    "a": "Na maioria das vezes NÃO. Não possuem certificação UV comprovada. É um risco sério pra saúde dos seus olhos. Economizar no solar pode custar caro lá na frente com doenças como catarata e pterígio."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é UV400?",
+    "a": "UV400 significa que a lente bloqueia 100% dos raios UVA e UVB (até 400 nanômetros de comprimento de onda). É o padrão ouro de proteção solar pra óculos. Sempre peça UV400!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar óculos solar por cima do de grau?",
+    "a": "Pode usar clipon (lente que encaixa por cima) ou sobreóculos. Mas o mais prático e confortável é fazer um solar com grau ou usar lentes Transitions, que escurecem no sol automaticamente."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Lente degradê (que escurece só em cima) protege?",
+    "a": "A parte escura (de cima) protege bem do sol. A parte clara (de baixo) protege menos. É boa pra dirigir porque bloqueia o sol que vem de cima e permite enxergar o painel do carro embaixo. Mas pra praia ou neve, uma lente uniformemente escura é melhor."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Pode usar óculos solar na água (praia e piscina)?",
+    "a": "Pode, mas cuide! Água salgada e cloro podem danificar os tratamentos da lente e da armação. Depois de usar, lave com água doce e seque com pano macio. E nunca deixe o óculos na areia!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Óculos solar pode ser usado como óculos de proteção no trabalho?",
+    "a": "Não! Óculos solar não é equipamento de proteção individual (EPI). Pra trabalho, existem óculos de proteção com normas específicas. Solar protege do sol, EPI protege de impactos e partículas."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Vocês consertam óculos quebrado?",
+    "a": "Sim! Fazemos soldas, troca de parafusos, plaquetas, hastes e muito mais. Traga seu óculos que a gente avalia se tem conserto e já passa o orçamento."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Quanto custa consertar óculos?",
+    "a": "Depende do reparo. Trocar parafuso ou plaqueta é cortesia da nossa ótica. Solda e troca de haste custam em média de R$40 à R$80. A gente avalia e faz orçamento na hora, sem compromisso!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Dá pra soldar armação de metal quebrada?",
+    "a": "Na maioria dos casos, sim! A solda em armação de metal fica bem resistente. O resultado estético depende do local da quebra, mas funcionalmente volta a ficar firme."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "E armação de acetato (plástico) quebrada, tem jeito?",
+    "a": "É mais difícil que metal. Dependendo do local e do tipo de quebra, dá pra colar com cola especial ou fazer acabamento. Mas nem sempre o resultado fica esteticamente perfeito. Traga pra gente avaliar!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos tá torto, vocês ajustam?",
+    "a": "Claro! Ajuste é rapidinho e geralmente e grátis. Pode trazer que a gente endireita, alinha as hastes e deixa confortável no seu rosto de novo."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Quanto tempo demora um conserto?",
+    "a": "Reparos simples (parafuso, plaqueta, ajuste) saem na hora, em minutinhos. Soldas e consertos maiores podem levar de 1 a 3 horas, dependendo da complexidade."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Vocês trocam as plaquetas (apoios de nariz)?",
+    "a": "Sim! É de graça e bem rapidinho. As plaquetas desgastam, ficam amareladas e escorregadias com o tempo. Trocar faz uma diferença enorme no conforto!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Minha lente riscou, tem como polir e tirar o risco?",
+    "a": "Riscos profundos infelizmente não. Polindo podemos “minimizar” os riscos superficiais, só que esse processo danifica o antirreflexo. O ideal é a lente riscada ser trocada por uma nova. É como tela de celular trincada — não tem como \"destrincar\"."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos tá apertando atrás da orelha, o que fazer?",
+    "a": "É só trazer na ótica que a gente ajusta a curvatura da haste. Leva 2 minutinhos e o óculos fica confortável de novo! Haste apertando pode até dar dor de cabeça, então não sofra — traga logo."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "A haste do meu óculos quebrou. Troca só ela?",
+    "a": "Sim. Em muitos casos, a gente consegue encomendar a haste original. Se não tiver, podemos tentar adaptar uma compatível."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Vocês consertam óculos comprados em outras óticas?",
+    "a": "Sim! Consertamos qualquer óculos, independente de onde foi comprado. Se tem jeito, a gente arruma!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos tá escorregando do nariz o tempo todo, o que fazer?",
+    "a": "Pode ser plaqueta gasta, armação alargada ou modelo inadequado pro seu nariz. Traga aqui que a gente diagnostica e resolve — às vezes é só um ajustinho rápido!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O parafuso do meu óculos caiu, o que faço?",
+    "a": "Traga na ótica que a gente coloca um novo em segundos!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos tá com a ponte (parte do nariz) quebrada, conserta?",
+    "a": "Se for de metal, geralmente dá pra soldar. Se for acetato, é mais complicado porque a ponte sustenta todo o peso. A gente avalia — em alguns casos é possível, em outros pode ser mais vantajoso trocar a armação."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "A lente soltou da armação, vocês recolocam?",
+    "a": "Sim! Se for armação de aro inteiro, reencaixamos na hora. Se for fio de nylon, trocamos o fio. Se for parafusada (3 peças), reapertamos. Tudo rapidinho!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos ficou desbotado/descascando, tem solução?",
+    "a": "Descascamento na armação geralmente é desgaste natural do material. Infelizmente não tem como recuperar a pintura original. Mas a gente pode avaliar se vale a pena fazer um retoque ou se é hora de uma armação nova."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Como limpar meus óculos corretamente?",
+    "a": "O jeito certo é simples: lave com água corrente e uma gotinha de sabão neutro (detergente), esfregue suavemente com os dedos e seque com papel higiênico macio ou flanela de microfibra. NUNCA use papel toalha, guardanapo, roupa ou álcool — eles riscam e danificam os tratamentos!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso limpar a lente com álcool ou álcool em gel?",
+    "a": "NÃO! Álcool é inimigo dos tratamentos da lente (antirreflexo, antirrisco, luz azul). Com o tempo, danifica e descasca a superfície. Use somente água + sabão neutro ou spray próprio pra lentes ópticas."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar a camiseta pra limpar o óculos rapidinho?",
+    "a": "Evite! O tecido da roupa é abrasivo (tem fibras grossas) e pode ter partículas de poeira e sujeira que riscam a lente. É como lixar a lente sem querer. Use SEMPRE a flanelinha de microfibra — ela foi feita pra isso."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Onde devo guardar meu óculos quando não estiver usando?",
+    "a": "Sempre no estojo! E nunca, jamais, deixe com as lentes viradas pra baixo sobre a mesa. É como guardar o celular sem capinha com a tela pra baixo — uma hora vai riscar. O estojo é o melhor amigo do óculos. Se vc é nosso cliente e perdeu seu estojo é só vir na ótica que disponibilizamos outro pra você."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso deixar o óculos dentro do carro?",
+    "a": "Não! O calor extremo dentro do carro (que pode passar dos 60°C) pode deformar a armação de acetato, soltar colagens e danificar os tratamentos da lente. Leve o óculos com você ou guarde no porta-luvas dentro do estojo."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "De quanto em quanto tempo devo trocar meus óculos?",
+    "a": "O ideal é trocar as lentes a cada 1 a 2 anos (ou antes, se o grau mudar). A armação pode durar mais, de 2 a 4 anos, se estiver bem conservada. Acompanhe com exame anual!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar o óculos na cabeça como tiara?",
+    "a": "Não é aconselhável usar óculos na cabeça como tiara. Essa prática danifica a armação."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos embaça muito quando uso máscara, o que fazer?",
+    "a": "Esse é um problema clássico! Dicas: ajuste bem a máscara no nariz (com o arame), posicione o óculos um pouquinho mais pra frente ou use spray anti-embaçante. Lentes com tratamento antiembaçante também existem!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar meu óculos de grau na praia ou piscina?",
+    "a": "Pode, mas cuide! Água salgada e cloro agridem os tratamentos da lente e a armação. Após o uso, lave BEM com água doce e seque com microfibra."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "A flanelinha de microfibra precisa ser lavada?",
+    "a": "Sim! Lave com água e sabão neutro pelo menos 1 vez por semana. Flanela suja acumula partículas que RISCAM a lente ao invés de limpar. É como passar pano sujo no chão — só espalha a sujeira."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que é a limpeza ultrassônica que fazem na ótica?",
+    "a": "É uma limpeza profunda feita numa máquina com água e ultrassom. As micro-vibrações removem sujeira de cantinhos que você não consegue limpar em casa (parafusos, plaquetas, entre a lente e a armação). Pode trazer seu óculos pra gente fazer — é gratuito!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Spray de limpeza pra lentes funciona?",
+    "a": "Sim! Sprays específicos pra lentes ópticas são seguros e práticos pra limpar no dia a dia. Borrife na lente e seque com microfibra. Mas atenção: use spray PRÓPRIO pra óculos. Sempre temos na ótica."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso molhar a armação de metal?",
+    "a": "Pode, na limpeza é até recomendado. Mas seque bem depois, especialmente nas dobradiças e parafusos. Armações de qualidade são mais resistentes à água, mas umidade constante pode causar oxidação em qualquer metal."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O suor pode estragar meu óculos?",
+    "a": "Sim! O suor é ácido e, com o tempo, pode corroer a pintura da armação, descascar o revestimento e desgastar as plaquetas. Limpe o óculos com frequência se você sua muito. Sempre que possível traga até a ótica para manutenção preventiva!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso apoiar o óculos na testa ou no colo?",
+    "a": "Na testa, o suor ataca a armação e alarga as hastes. No colo, o risco de cair é enorme. O ideal é sempre guardar no estojo ou pendurá-lo num cordão/corrente pra óculos. Seguro e estiloso!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "É normal sentir tontura com óculos novo?",
+    "a": "Sim, é bem normal nos primeiros dias! Seu cérebro precisa recalibrar a forma como processa as imagens. É como trocar de sapato — incomoda no começo, mas em poucos dias fica natural. Se passar de 7 a 10 dias e ainda sente desconforto, volte na ótica pra verificar."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Quanto tempo leva pra me adaptar ao multifocal?",
+    "a": "Em média de 7 a 15 dias. Dica de ouro: use o tempo TODO (não tire e ponha) e movimente a CABEÇA (não só os olhos) pra olhar pros lados. Se não se adaptar em 30 dias, volte que a gente reavalia tudo."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Óculos novo tá dando dor de cabeça, é normal?",
+    "a": "Nos primeiros 3-5 dias pode acontecer, faz parte da adaptação. Mas se a dor for forte ou persistir por mais de uma semana, volte na ótica. Pode ser que alguma medida precise de ajuste."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Tenho que usar o óculos o tempo todo?",
+    "a": "Depende da sua receita e da indicação do médico. Miopia alta geralmente exige uso constante. Presbiopia leve pode ser só pra leitura. Multifocal funciona melhor com uso contínuo. Siga a orientação do seu oftalmo!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso alternar entre o óculos velho e o novo durante a adaptação?",
+    "a": "Evite! Alternar atrasa a adaptação porque o cérebro fica confuso entre os dois. Use o óculos novo o tempo todo — é a forma mais rápida de se acostumar."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Estou enxergando o chão mais perto ou mais longe com o óculos novo, é normal?",
+    "a": "Sim! Isso acontece com mudanças de grau, especialmente em graus altos ou multifocais. É uma distorção esperada que seu cérebro vai corrigir naturalmente em poucos dias."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Estou vendo as coisas \"curvadas\" nas laterais com o óculos novo, é normal?",
+    "a": "Pode acontecer com lentes de grau mais alto ou quando há mudança grande na receita. É chamado de \"efeito barril\" ou \"efeito almofada\". Seu cérebro se adapta em poucos dias. Se persistir além de 10 dias, volte na ótica!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Não estou me adaptando ao multifocal, o que fazer?",
+    "a": "Não desista! Volte na ótica. Pode ser questão de ajuste na armação, na altura de montagem ou até no tipo de lente. Existem multifocais com campo de visão mais amplo que facilitam a adaptação. A gente encontra a solução!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar óculos de outra pessoa pra testar?",
+    "a": "Não! Cada óculos é feito com grau e medidas específicas pra aquela pessoa. Usar o de outra pessoa é como tomar remédio na dose errada — pode dar dor de cabeça, tontura e desconforto."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Usar óculos causa dependência? O olho vicia?",
+    "a": "MITO! O óculos NÃO vicia e NÃO piora sua visão. O que acontece é que você se acostuma a enxergar BEM e, quando tira, percebe o quanto sua visão natural é ruim. O olho não muda por causa do óculos — ele já era assim antes!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Óculos de grau pode causar dor no nariz?",
+    "a": "Pode, se a armação for pesada demais, mal ajustada ou com plaquetas inadequadas pro seu nariz. Traga na ótica que a gente ajusta. Ninguém precisa sofrer com óculos desconfortável!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos multifocal tem áreas embaçadas nas laterais, é defeito?",
+    "a": "Não é defeito! Toda lente multifocal tem zonas de distorção nas laterais — é uma característica física da lente. Lentes premium têm campos laterais maiores e distorção menor. É por isso que multifocais mais caros são mais confortáveis."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Estou com dificuldade de descer escada com óculos novo, é normal?",
+    "a": "Sim, especialmente com multifocais. Acontece porque ao olhar pra baixo, você usa a zona de perto da lente, que altera a percepção de profundidade. Dica: incline levemente a cabeça pra baixo (use a zona de longe) ao descer escada. Em poucos dias isso vira automático!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Meu óculos novo parece ter grau mais forte que o anterior, é normal?",
+    "a": "Se houve mudança de grau na receita, sim! Seu olho precisa de tempo pra se adaptar ao novo grau. É como trocar o zoom de uma câmera — no começo estranha, mas rapidinho o cérebro se ajusta."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Lente de contato dói?",
+    "a": "Não! No comecinho pode ter uma sensação de que tem algo no olho, mas passa em minutos. É como usar brinco pela primeira vez — logo você esquece que tá usando. Se doer de verdade, retire e procure orientação."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Lente de contato pode ir pra trás do olho?",
+    "a": "Impossível! Tem uma membrana (a conjuntiva) que impede qualquer coisa de ir \"pra trás\" do olho. A lente pode sair do lugar e ficar debaixo da pálpebra, mas nunca vai sumir. Fique tranquilo!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso dormir com lente de contato?",
+    "a": "Com a maioria, NÃO! Dormir com lente comum corta o oxigênio da córnea e pode causar infecção grave. Existem lentes específicas de uso contínuo aprovadas pra isso, mas são a exceção. Na dúvida: tire SEMPRE antes de dormir."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Qual a diferença entre lente descartável diária e lente mensal?",
+    "a": "Diária: usa uma vez e joga fora. Zero manutenção. Mensal: usa por 30 dias, limpando todo dia com solução. Diária é mais higiênica e prática. Mensal é geralmente mais econômica no longo prazo."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Criança pode usar lente de contato?",
+    "a": "Pode, geralmente a partir dos 10-12 anos, quando tem responsabilidade e maturidade pra cuidar da higiene. O oftalmologista avalia cada caso. Pra crianças menores com necessidades especiais, também pode ser indicado."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Lente de contato colorida precisa de receita?",
+    "a": "Sim! Mesmo sem grau, a lente precisa ser adaptada pelo profissional. Lente colorida de camelô ou sem prescrição é MUITO perigosa — pode causar infecção, alergia e até lesão na córnea. Nunca arrisque!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Como limpar lente de contato corretamente?",
+    "a": "Use SOMENTE a solução multiuso recomendada. Coloque a lente na palma da mão, pingue a solução e esfregue suavemente com o dedo por uns 20 segundos. Depois enxágue com a solução e guarde no estojo com solução nova. NUNCA use água da torneira ou soro fisiológico."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar lente de contato na piscina ou no mar?",
+    "a": "Não é ideal! A água pode contaminar a lente com bactérias e parasitas, incluindo a temida Acanthamoeba. Se for usar, prefira lentes descartáveis diárias e descarte depois. E nunca abra os olhos debaixo d'água com lente!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Quanto custa lente de contato por mês?",
+    "a": "Varia bastante! Lentes diárias custam mais por mês (mas não precisa de solução). Lentes mensais custam menos nas lentes, mas somando a solução de limpeza, fica parecido. A gente faz o comparativo certinho pro seu caso!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Tenho astigmatismo, posso usar lente de contato?",
+    "a": "Sim! Existem lentes tóricas, projetadas especialmente pra corrigir astigmatismo. Elas têm um \"peso\" na parte de baixo que mantém a lente na posição certa no olho. Adaptam muito bem!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Existe lente de contato multifocal?",
+    "a": "Sim! São lentes que corrigem longe e perto ao mesmo tempo, como o óculos multifocal, mas na lente de contato. Ótima opção pra quem tem mais de 40 anos e quer se livrar dos óculos de leitura."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Minha lente de contato tá embaçando durante o uso, o que pode ser?",
+    "a": "Pode ser olho seco (lente desidratando), depósito de proteína na lente, lente vencida ou simplesmente sujeira. Tente piscar mais, usar colírio lubrificante próprio pra lentes ou trocar a lente. Se persistir, consulte seu profissional."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar colírio com lente de contato?",
+    "a": "Somente colírios ESPECÍFICOS pra quem usa lente de contato (geralmente lubrificantes sem conservantes). Colírios comuns podem danificar a lente e irritar o olho. Sempre confira com o oftalmo!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Quanto tempo posso usar a lente de contato por dia?",
+    "a": "Em média, de 8 a 12 horas por dia, dependendo do tipo de lente e da tolerância do seu olho. Respeite o limite! Depois tire, deixe o olho respirar. Pense na lente como um sapato fechado — seus pés também precisam de ar."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "O que acontece se eu usar a lente de contato por mais tempo que o recomendado?",
+    "a": "A córnea pode ficar sem oxigênio, causando vermelhidão, inchaço, infecção e até úlcera de córnea (muito grave). Não vale o risco! Respeite o prazo da lente (diária = 1 dia, mensal = 30 dias) e o limite diário de horas."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Posso usar lente de contato e óculos no mesmo dia?",
+    "a": "Claro! Muita gente usa lente durante o dia e troca pro óculos à noite pra descansar os olhos. Ou usa lente pra sair e óculos em casa. Ter os dois é a combinação ideal!"
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "Como sei se a lente de contato tá do lado certo ou do avesso?",
+    "a": "Coloque a lente na ponta do dedo e olhe de lado. Se a borda parece uma \"tigela\" (U perfeito), tá certo. Se a borda \"abre pra fora\" como um pratinho, tá do avesso."
+  },
+  {
+    "category": "DOENÇAS E PROBLEMAS VISUAIS",
+    "q": "É normal o olho ficar vermelho com lente de contato?",
+    "a": "Um pouquinho no começo da adaptação pode acontecer. Mas vermelhidão persistente, com dor ou secreção, é sinal de alerta! Retire a lente imediatamente e procure o profissional. Pode ser infecção ou intolerância."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quanto tempo demora pra meu óculos ficar pronto?",
+    "a": "Depende do tipo de lente: lentes simples (monofocais) podemos te entregar no mesmo dia ou em até 2 dias. Multifocais sem tratamentos nas lentes o mesmo período. Para multifocais com campos amplos e com tratamentos e/ou lentes especiais de 7 a 10 dias úteis. Graus muito altos ou lentes importadas podem demorar um pouquinho mais. A gente sempre informa o prazo certinho na hora do pedido!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Tem como fazer óculos mais rápido (serviço expresso)?",
+    "a": "Em alguns casos sim! Se a lente estiver disponível em estoque no laboratório, dá pra fazer em até 3 horas. Consulte a disponibilidade pro seu grau!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Como fico sabendo quando meu óculos ficou pronto?",
+    "a": "A gente avisa por WhatsApp assim que ficar pronto! Pode ficar tranquilo que não esquecemos de você. Se preferir, pode ligar também pra conferir o andamento."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Por que meu óculos tá demorando mais que o prazo?",
+    "a": "Alguns motivos possíveis: lente importada com prazo maior do fabricante, grau muito alto que exige fabricação especial, ou feriados no meio do caminho. Se estiver demorando além do combinado, nos procure que verificamos com o laboratório na hora!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Posso buscar na loja ou vocês entregam?",
+    "a": "As duas opções! Pode buscar pessoalmente (recomendado, pois a gente ajusta na hora no seu rosto) ou entregamos no endereço que preferir. Consulte taxa e prazo de entrega."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Se eu comprar agora, quando fica pronto?",
+    "a": "Depende da lente e do grau. Manda sua receita aqui que a gente te informa o prazo exato! Trabalhamos sempre pra entregar o mais rápido possível!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Vocês enviam óculos pelo correio para outras cidades?",
+    "a": "Sim! Pra clientes de fora da cidade, enviamos pelos Correios ou transportadora com toda segurança. O óculos vai bem embalado e protegido. Consulte o frete pro seu CEP!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O óculos vem pronto pra usar ou precisa ajustar na loja?",
+    "a": "Ele vem montado e pronto, mas é muito recomendado passar na loja pra gente fazer o ajuste fino no seu rosto — encaixar nas orelhas, no nariz, conferir se tá certinho. Faz TODA a diferença no conforto e na visão!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Posso acompanhar o status do meu pedido?",
+    "a": "Claro! É só mandar mensagem aqui no WhatsApp perguntando sobre seu pedido que a gente consulta o status no sistema e te informa na hora."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Meu óculos ficou pronto, quanto tempo tenho pra buscar?",
+    "a": "Recomendamos buscar o quanto antes. Seus óculos é o tratamento para seus olhos, além disso caso precise de algum ajuste ou acionar alguma garantia temos um tempo hábil para isso."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Vocês aceitam plano de saúde ou convênio?",
+    "a": "Trabalhamos em parceria com diversos hospitais e clinicas que realizam consulta e exame de visão. A maioria aceita plano de saúde. Nos informe o nome do seu plano que a gente verifica na hora quem pode te atender."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Meu convênio não cobre óculos, tem alguma alternativa?",
+    "a": "Sim! Mesmo sem cobertura do plano, a gente tem ótimas condições de pagamento: parcelamento no cartão, crediário próprio, descontos à vista. Não deixe de cuidar da sua visão — a gente encontra uma forma!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Sou obrigado a usar óculos pra dirigir?",
+    "a": "Se na sua CNH consta a observação 'uso obrigatório de lentes corretivas', SIM! Dirigir sem óculos nesse caso é infração de trânsito gravíssima, com multa e pontos na carteira. Não arrisque!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Qual o melhor tipo de lente pra dirigir à noite?",
+    "a": "Lentes com antirreflexo de qualidade! Elas reduzem o ofuscamento dos faróis dos outros carros, aquele brilho que 'cega' à noite. Faz uma diferença enorme no conforto e na segurança. Algumas lentes têm tratamento específico 'Night Drive'."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Óculos com lente polarizada é bom pra dirigir?",
+    "a": "Excelente pro dia! Elimina os reflexos do asfalto molhado, do capô dos carros e da água. Reduz muito o ofuscamento solar. MAS: use APENAS durante o dia — à noite não é indicado."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Lente Transitions funciona bem pra dirigir?",
+    "a": "Funciona, com um detalhe: dentro do carro, a Transitions pode NÃO escurecer completamente, porque o para-brisa já bloqueia parte dos raios UV que ativam a lente. Pra sol muito forte no trânsito, um óculos solar com seu grau é a melhor opção."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Lente amarela pra dirigir à noite funciona mesmo?",
+    "a": "Sim. As lentes Night Drive são lentes oftálmicas com tonalidade amarela projetadas especificamente para uso noturno ou em condições de baixa luminosidade (chuva, neblina). Elas funcionam aumentando o contraste e reduzindo o ofuscamento (reflexo) provocado pelos faróis de outros veículos, proporcionando maior conforto visual e segurança ao motorista. Essas lentes são muito comuns em armações clipon, você tem seu óculos de grau e encaixa a lente night drive para uso noturno ao dirigir."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Posso dirigir com óculos solar?",
+    "a": "Sim, durante o dia! É até recomendado pra reduzir ofuscamento. Mas atenção: NUNCA dirija à noite com óculos solar. E evite lentes de categoria 4 (muito escuras) — são proibidas pra direção."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Meu grau mudou, preciso informar o DETRAN?",
+    "a": "Se a mudança de grau não altera a necessidade de usar óculos (ou seja, você já usava e continua usando), não precisa informar. A obrigatoriedade continua a mesma. Mas mantenha seu óculos sempre atualizado com o grau correto pra sua segurança!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Posso dirigir com lente de contato no lugar do óculos?",
+    "a": "Sim! Se sua CNH exige lentes corretivas, tanto óculos quanto lente de contato são aceitos. O importante é estar com a correção visual em uso. Mas tenha sempre um óculos reserva no carro, por precaução."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Que tipo de óculos é ideal pra quem dirige muito (motorista profissional)?",
+    "a": "Recomendamos: lente com antirreflexo premium (pra noite), um óculos solar polarizado (pro dia) e, se usar multifocal, optar por lentes com campo de visão amplo pra facilitar a visão dos retrovisores e do painel."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Óculos com lente suja ou riscada atrapalha a direção?",
+    "a": "MUITO! Lente suja ou riscada causa brilhos, halos e distorções, especialmente à noite. É como dirigir com o para-brisa embaçado. Mantenha suas lentes sempre limpas e troque quando estiverem muito riscadas!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Preciso de óculos especial pra usar computador?",
+    "a": "Se você passa mais de 2 horas por dia na tela, óculos com filtro de luz azul e antirreflexo são altamente recomendados — mesmo que você NÃO tenha grau. É uma proteção pro cansaço e pro conforto dos seus olhos."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O que é a regra 20-20-20?",
+    "a": "A cada 20 minutos no computador, olhe pra algo a 20 pés de distância (mais ou menos 6 metros), por 20 segundos. É um descanso rápido pros seus olhos. Pense como um alongamento pra quem fica sentado muito tempo — simples, rápido e faz toda a diferença!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Óculos pra computador precisa ter grau?",
+    "a": "Não necessariamente! Se você já tem grau, o filtro de luz azul é adicionado às suas lentes. Se não tem grau nenhum, pode fazer óculos só com o filtro de luz azul (grau zero). Chamamos de 'óculos de descanso'."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Tela de computador causa doença nos olhos?",
+    "a": "Não causa doença permanente, mas pode provocar a Síndrome da Visão de Computador: olhos secos, cansados, vermelhos, dor de cabeça e visão embaçada temporária. Pausas regulares, piscar mais e óculos com filtro de luz azul ajudam muito!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Usar celular no escuro faz mal pra vista?",
+    "a": "Faz o olho trabalhar muito mais, pois a diferença de brilho entre a tela e o ambiente é enorme. Causa cansaço intenso e desconforto. Não vai 'estragar' a vista permanentemente, mas incomoda bastante. Dica: mantenha pelo menos uma luz ambiente ligada."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O que é lente ocupacional (tipo Office)?",
+    "a": "É uma lente feita sob medida pra quem trabalha em escritório ou computador. Ela corrige a visão pra perto (40cm — teclado, celular) e intermediário (até 2m — tela do computador). Não enxerga longe com ela, mas pro ambiente de trabalho é perfeita — muito mais confortável que o multifocal comum. E para deixa-la perfeita para o trabalho, adicionamos o filtro para uso de telas."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O filtro de luz azul deixa a lente amarelada?",
+    "a": "As versões mais antigas tinham sim um tom amarelado. Mas as tecnologias atuais são praticamente imperceptíveis — a lente fica transparente com um leve reflexo azulado ou violeta. Esteticamente, quase não se nota diferença!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Criança que usa tablet/celular precisa de óculos com filtro de luz azul?",
+    "a": "Sim, super recomendado! Os olhos das crianças são mais sensíveis porque o cristalino é mais transparente, deixando passar mais luz. Mas o mais importante de tudo: LIMITAR o tempo de tela! Óculos ajuda, mas não substitui o controle do uso."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Qual a distância ideal pra ficar do computador?",
+    "a": "A tela deve ficar a cerca de 50 a 70 cm dos olhos (comprimento do braço esticado) e um pouco abaixo da linha dos olhos (uns 15 a 20 graus). Assim o olho trabalha de forma mais natural e cansa menos."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Modo noturno (tela amarelada) do celular substitui o óculos com filtro de luz azul?",
+    "a": "Ajuda, mas não substitui completamente. O modo noturno reduz parte da luz azul da tela, mas o óculos com filtro protege de TODAS as fontes de luz ao redor (lâmpadas, TV, outras telas). O ideal é usar os dois juntos!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Usar óculos de grau faz o grau aumentar?",
+    "a": "MITO! O óculos apenas corrige a visão — ele não muda, não aumenta e não diminui o grau. O grau muda por fatores genéticos e naturais do olho. É como dizer que usar guarda-chuva faz chover — não tem nenhuma relação!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Comer cenoura melhora a visão?",
+    "a": "MEIA-VERDADE! A cenoura tem vitamina A, que é importante pra saúde dos olhos. Mas comer toneladas de cenoura NÃO vai eliminar seu grau. É como dizer que ajuda na saúde geral, mas não faz milagre."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Óculos de leitura de farmácia são bons?",
+    "a": "Pra uso ocasional e emergencial, pode quebrar um galho. MAS: eles têm o mesmo grau nos dois olhos (e raramente seus olhos são iguais), não têm DNP personalizada e a qualidade óptica é inferior. Não é indicado o uso contínuo."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Exercício ocular elimina o grau?",
+    "a": "MITO! Nenhum exercício, ioga ocular ou técnica alternativa elimina miopia, hipermetropia ou astigmatismo. Exercícios podem ajudar a aliviar cansaço visual, mas não substituem óculos, lentes de contato ou cirurgia."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Bebê pode precisar de óculos?",
+    "a": "VERDADE! Alguns bebês nascem com problemas visuais que precisam de correção precoce. O teste do olhinho (feito na maternidade) identifica muitos casos. Quanto antes tratar, melhor o desenvolvimento visual da criança."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quem tem grau alto não pode fazer cirurgia refrativa?",
+    "a": "DEPENDE! Cada caso é único. A tecnologia avançou muito e hoje é possível operar graus bem altos. O oftalmo avalia a espessura da córnea, formato, saúde geral do olho e outros fatores pra decidir se você é apto a operar."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Colírio pode substituir o óculos?",
+    "a": "MITO! Colírios tratam sintomas específicos (olho seco, alergia, inflamação, pressão). Óculos corrige o grau. São coisas completamente diferentes — Um não substitui o outro!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Piscar muito é sinal de problema de vista?",
+    "a": "PODE SER! Especialmente em crianças: piscar excessivo, apertar os olhos, inclinar a cabeça pra ler e chegar muito perto da TV podem ser sinais de que algo não vai bem. Vale uma visita ao oftalmo pra investigar."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Olhar pra tela de celular o dia todo causa cegueira?",
+    "a": "MITO! Telas NÃO causam cegueira. Mas causam cansaço visual, olho seco e desconforto. A longo prazo, o excesso de luz azul pode contribuir pra degeneração macular, mas a relação ainda está sendo estudada. Melhor prevenir: faça pausas e use filtro de luz azul."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Usar óculos de grau errado estraga a vista?",
+    "a": "Não \"estraga\" permanentemente em adultos, mas causa muito desconforto: dor de cabeça, tontura, náusea e cansaço visual. Em crianças, o risco é maior porque a visão ainda está em desenvolvimento. Por isso a receita certa e atualizada é tão importante!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Óculos com lente grossa significa grau muito alto?",
+    "a": "NEM SEMPRE! Pode ser que a pessoa tenha grau alto, sim, mas também pode ser que a lente escolhida tenha índice de refração baixo (lente barata). Com lentes de alto índice (1.67, 1.74), mesmo graus altos ficam finos e discretos."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quem usa óculos não pode praticar esportes?",
+    "a": "MITO! Existem armações esportivas super resistentes, com encaixe firme e lentes de policarbonato (resistentes a impacto). Dá pra correr, jogar futebol, pedalar... Se preferir, lentes de contato também são ótima opção pro esporte."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "A visão piora no inverno ou em dias nublados?",
+    "a": "SENSAÇÃO, não piora real. Em dias nublados, a luminosidade menor pode fazer você sentir que enxerga pior. Além disso, o ar frio e seco pode causar mais ressecamento ocular. Mas o grau em si não muda com o clima."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Depois dos 40 anos todo mundo precisa de óculos pra leitura?",
+    "a": "QUASE VERDADE! A presbiopia (vista cansada) é um processo natural que afeta praticamente 100% das pessoas depois dos 40. Algumas percebem antes, outras um pouco depois, mas é inevitável. É como cabelo branco — uns mais cedo, outros mais tarde, mas chega pra todo mundo."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Como saber se meu filho precisa de óculos?",
+    "a": "Fique atento aos sinais: chega muito perto da TV, aperta os olhos, inclina a cabeça pra ler, reclama de dor de cabeça, tem dificuldade de enxergar o quadro na escola, esfrega os olhos com frequência. Se notar qualquer um desses, leve ao oftalmo! Muitas crianças nem sabem que enxergam mal."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "A partir de que idade a criança pode usar óculos?",
+    "a": "Desde bebê, se necessário! Existem armações próprias pra bebês a partir de meses de vida. Quanto antes corrigir um problema visual, melhor o desenvolvimento da visão da criança."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Criança se adapta bem a óculos?",
+    "a": "Sim! Quando a criança percebe que enxerga MELHOR com o óculos, geralmente aceita bem. A dica: envolva a criança na escolha da armação (deixe ela escolher a cor, o modelo). Quando é 'escolha dela', o óculos vira motivo de orgulho!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Qual a melhor armação pra criança?",
+    "a": "Priorize: material flexível (TR-90 ou silicone), hastes emborrachadas com ponteira antideslizante, ponte anatômica (sem plaquetas pra não machucar). O óculos precisa aguentar a rotina da criança — brincar, correr, cair... O visual é importante, mas a resistência é essencial!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "De quanto em quanto tempo meu filho deve ir ao oftalmo?",
+    "a": "A cada 6 meses a 1 ano. Na infância e adolescência o grau pode mudar com mais frequência porque o olho ainda está crescendo. Acompanhamento regular é fundamental pra garantir que o óculos está sempre atualizado."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Lente de policarbonato é obrigatória pra criança?",
+    "a": "Não é obrigatória, mas é MUITO recomendada! Policarbonato é até 10 vezes mais resistente a impacto que a resina comum. Se uma bolada acertar o óculos, a lente não estilhaça. Segurança em primeiro lugar, sempre!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Meu filho não quer usar óculos, o que faço?",
+    "a": "Algumas estratégias: 1) Deixe ELE escolher a armação (cor, modelo, personagem); 2) Elogie quando usar; 3) Mostre personagens ou pessoas que ele admira usando óculos; 4) Não force com bronca — converse sobre como vai enxergar melhor na escola, nos jogos. Paciência é a chave!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Óculos infantil precisa de algum cuidado especial?",
+    "a": "Os mesmos cuidados do adulto, com reforço no básico: guardar no estojo quando tirar, limpar só com microfibra, não dormir com o óculos. E um extra: tenha uma cordinha ou elástico de segurança pra crianças muito pequenas — evita que o óculos caia e quebre."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "A armação do meu filho vive entortando, é normal?",
+    "a": "Infelizmente sim — crianças são energia pura! Traga pra gente ajustar quantas vezes precisar (é cortesia). E se precisar trocar, iremos sempre sugerir a armação que mais atende as necessidades do seu filho."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Meu filho tem grau alto, as lentes vão ficar muito grossas?",
+    "a": "Não necessariamente! Com lentes de alto índice (1.67 ou 1.74), mesmo graus altos ficam finos e leves. Pra crianças, recomendamos policarbonato de alto índice — fino, leve e resistente. A estética ajuda muito na aceitação do óculos!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O grau do meu filho pode estabilizar? Quando?",
+    "a": "O grau costuma estabilizar entre 18 e 25 anos, quando o olho para de crescer. Até lá, é normal ter mudanças. Por isso as visitas regulares ao oftalmo são tão importantes na infância e adolescência."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Meu filho usa tablet o dia todo. Isso prejudica a visão?",
+    "a": "Estudos mostram que o excesso de atividades de perto (telas, livros) na infância pode contribuir pro aumento da miopia. A recomendação: limitar o tempo de tela, incentivar brincadeiras ao ar livre (a luz natural ajuda a proteger contra miopia!) e fazer pausas frequentes. Além do uso de lentes de descanso (com filtro de luz azul) caso faça muito uso de telas."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Criança pode usar lente de contato no lugar do óculos?",
+    "a": "Pode, geralmente a partir dos 10-12 anos, quando tem responsabilidade pra cuidar da higiene (lavar as mãos, limpar, guardar no estojinho). Pra crianças menores, o óculos é a opção mais segura e prática. O oftalmo avalia caso a caso."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Meu filho vai precisar de óculos pra sempre?",
+    "a": "Depende do problema. Algumas crianças usam óculos por um período e depois não precisam mais (ex: hipermetropia leve que melhora com o crescimento do olho). Outras vão usar a vida toda. Quando adulto, a cirurgia refrativa pode ser uma opção. O oftalmo acompanha e orienta ao longo do tempo."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Vocês agendam consulta com oftalmologista aqui na ótica?",
+    "a": "Sim, agendamos consultas com oftalmologistas e com optometristas. Clientes da ótica tem descontos especiais nas clinicas."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Como faço pra agendar uma consulta oftalmológica?",
+    "a": "Só nos informar qual a sua preferência de especialista, nos informar se tem algum plano de saúde, e também qual dia e horário fica bom, verificamos a agenda e te retornamos com a melhor opção."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Preciso de encaminhamento pra ir ao oftalmologista?",
+    "a": "Agendando pela ótica não precisa de encaminhamento."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quanto custa uma consulta com oftalmologista?",
+    "a": "Temos três opções de consultas: Com oftalmologista a partir de 150,00 direto no hospital e clinica. Com optometrista fica 80,00 e também temos a opção da consulta gratuita na ótica para os clientes que já vão fazer os óculos conosco. Consulte agora mesmo a disponibilidade."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "De quanto em quanto tempo devo ir ao oftalmologista?",
+    "a": "O recomendado: crianças a cada 6 meses a 1 ano. Adultos de 18 a 39 anos a cada 1 a 2 anos. A partir dos 40 anos, TODO ANO sem falta (é quando surgem presbiopia, glaucoma, catarata). Diabéticos e hipertensos: todo ano em qualquer idade."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Nunca fui ao oftalmologista. Preciso ir mesmo?",
+    "a": "Sim! Muitos problemas de visão são silenciosos — você pode ter um grau leve e nem perceber, ou ter pressão alta no olho (glaucoma) sem sentir nada. É como ir ao dentista: melhor prevenir do que remediar. A primeira consulta é tranquila e rápida!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Posso ir ao oftalmologista mesmo sem sentir nada de errado?",
+    "a": "Não só pode como DEVE! O exame de rotina é justamente pra isso — detectar problemas ANTES que você perceba. Muitas doenças oculares (como o glaucoma) não dão sintoma no começo. Quando a pessoa sente, já pode ter causado dano. Prevenção é tudo!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Preciso estar em jejum pra consulta oftalmológica?",
+    "a": "Não! Não precisa de jejum pra consulta normal com o oftalmo. Pode comer e beber normalmente. A única coisa que o médico pode pedir é que você leve seus óculos atuais (se tiver) pra ele avaliar."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O que devo levar na consulta com o oftalmologista?",
+    "a": "Leve: documento de identidade, carteirinha do convênio (se tiver), seus óculos atuais (se usar), receitas ou exames anteriores (se tiver guardado) e uma lista de queixas ou sintomas que quer relatar. Quanto mais informação, melhor o médico consegue te avaliar!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Posso ir de lente de contato na consulta?",
+    "a": "O ideal é NÃO usar lente de contato no dia da consulta (ou tirá-la algumas horas antes). A lente pode alterar temporariamente a curvatura da córnea e interferir nas medições. Leve seus óculos pra usar no lugar."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O que o especialista faz na consulta?",
+    "a": "Basicamente: testa sua visão de longe e de perto, mede a pressão do olho, examina o fundo do olho (retina), verifica se tem alguma doença e, se necessário, determina o grau dos seus óculos. É indolor e dura em média 20 a 40 minutos."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O exame de vista dói?",
+    "a": "Não dói nada! São testes simples: ler letrinhas num painel, olhar luzes, o médico examina com aparelhos que não tocam no olho. Se for necessário dilatar a pupila, pingam um colírio que pode arder por 1 segundo — só isso!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O que é o exame de dilatação da pupila? Sempre precisa fazer?",
+    "a": "É quando o médico pinga um colírio que faz a pupila abrir (dilatar), permitindo examinar o fundo do olho (retina, nervo óptico) com detalhes. Não é obrigatório em toda consulta, mas é muito importante, especialmente a partir dos 40 anos, pra diabéticos e na primeira consulta."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Depois de dilatar a pupila, posso dirigir?",
+    "a": "NÃO é recomendado! A dilatação deixa a visão embaçada e muito sensível à luz por 3 a 6 horas. Vá acompanhado ou de transporte por aplicativo. Leve óculos solar pra se proteger na saída — a luz do sol vai incomodar bastante."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quanto tempo dura o efeito da dilatação da pupila?",
+    "a": "De 3 a 6 horas em média. Em algumas pessoas (olhos claros, crianças) pode durar um pouco mais. Nesse período a visão fica embaçada e sensível à luz. Depois volta ao normal sozinho, sem precisar fazer nada."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Criança consegue fazer o exame de vista?",
+    "a": "Sim! Existem exames adaptados pra cada idade. Bebês e crianças pequenas são avaliados com técnicas especiais (luzes, figuras, reflexos) que não dependem de a criança falar ou ler. O oftalmo infantil é treinado pra isso!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Saí da consulta com a receita, qual o próximo passo?",
+    "a": "Agora é hora de ir à ótica! Traga a receita (ou mande foto por WhatsApp) que a gente te ajuda a escolher a armação, explica os tipos de lentes e monta o melhor orçamento conforme sua necessidade. É a melhor parte — escolher seu óculos novo!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quanto tempo vale a receita do oftalmologista?",
+    "a": "Geralmente 1 ano. Depois disso, é recomendável voltar ao médico pra checar se houve mudança no grau. Para fins de garantia de adaptação de grau a garantia é de 3 meses."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Minha receita venceu por poucos dias, ainda posso usar?",
+    "a": "Tecnicamente a receita vencida não é mais válida. Mas se passou pouquinho (dias) e especialmente se o grau é estável, aceitamos com bom senso. O ideal mesmo é renovar com o oftalmo pra garantir que o grau está certinho."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O médico não me deu receita, só disse que está tudo bem. É normal?",
+    "a": "Sim! Se o oftalmologista não identificou necessidade de óculos nem nenhum problema, ele não emite receita. Isso é uma BOA NOTÍCIA — significa que sua visão está boa e seus olhos estão saudáveis. Continue fazendo exames de rotina!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O médico disse que meu grau mudou. Preciso trocar os óculos?",
+    "a": "Se a mudança for significativa (acima de 0,25 a 0,50 de diferença), sim, é muito recomendado trocar as lentes. Usar óculos com grau desatualizado causa cansaço visual, dor de cabeça e visão borrada. Traga a receita nova que a gente faz o orçamento!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "A receita diz que não preciso mais de óculos. Isso acontece?",
+    "a": "Pode acontecer sim, especialmente em crianças (hipermetropia leve pode diminuir com o crescimento) ou em adultos jovens com graus muito baixos que se estabilizaram em zero. Se o médico liberou, pode comemorar!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Posso fazer os óculos no mesmo dia da consulta?",
+    "a": "A escolha da armação e o pedido, sim! Mas a fabricação das lentes leva de 2 a 15 dias dependendo do tipo. Se tiver lente em estoque pro seu grau, pode até sair no mesmo dia ou no dia seguinte. Consulte a disponibilidade!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Fiz a consulta e não entendi nada da receita. A ótica me explica?",
+    "a": "Claro! Faz parte do nosso trabalho. A gente traduz cada sigla e número da receita pra você entender direitinho: o que é esférico, cilíndrico, eixo, adição, DNP... Tudo explicado em linguagem simples. Sem medo de perguntar!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O médico receitou multifocal, mas eu queria só de perto. Posso?",
+    "a": "Se você só precisa de óculos pra ler, um óculos exclusivo pra perto é possível. Mas o multifocal é mais versátil porque corrige longe E perto num óculos só. A gente explica os prós e contras de cada opção pra você decidir."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Recebi duas receitas: uma pra longe e outra pra perto. Preciso de dois óculos?",
+    "a": "Não necessariamente! Você pode optar por um multifocal (que junta os dois num óculos só) ou por dois óculos separados (um pra longe e um pra perto). Cada opção tem vantagens. A gente apresenta as duas e te ajuda a decidir a melhor pro seu dia a dia."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quanto tempo depois da consulta devo ir à ótica?",
+    "a": "O quanto antes, melhor — enquanto a receita está fresca e você lembra dos detalhes da consulta. Mas não precisa ir correndo: dentro de alguns dias ou semanas está ótimo. Só não deixe a receita vencer sem providenciar!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "O médico pediu exames complementares (campo visual, OCT, topografia). Devo me preocupar?",
+    "a": "Nem sempre é motivo de preocupação! Muitos exames são de rotina — o médico quer uma avaliação mais detalhada pra acompanhar sua saúde ocular. É como quando o clínico pede exame de sangue: faz parte do check-up. Faça os exames e leve os resultados na próxima consulta."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quando devo voltar ao oftalmologista depois de fazer o óculos?",
+    "a": "Se o óculos ficou confortável e você está enxergando bem: retorne em 1 ano pra revisão de rotina. Se sentir desconforto, dor de cabeça ou não se adaptar: volte antes (na ótica primeiro pra conferir o óculos, e ao médico se necessário). Na dúvida, melhor conferir!"
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Ola gostaria de saber mais informações sobre a consulta gratuita.",
+    "a": "Olá 😊\nSou a Íris, assistente virtual da Ótica Leve Mais."
+  },
+  {
+    "category": "PRAZOS E ENTREGA",
+    "q": "Quero saber mais sobre essa armação na promoção.",
+    "a": "Olá! 😊\nEu sou a Íris, da Ótica Leve Mais."
+  }
+]

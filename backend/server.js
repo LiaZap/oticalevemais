@@ -1,12 +1,15 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const { Server } = require("socket.io");
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
+
 const PORT = process.env.PORT || 5000;
 
 // Configuração do CORS para permitir requisições do frontend
-// Em produção no Easypanel, o frontend pode estar em outro domínio
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*', 
     credentials: true
@@ -14,16 +17,32 @@ app.use(cors({
 
 app.use(express.json());
 
+// Socket.io Setup
+const io = new Server(server, {
+    cors: {
+        origin: process.env.FRONTEND_URL || "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+// Services
+const whatsappService = require('./services/whatsappService');
+
+// Initialize WhatsApp Service (Uazapi)
+whatsappService.initialize(io);
+
 // Rotas
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const settingsRoutes = require('./routes/settings');
+const whatsappRoutes = require('./routes/whatsapp');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/users', require('./routes/users'));
 app.use('/api/atendimentos', require('./routes/atendimentos'));
+app.use('/api/whatsapp', whatsappRoutes);
 
 app.get('/api/test-cron', async (req, res) => {
     try {
@@ -35,7 +54,7 @@ app.get('/api/test-cron', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     
     // Iniciar Cron Jobs

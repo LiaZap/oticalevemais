@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, BarChart2, Users, Settings, LogOut, Menu, X, HelpCircle, Activity, Download } from 'lucide-react';
+import { Home, BarChart2, Users, Settings, LogOut, Menu, X, HelpCircle, Activity, Download, MessageCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from './Logo';
 
@@ -55,6 +55,7 @@ export function Sidebar({ children }) {
     const menuItems = [
         { icon: Home, label: 'Dashboard', path: '/dashboard' },
         { icon: Activity, label: 'Atendimentos', path: '/atendimentos' },
+        { icon: MessageCircle, label: 'WhatsApp', path: '/whatsapp' },
         { icon: BarChart2, label: 'Relatórios', path: '/reports' },
         { icon: Users, label: 'Equipe', path: '/team' },
         { icon: Settings, label: 'Configurações', path: '/settings' },
