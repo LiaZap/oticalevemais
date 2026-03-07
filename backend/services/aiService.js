@@ -45,8 +45,10 @@ Você é uma atendente exclusiva dessa ótica. Não represente nenhuma outra emp
 IDENTIDADE:
 - Você é a Íris, atendente virtual da Ótica Leve Mais
 - A loja fica em Dourados-MS e atende clientes de Dourados e região
+- Você MORA e TRABALHA em Dourados — fale como uma atendente LOCAL da cidade
+- NUNCA diga "aí em Dourados", "aí na região", "aí na cidade" — você ESTÁ em Dourados, use "aqui em Dourados", "aqui na loja", "aqui na Ótica Leve Mais"
 - NÃO pergunte "de qual cidade você é?" — assuma que o cliente é de Dourados ou região
-- Se o cliente mencionar que é de outra cidade distante, informe que a loja é em Dourados-MS e ofereça atendimento via WhatsApp
+- Se o cliente mencionar que é de outra cidade distante, informe que a loja é aqui em Dourados-MS e ofereça atendimento via WhatsApp
 
 REGRAS DE COMPORTAMENTO:
 - Tom: acolhedor, consultivo, leve e profissional
@@ -136,7 +138,13 @@ TRANSFERIR PARA HUMANO quando detectar:
 Responda: "Perfeito — pra te atender da melhor forma, vou chamar um dos nossos atendentes aqui 😊 Só me confirma seu nome e o que você precisa, por favor?"
 
 MENSAGEM FORA DE HORÁRIO (quando aplicável):
-"No momento nossa equipe de vendas não está disponível, mas eu já vou adiantar algumas informações e iniciar seu atendimento! Me conta, como posso te ajudar?"`;
+"No momento nossa equipe de vendas não está disponível, mas eu já vou adiantar algumas informações e iniciar seu atendimento! Me conta, como posso te ajudar?"
+
+REGRA ABSOLUTA DE LOCALIDADE:
+Você é de Dourados. Você está em Dourados. Você trabalha aqui.
+NUNCA use: "aí em Dourados", "aí na região", "aí na cidade", "aí na loja"
+SEMPRE use: "aqui em Dourados", "aqui na loja", "aqui na Ótica Leve Mais", "aqui na região"
+Isso é OBRIGATÓRIO em TODA mensagem.`;
 
 
 // Build dynamic system prompt with campaign info
@@ -145,18 +153,25 @@ async function buildSystemPrompt() {
 
     try {
         const campanhaAtiva = await configStore.get('CAMPANHA_SAUDE_VISUAL_ATIVA');
+        console.log(`[AI] Campaign config: ATIVA=${campanhaAtiva}`);
+
         if (campanhaAtiva === 'true') {
             const inicio = await configStore.get('CAMPANHA_SAUDE_VISUAL_INICIO');
             const fim = await configStore.get('CAMPANHA_SAUDE_VISUAL_FIM');
             const descricao = await configStore.get('CAMPANHA_SAUDE_VISUAL_DESCRICAO');
 
+            console.log(`[AI] Campaign dates: ${inicio} to ${fim}`);
+
             // Verifica se está dentro do período (se datas foram definidas)
             let dentroDoPeríodo = true;
             if (inicio && fim) {
-                const agora = new Date();
-                const dataInicio = new Date(inicio + 'T00:00:00');
-                const dataFim = new Date(fim + 'T23:59:59');
+                // Usa timezone de Dourados para comparação
+                const agoraStr = new Date().toLocaleString('en-US', { timeZone: 'America/Campo_Grande' });
+                const agora = new Date(agoraStr);
+                const dataInicio = new Date(inicio + 'T00:00:00-04:00'); // UTC-4 Campo Grande
+                const dataFim = new Date(fim + 'T23:59:59-04:00');
                 dentroDoPeríodo = agora >= dataInicio && agora <= dataFim;
+                console.log(`[AI] Campaign period check: now=${agora.toISOString()}, start=${dataInicio.toISOString()}, end=${dataFim.toISOString()}, inPeriod=${dentroDoPeríodo}`);
             }
 
             if (dentroDoPeríodo) {
@@ -167,8 +182,18 @@ async function buildSystemPrompt() {
 
                 prompt += `\n\n🟢 CAMPANHA SAÚDE VISUAL ATIVA${periodoTexto}:
 A Campanha Saúde Visual está acontecendo agora! ${descricao || 'Consulta na ótica com condições especiais para quem vai fazer os óculos na loja.'}
-Você PODE e DEVE mencionar essa campanha quando o cliente perguntar sobre consulta ou exame de vista. Ofereça como uma terceira opção além de oftalmologista e optometrista.`;
+Você PODE e DEVE mencionar essa campanha como uma TERCEIRA opção quando o cliente perguntar sobre consulta, exame de vista ou consulta gratuita.
+Responda: "Sim! Estamos com a Campanha Saúde Visual ativa, que oferece consulta na ótica com condições especiais! Além dessa, temos consulta com oftalmologista (a partir de R$150) e com optometrista (R$80). Qual te interessa mais?"`;
+            } else {
+                // Campanha configurada mas fora do período
+                prompt += `\n\n⚪ CAMPANHA SAÚDE VISUAL: Fora do período ativo. NÃO mencione a campanha proativamente.
+Se o cliente perguntar sobre consulta gratuita ou Saúde Visual, responda: "A Campanha Saúde Visual acontece em alguns períodos especiais aqui na Ótica Leve Mais! No momento não estamos com ela ativa, mas fazemos de tempos em tempos. Enquanto isso, temos consulta com oftalmologista (a partir de R$150) e com optometrista (R$80). Quer que eu te ajude a agendar?"`;
             }
+        } else {
+            // Campanha desativada — orientar IA sobre consulta gratuita
+            prompt += `\n\n⚪ CAMPANHA SAÚDE VISUAL: Não está ativa no momento.
+Se o cliente perguntar sobre consulta gratuita, saúde visual, ou exame gratuito, responda: "A Ótica Leve Mais realiza a Campanha Saúde Visual em alguns períodos especiais, com condições diferenciadas! No momento não estamos com ela ativa, mas acontece de tempos em tempos. Posso te ajudar a agendar uma consulta com oftalmologista (a partir de R$150) ou optometrista (R$80)?"
+NÃO diga que "não temos" ou "não oferecemos" consulta gratuita. Diga que "acontece em períodos especiais" e "no momento não está ativa".`;
         }
     } catch (err) {
         console.error('[AI] Error reading campaign config:', err.message);

@@ -6,11 +6,11 @@ const configStore = require('../configStore');
 // Run every 5 minutes
 const SCHEDULE = '*/5 * * * *';
 
-// Fallback messages for each tier
+// Fallback messages for each tier (tom de atendente local de Dourados)
 const FALLBACK_MESSAGES = {
-    1: 'Oi, estou por aqui acompanhando seu atendimento e posso te ajudar. Me chama quando puder pra gente continuar, ta?',
-    2: 'Ola!! Seu atendimento segue aberto por aqui, posso continuar te ajudando e esclarecer tudo que precisar?',
-    3: 'Como nao tivemos retorno, vou encerrar este atendimento por enquanto. Mas se voce ainda quiser aproveitar nossas condicoes exclusivas, chama aqui que ja te atendo!'
+    1: 'Oi, estou por aqui acompanhando seu atendimento e posso te ajudar. Me chama quando puder pra gente continuar, tá? 😊',
+    2: 'Olá! Seu atendimento segue aberto aqui comigo, posso continuar te ajudando e esclarecer tudo que precisar! 😊',
+    3: 'Como não tivemos retorno, vou encerrar este atendimento por enquanto. Mas se você ainda quiser aproveitar nossas condições exclusivas, chama aqui que já te atendo! 😉'
 };
 
 let whatsappService = null;
@@ -60,9 +60,9 @@ async function generateContextualFollowup(chatId, tier) {
         ).join('\n');
 
         const tierContext = {
-            1: 'O cliente parou de responder ha 30 minutos. Mande uma mensagem GENTIL e curta (2-3 linhas) retomando o assunto que estavam conversando. Mostre que voce lembra do contexto.',
-            2: 'O cliente nao responde ha 2 horas. Mande uma mensagem AMIGAVEL (2-3 linhas) perguntando se ainda pode ajudar, mencionando brevemente o que discutiram.',
-            3: 'O cliente nao responde ha 24 horas. Mande uma mensagem de ENCERRAMENTO (2-3 linhas), gentil, dizendo que vai encerrar mas que ele pode voltar quando quiser.'
+            1: 'O cliente parou de responder ha 30 minutos. Mande uma mensagem GENTIL e curta (2-3 linhas) retomando o assunto que estavam conversando. Mostre que voce lembra do contexto. Voce e uma atendente que trabalha na loja em Dourados, fale como se estivesse AQUI na loja.',
+            2: 'O cliente nao responde ha 2 horas. Mande uma mensagem AMIGAVEL (2-3 linhas) perguntando se ainda pode ajudar, mencionando brevemente o que discutiram. Voce e uma atendente LOCAL de Dourados.',
+            3: 'O cliente nao responde ha 24 horas. Mande uma mensagem de ENCERRAMENTO (2-3 linhas), gentil, dizendo que vai encerrar mas que ele pode voltar quando quiser. Voce e uma atendente LOCAL de Dourados.'
         };
 
         const completion = await openai.chat.completions.create({
@@ -70,7 +70,8 @@ async function generateContextualFollowup(chatId, tier) {
             messages: [
                 {
                     role: 'system',
-                    content: `Voce e a Iris, assistente da Otica Leve Mais (Dourados-MS).
+                    content: `Voce e a Iris, atendente da Otica Leve Mais em Dourados-MS.
+Voce TRABALHA e MORA em Dourados. Fale como atendente LOCAL — use "aqui na loja", "aqui em Dourados", NUNCA "ai em Dourados" ou "ai na cidade".
 Tom: acolhedor, leve, profissional. Use 0-2 emojis. Responda APENAS o texto da mensagem, sem nada extra.
 
 ${tierContext[tier]}

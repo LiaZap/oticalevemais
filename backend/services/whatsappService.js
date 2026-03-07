@@ -5,6 +5,42 @@ const { isBusinessHours } = require('./businessHours');
 
 let io;
 
+// =============================================
+// MESSAGE BUFFER — Acumula mensagens antes de responder
+// Espera até 15 segundos para juntar mensagens consecutivas
+// =============================================
+const messageBuffer = new Map(); // chatId → { messages: [], timer: null }
+const BUFFER_WAIT_MS = 15000; // 15 segundos de espera
+
+function bufferMessage(chatId, message, contactName) {
+    if (!messageBuffer.has(chatId)) {
+        messageBuffer.set(chatId, { messages: [], timer: null });
+    }
+
+    const buffer = messageBuffer.get(chatId);
+
+    // Limpa timer anterior (reseta contagem a cada mensagem nova)
+    if (buffer.timer) {
+        clearTimeout(buffer.timer);
+    }
+
+    // Adiciona mensagem ao buffer
+    buffer.messages.push(message);
+    console.log(`[Buffer] ${chatId}: ${buffer.messages.length} msg(s) buffered, waiting ${BUFFER_WAIT_MS / 1000}s...`);
+
+    // Inicia novo timer
+    buffer.timer = setTimeout(async () => {
+        const buffered = buffer.messages.slice();
+        messageBuffer.delete(chatId);
+
+        // Junta todas as mensagens em uma só
+        const combinedMessage = buffered.join('\n');
+        console.log(`[Buffer] ${chatId}: Processing ${buffered.length} message(s): "${combinedMessage.substring(0, 100)}..."`);
+
+        await handleIncomingMessage(chatId, combinedMessage, contactName);
+    }, BUFFER_WAIT_MS);
+}
+
 const initialize = (socketIoInstance) => {
     io = socketIoInstance;
     aiService.initialize();
@@ -34,8 +70,8 @@ const sendMessage = async (jid, text) => {
     const number = jid.replace('@s.whatsapp.net', '');
 
     // Calcula delay dinâmico baseado no tamanho da mensagem para simular digitação
-    // Mínimo 2s, máximo 5s — ~30ms por caractere
-    const dynamicDelay = Math.min(Math.max(text.length * 30, 2000), 5000);
+    // Mínimo 3s, máximo 12s — ~40ms por caractere (humanizado)
+    const dynamicDelay = Math.min(Math.max(text.length * 40, 3000), 12000);
 
     try {
         await axios.post(`${config.url}/send/text`, {
@@ -53,6 +89,30 @@ const sendMessage = async (jid, text) => {
     } catch (err) {
         console.error("Erro ao enviar mensagem Uazapi:", err.response?.data || err.message);
         throw new Error("Falha no envio Uazapi");
+    }
+};
+
+// Mark messages as read (visualizar mensagem) via Uazapi
+const markAsRead = async (jid) => {
+    const config = getApiConfig();
+    if (!config) return;
+
+    const number = jid.replace('@s.whatsapp.net', '');
+
+    try {
+        await axios.post(`${config.url}/chat/markread`, {
+            number: number
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'token': config.token
+            }
+        });
+        console.log(`[WhatsApp] Marked as read: ${number}`);
+    } catch (err) {
+        // Silently fail — não é crítico
+        console.warn('[WhatsApp] markAsRead failed:', err.response?.data?.message || err.message);
     }
 };
 
@@ -180,7 +240,11 @@ const processWebhook = async (data) => {
 
         // 4. AI Handling — only for incoming customer TEXT messages
         if (!isFromMe && isTextMessage && content !== '[Midia]') {
-            await handleIncomingMessage(sender, content, contactName);
+            // Marcar mensagem como lida (visualizada) imediatamente
+            markAsRead(sender);
+
+            // Usa buffer para acumular mensagens antes de responder (15s)
+            bufferMessage(sender, content, contactName);
         }
 
     } catch (err) {
@@ -324,6 +388,6 @@ const getChatInfo = async (chatId) => {
 };
 
 module.exports = {
-    initialize, sendMessage, sendMedia, processWebhook, getContacts,
+    initialize, sendMessage, sendMedia, markAsRead, processWebhook, getContacts,
     getMessages, getStatus, setChatMode, getChatInfo
 };
