@@ -195,6 +195,46 @@ const sendMedia = async (jid, type, fileUrl, caption) => {
 };
 
 // =============================================
+// DOWNLOAD MEDIA — Via Uazapi /message/download
+// =============================================
+const downloadMedia = async (messageId, options = {}) => {
+    const config = getApiConfig();
+    if (!config) throw new Error("WhatsApp nao configurado (UAZAPI)");
+
+    const body = {
+        id: messageId,
+        return_base64: options.return_base64 || false,
+        generate_mp3: options.generate_mp3 || false,
+        return_link: options.return_link || false,
+        transcribe: options.transcribe || false,
+        download_quoted: false
+    };
+
+    // Se for transcrição, passa a chave da OpenAI
+    if (options.transcribe && process.env.OPENAI_API_KEY) {
+        body.openai_apikey = process.env.OPENAI_API_KEY;
+    }
+
+    try {
+        console.log(`[Uazapi] Downloading media: ${messageId}, options:`, JSON.stringify(options));
+        const response = await axios.post(`${config.url}/message/download`, body, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'token': config.token
+            },
+            timeout: 60000 // 60s timeout para arquivos grandes
+        });
+
+        console.log(`[Uazapi] Download response keys:`, Object.keys(response.data || {}).join(', '));
+        return response.data;
+    } catch (err) {
+        console.error('[Uazapi] Download error:', err.response?.data || err.message);
+        return null;
+    }
+};
+
+// =============================================
 // WEBHOOK — Formato Uazapi
 // =============================================
 // Uazapi envia:
@@ -324,16 +364,16 @@ const processWebhook = async (data) => {
                 // Texto: usa buffer para acumular mensagens antes de responder (15s)
                 markAsRead(sender);
                 bufferMessage(sender, content, contactName);
-            } else if (isImageMessage && mediaUrl) {
-                // Imagem: analisa com Vision API (pode ser receita)
+            } else if (isImageMessage) {
+                // Imagem: baixa via Uazapi e analisa com Vision API
                 markAsRead(sender);
-                console.log(`[Webhook] Image received from ${sender}, analyzing...`);
-                handleIncomingImage(sender, mediaUrl, imageCaption, contactName);
-            } else if (isAudioMessage && mediaUrl) {
-                // Áudio: transcreve com Whisper e processa como texto
+                console.log(`[Webhook] Image received from ${sender}, msgId=${messageId}`);
+                handleIncomingImage(sender, messageId, imageCaption, contactName);
+            } else if (isAudioMessage) {
+                // Áudio: transcreve via Uazapi + Whisper
                 markAsRead(sender);
-                console.log(`[Webhook] Audio received from ${sender}, transcribing...`);
-                handleIncomingAudio(sender, mediaUrl, contactName);
+                console.log(`[Webhook] Audio received from ${sender}, msgId=${messageId}`);
+                handleIncomingAudio(sender, messageId, contactName);
             }
         }
 
@@ -462,8 +502,8 @@ async function handleIncomingMessage(chatId, message, contactName) {
     }
 }
 
-// Handle incoming IMAGE with Vision AI (receita, etc.)
-async function handleIncomingImage(chatId, imageUrl, caption, contactName) {
+// Handle incoming IMAGE — download via Uazapi + analyze with Vision AI
+async function handleIncomingImage(chatId, messageId, caption, contactName) {
     try {
         // Get chat mode
         const chatRes = await db.query(
@@ -472,10 +512,8 @@ async function handleIncomingImage(chatId, imageUrl, caption, contactName) {
         );
         const mode = chatRes.rows[0]?.atendimento_mode || 'auto';
 
-        // Reset follow-up tier on customer response
         await aiService.resetFollowupOnResponse(chatId);
 
-        // Decide whether AI should respond
         let shouldRespond = false;
         if (mode === 'human') {
             console.log(`[AI] Chat ${chatId} is in HUMAN mode, skipping image`);
@@ -483,15 +521,41 @@ async function handleIncomingImage(chatId, imageUrl, caption, contactName) {
         } else if (mode === 'ai') {
             shouldRespond = true;
         } else {
-            const inHours = isBusinessHours();
-            shouldRespond = !inHours;
+            shouldRespond = !isBusinessHours();
         }
 
         if (!shouldRespond) return;
 
-        console.log(`[AI] Analyzing image for ${chatId}...`);
+        // Download image via Uazapi API (returns base64)
+        console.log(`[AI] Downloading image via Uazapi for ${chatId}, msgId=${messageId}`);
+        const mediaData = await downloadMedia(messageId, { return_base64: true });
 
-        // Analyze image with Vision API
+        if (!mediaData) {
+            console.log('[AI] Failed to download image from Uazapi');
+            return;
+        }
+
+        // Extract base64 from response
+        let base64Image = null;
+        if (mediaData.base64) {
+            base64Image = mediaData.base64;
+        } else if (mediaData.data) {
+            base64Image = typeof mediaData.data === 'string' ? mediaData.data : null;
+        } else if (typeof mediaData === 'string' && mediaData.length > 100) {
+            base64Image = mediaData;
+        }
+
+        console.log(`[Uazapi] Image download result: base64=${base64Image ? `${base64Image.length} chars` : 'null'}, keys=${Object.keys(mediaData).join(',')}`);
+
+        if (!base64Image) {
+            console.log('[AI] No base64 data in Uazapi response');
+            return;
+        }
+
+        // Ensure proper data URI format
+        const imageUrl = base64Image.startsWith('data:') ? base64Image : `data:image/jpeg;base64,${base64Image}`;
+
+        // Analyze with Vision API
         const result = await aiService.analyzeImage(chatId, imageUrl, caption);
         if (!result || !result.reply) {
             console.log('[AI] No response from image analysis');
@@ -504,46 +568,30 @@ async function handleIncomingImage(chatId, imageUrl, caption, contactName) {
 
         for (let i = 0; i < messageParts.length; i++) {
             const part = messageParts[i];
-
             if (i > 0) {
-                const interDelay = Math.min(Math.max(part.length * 35, 2000), 6000);
-                await sleep(interDelay);
+                await sleep(Math.min(Math.max(part.length * 35, 2000), 6000));
             }
-
             await sendMessage(chatId, part);
-
             await db.query(`
                 INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
                 VALUES ($1, $2, 'me', $3, NOW())
                 ON CONFLICT (whatsapp_id) DO NOTHING
             `, [`ai_img_${Date.now()}_${i}`, chatId, part]);
-
             if (io) {
-                io.emit('wa.message', {
-                    chatId,
-                    content: part,
-                    sender: 'me',
-                    timestamp: new Date()
-                });
+                io.emit('wa.message', { chatId, content: part, sender: 'me', timestamp: new Date() });
             }
         }
 
         // Update chat
-        const lastPart = messageParts[messageParts.length - 1];
         await db.query(`
-            UPDATE tb_whatsapp_chats SET
-                last_message_content = $1,
-                last_message_timestamp = NOW()
-            WHERE id = $2
-        `, [lastPart, chatId]);
+            UPDATE tb_whatsapp_chats SET last_message_content = $1, last_message_timestamp = NOW() WHERE id = $2
+        `, [messageParts[messageParts.length - 1], chatId]);
 
         // Save prescription data if extracted
         if (result.prescriptionData) {
             const telefone = chatId.replace('@s.whatsapp.net', '');
             await aiService.upsertAtendimento(chatId, telefone, {
-                ...result.prescriptionData,
-                tem_receita: true,
-                nome: contactName
+                ...result.prescriptionData, tem_receita: true, nome: contactName
             });
             console.log(`[AI] Prescription data saved for ${chatId}`);
         }
@@ -555,8 +603,8 @@ async function handleIncomingImage(chatId, imageUrl, caption, contactName) {
     }
 }
 
-// Handle incoming AUDIO — transcribe with Whisper and process as text
-async function handleIncomingAudio(chatId, audioUrl, contactName) {
+// Handle incoming AUDIO — transcribe via Uazapi + Whisper, then process as text
+async function handleIncomingAudio(chatId, messageId, contactName) {
     try {
         // Get chat mode
         const chatRes = await db.query(
@@ -574,35 +622,42 @@ async function handleIncomingAudio(chatId, audioUrl, contactName) {
         } else if (mode === 'ai') {
             shouldRespond = true;
         } else {
-            const inHours = isBusinessHours();
-            shouldRespond = !inHours;
+            shouldRespond = !isBusinessHours();
         }
 
         if (!shouldRespond) return;
 
-        // Transcribe audio
-        console.log(`[AI] Transcribing audio for ${chatId}...`);
-        const transcription = await aiService.transcribeAudio(audioUrl);
+        // Transcribe audio via Uazapi (uses their Whisper integration)
+        console.log(`[AI] Transcribing audio via Uazapi for ${chatId}, msgId=${messageId}`);
+        const mediaData = await downloadMedia(messageId, { transcribe: true });
 
-        if (!transcription) {
-            console.log('[AI] Could not transcribe audio');
-            // Send a friendly message asking to type instead
-            const fallbackMsg = 'Oi! Recebi seu áudio mas não consegui entender bem. Pode me enviar por escrito? Assim consigo te ajudar melhor 😊';
-            await sendMessage(chatId, fallbackMsg);
-
-            await db.query(`
-                INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
-                VALUES ($1, $2, 'me', $3, NOW())
-                ON CONFLICT (whatsapp_id) DO NOTHING
-            `, [`ai_audio_fail_${Date.now()}`, chatId, fallbackMsg]);
-
-            if (io) {
-                io.emit('wa.message', { chatId, content: fallbackMsg, sender: 'me', timestamp: new Date() });
-            }
+        if (!mediaData) {
+            console.log('[AI] Failed to download/transcribe audio from Uazapi');
+            await sendFallbackAudioMsg(chatId);
             return;
         }
 
-        console.log(`[AI] Audio transcribed: "${transcription.substring(0, 100)}..."`);
+        // Extract transcription from response
+        let transcription = null;
+        if (mediaData.transcription) {
+            transcription = mediaData.transcription;
+        } else if (mediaData.text) {
+            transcription = mediaData.text;
+        } else if (mediaData.transcribe) {
+            transcription = mediaData.transcribe;
+        } else if (typeof mediaData === 'string' && mediaData.length > 2) {
+            transcription = mediaData;
+        }
+
+        console.log(`[Uazapi] Audio transcription result: text=${transcription ? `"${transcription.substring(0, 100)}"` : 'null'}, keys=${typeof mediaData === 'object' ? Object.keys(mediaData).join(',') : 'string'}`);
+
+        if (!transcription || transcription.length < 2) {
+            console.log('[AI] Could not transcribe audio');
+            await sendFallbackAudioMsg(chatId);
+            return;
+        }
+
+        console.log(`[AI] Audio transcribed: "${transcription.substring(0, 100)}"`);
 
         // Save transcription as message (so it appears in history)
         await db.query(`
@@ -616,6 +671,20 @@ async function handleIncomingAudio(chatId, audioUrl, contactName) {
 
     } catch (err) {
         console.error('[AI] Error handling incoming audio:', err);
+    }
+}
+
+// Helper: send fallback message when audio transcription fails
+async function sendFallbackAudioMsg(chatId) {
+    const fallbackMsg = 'Oi! Recebi seu \u00e1udio mas n\u00e3o consegui entender bem. Pode me enviar por escrito? Assim consigo te ajudar melhor \ud83d\ude0a';
+    await sendMessage(chatId, fallbackMsg);
+    await db.query(`
+        INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
+        VALUES ($1, $2, 'me', $3, NOW())
+        ON CONFLICT (whatsapp_id) DO NOTHING
+    `, [`ai_audio_fail_${Date.now()}`, chatId, fallbackMsg]);
+    if (io) {
+        io.emit('wa.message', { chatId, content: fallbackMsg, sender: 'me', timestamp: new Date() });
     }
 }
 
