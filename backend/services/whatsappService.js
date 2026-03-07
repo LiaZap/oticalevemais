@@ -693,7 +693,7 @@ async function handleIncomingAudio(chatId, messageId, contactName) {
 
         // Transcribe audio via Uazapi (uses their Whisper integration)
         console.log(`[AI] Transcribing audio via Uazapi for ${chatId}, msgId=${messageId}`);
-        const mediaData = await downloadMedia(messageId, { transcribe: true });
+        const mediaData = await downloadMedia(messageId, { transcribe: true, return_link: true });
 
         if (!mediaData) {
             console.log('[AI] Failed to download/transcribe audio from Uazapi');
@@ -703,17 +703,26 @@ async function handleIncomingAudio(chatId, messageId, contactName) {
 
         // Extract transcription and file URL from response
         let transcription = mediaData.transcription || mediaData.text || mediaData.transcribe || null;
-        const audioFileURL = mediaData.fileURL || mediaData.fileUrl || null;
+        const audioFileURL = mediaData.fileURL || mediaData.fileUrl || mediaData.url || mediaData.link || mediaData.file || null;
 
         if (typeof mediaData === 'string' && mediaData.length > 2 && !transcription) {
             transcription = mediaData;
         }
 
+        // Trim transcription to avoid whitespace-only results
+        if (transcription && typeof transcription === 'string') {
+            transcription = transcription.trim();
+        }
+
         console.log(`[Uazapi] Audio result: text=${transcription ? `"${transcription.substring(0, 80)}"` : 'null'}, fileURL=${audioFileURL ? 'yes' : 'null'}, keys=${typeof mediaData === 'object' ? Object.keys(mediaData).join(',') : 'string'}`);
 
-        // Update original audio message with file URL for playback in frontend
-        if (audioFileURL) {
-            const audioContent = transcription ? `[Áudio] ${audioFileURL} 🎤 ${transcription}` : `[Áudio] ${audioFileURL}`;
+        // Update original audio message with file URL and/or transcription for frontend
+        const hasUrl = audioFileURL && audioFileURL.startsWith('http');
+        const hasTranscription = transcription && transcription.length >= 2;
+        if (hasUrl || hasTranscription) {
+            let audioContent = '[Áudio]';
+            if (hasUrl) audioContent += ` ${audioFileURL}`;
+            if (hasTranscription) audioContent += ` 🎤 ${transcription}`;
             await db.query(`
                 UPDATE tb_whatsapp_messages SET content = $1 WHERE whatsapp_id = $2
             `, [audioContent, messageId]);
