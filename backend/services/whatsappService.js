@@ -586,9 +586,9 @@ async function handleIncomingImage(chatId, messageId, caption, contactName) {
 
         if (!shouldRespond) return;
 
-        // Download image via Uazapi API (returns base64)
+        // Download image via Uazapi API (base64 for Vision + link for frontend display)
         console.log(`[AI] Downloading image via Uazapi for ${chatId}, msgId=${messageId}`);
-        const mediaData = await downloadMedia(messageId, { return_base64: true });
+        const mediaData = await downloadMedia(messageId, { return_base64: true, return_link: true });
 
         if (!mediaData) {
             console.log('[AI] Failed to download image from Uazapi');
