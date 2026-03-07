@@ -1,20 +1,11 @@
 const OpenAI = require('openai');
+const { toFile } = require('openai');
 const db = require('../db');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const axios = require('axios');
 const configStore = require('../configStore');
-
-// Polyfill File for Node.js < 20 (needed by OpenAI SDK for file uploads)
-if (typeof globalThis.File === 'undefined') {
-    try {
-        const { File } = require('node:buffer');
-        globalThis.File = File;
-        console.log('[AI] File polyfill applied for Node < 20');
-    } catch (e) {
-        console.warn('[AI] Could not polyfill File — audio transcription may not work');
-    }
-}
 
 let openai = null;
 let knowledgeBase = '';
@@ -441,23 +432,31 @@ async function analyzeImage(chatId, imageUrl, caption) {
             // URL — download first and convert to base64
             console.log(`[AI] Downloading image from: ${imageUrl.substring(0, 100)}...`);
             try {
-                const imgResponse = await require('axios').get(imageUrl, {
+                const imgResponse = await axios.get(imageUrl, {
                     responseType: 'arraybuffer',
                     timeout: 30000
                 });
-                const base64 = Buffer.from(imgResponse.data).toString('base64');
-                // Force correct MIME — WhatsApp CDN often returns application/octet-stream
-                let mime = imgResponse.headers['content-type'] || 'image/jpeg';
-                if (mime === 'application/octet-stream' || !mime.startsWith('image/')) {
-                    // Detect from URL or default to jpeg
-                    if (imageUrl.includes('.png')) mime = 'image/png';
-                    else if (imageUrl.includes('.webp')) mime = 'image/webp';
-                    else if (imageUrl.includes('.gif')) mime = 'image/gif';
-                    else mime = 'image/jpeg';
-                    console.log(`[AI] Forced MIME to ${mime} (server returned ${imgResponse.headers['content-type']})`);
+                const imgBuffer = Buffer.from(imgResponse.data);
+
+                // Validate image by checking magic bytes
+                const isJPEG = imgBuffer[0] === 0xFF && imgBuffer[1] === 0xD8;
+                const isPNG = imgBuffer[0] === 0x89 && imgBuffer[1] === 0x50;
+                const isGIF = imgBuffer[0] === 0x47 && imgBuffer[1] === 0x49;
+                const isWEBP = imgBuffer[0] === 0x52 && imgBuffer[1] === 0x49 && imgBuffer[8] === 0x57;
+                const isValidImage = isJPEG || isPNG || isGIF || isWEBP;
+
+                console.log(`[AI] Image downloaded: ${imgBuffer.length} bytes, magic=${imgBuffer[0]?.toString(16)}${imgBuffer[1]?.toString(16)}, valid=${isValidImage}`);
+
+                if (isValidImage) {
+                    const base64 = imgBuffer.toString('base64');
+                    const mime = isJPEG ? 'image/jpeg' : isPNG ? 'image/png' : isGIF ? 'image/gif' : 'image/webp';
+                    imageContent = { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } };
+                    console.log(`[AI] Image valid: ${mime}, base64 length=${base64.length}`);
+                } else {
+                    // Not a valid image — try URL directly (maybe OpenAI can access it)
+                    console.log(`[AI] Downloaded data is not a valid image, trying URL directly`);
+                    imageContent = { type: 'image_url', image_url: { url: imageUrl } };
                 }
-                imageContent = { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } };
-                console.log(`[AI] Image downloaded: ${imgResponse.data.length} bytes, mime=${mime}`);
             } catch (dlErr) {
                 console.error(`[AI] Failed to download image: ${dlErr.message}`);
                 // Fallback: try sending URL directly
@@ -599,13 +598,11 @@ async function transcribeAudio(audioUrl) {
         return null;
     }
 
-    let tmpFile = null;
-
     try {
         console.log(`[AI] Downloading audio from: ${audioUrl.substring(0, 100)}...`);
 
         // Download the audio file
-        const response = await require('axios').get(audioUrl, {
+        const response = await axios.get(audioUrl, {
             responseType: 'arraybuffer',
             timeout: 30000
         });
@@ -613,26 +610,18 @@ async function transcribeAudio(audioUrl) {
         const audioBuffer = Buffer.from(response.data);
         console.log(`[AI] Audio downloaded: ${audioBuffer.length} bytes`);
 
-        if (audioBuffer.length < 1000) {
+        if (audioBuffer.length < 500) {
             console.log('[AI] Audio file too small, skipping');
             return null;
         }
 
-        // Detect format from URL or content-type
-        let ext = 'ogg';
-        if (audioUrl.includes('.mp3')) ext = 'mp3';
-        else if (audioUrl.includes('.m4a')) ext = 'm4a';
-        else if (audioUrl.includes('.wav')) ext = 'wav';
-        else if (audioUrl.includes('.webm')) ext = 'webm';
-        else if (audioUrl.includes('.opus')) ext = 'ogg';
+        // WhatsApp sends OGG/Opus — Whisper accepts .ogg
+        // Use openai.toFile() which works on all Node.js versions (no File polyfill needed)
+        const file = await toFile(audioBuffer, 'audio.ogg', { type: 'audio/ogg' });
 
-        // Write to temp file (compatible with all Node.js versions)
-        tmpFile = path.join(os.tmpdir(), `whisper_${Date.now()}.${ext}`);
-        fs.writeFileSync(tmpFile, audioBuffer);
-
-        // Use OpenAI Whisper to transcribe via file stream
+        console.log('[AI] Sending to Whisper...');
         const transcription = await openai.audio.transcriptions.create({
-            file: fs.createReadStream(tmpFile),
+            file: file,
             model: 'whisper-1',
             language: 'pt',
             response_format: 'text'
@@ -651,11 +640,6 @@ async function transcribeAudio(audioUrl) {
     } catch (err) {
         console.error('[AI] Error transcribing audio:', err.message);
         return null;
-    } finally {
-        // Cleanup temp file
-        if (tmpFile) {
-            try { require('fs').unlinkSync(tmpFile); } catch (e) {}
-        }
     }
 }
 
