@@ -221,11 +221,10 @@ const processWebhook = async (data) => {
         return;
     }
 
-    // Debug: log full message keys for non-text messages
-    const msgType = msg.type || msg.messageType || 'unknown';
-    if (msgType !== 'text' && msgType !== 'Conversation') {
-        console.log(`[Webhook] Non-text msg keys:`, Object.keys(msg).join(', '));
-        console.log(`[Webhook] Non-text msg data:`, JSON.stringify(msg).substring(0, 1000));
+    // Debug: log media message details
+    if (typeof msg.content === 'object' && msg.content !== null) {
+        const mc = msg.content;
+        console.log(`[Webhook] Media content: mime=${mc.mimetype}, url=${(mc.URL || mc.url || 'none').substring(0, 80)}, PTT=${mc.PTT}, size=${mc.fileLength}`);
     }
 
     // Get sender JID from Uazapi format
@@ -252,21 +251,43 @@ const processWebhook = async (data) => {
     // Parse message fields from Uazapi format
     const isFromMe = msg.fromMe === true || msg.fromMe === 'true' || data.wasSentByApi === true;
     const contactName = msg.senderName || data.wa_name || sender.split('@')[0];
-    const rawContent = msg.content || msg.text || msg.caption || '[Midia]';
-    const content = typeof rawContent === 'string' ? rawContent : (rawContent ? String(rawContent) : '[Midia]');
     const messageId = msg.messageid || msg.id || `uaz_${Date.now()}`;
     const messageType = msg.type || msg.messageType || 'text';
 
-    // Detect message types
-    const isTextMessage = messageType === 'text' || messageType === 'Conversation' || messageType === 'extendedText';
-    const isImageMessage = messageType === 'image' || messageType === 'ImageMessage';
-    const isAudioMessage = messageType === 'audio' || messageType === 'ptt' || messageType === 'AudioMessage' || messageType === 'PttMessage';
+    // Uazapi sends content as OBJECT for media (with URL, mimetype, etc.) or STRING for text
+    const isMediaContent = typeof msg.content === 'object' && msg.content !== null;
+    const mediaMimetype = isMediaContent ? (msg.content.mimetype || '') : '';
+    const mediaUrlFromContent = isMediaContent ? (msg.content.URL || msg.content.url || msg.content.directPath || '') : '';
 
-    // Get media URL (Uazapi sends file URL, base64, image, or imagePreview)
-    const mediaUrl = msg.file || msg.fileUrl || msg.media || msg.image || msg.imagePreview || data.image || data.imagePreview || msg.base64 || null;
+    // Extract text content (string for display/saving)
+    let content;
+    if (isMediaContent) {
+        if (mediaMimetype.startsWith('audio/') || msg.content.PTT) {
+            content = '[Áudio]';
+        } else if (mediaMimetype.startsWith('image/')) {
+            content = msg.caption || msg.text || `[Imagem] ${mediaUrlFromContent}`;
+        } else if (mediaMimetype.startsWith('video/')) {
+            content = '[Vídeo]';
+        } else {
+            content = msg.caption || msg.text || '[Midia]';
+        }
+    } else {
+        const rawContent = msg.content || msg.text || msg.caption || '[Midia]';
+        content = typeof rawContent === 'string' ? rawContent : String(rawContent || '[Midia]');
+    }
+
+    // Detect message types based on Uazapi structure
+    // Uazapi uses type="media" for all media, differentiate by mimetype
+    const isTextMessage = !isMediaContent && (messageType === 'text' || messageType === 'Conversation' || messageType === 'extendedText');
+    const isImageMessage = isMediaContent && mediaMimetype.startsWith('image/');
+    const isAudioMessage = isMediaContent && (mediaMimetype.startsWith('audio/') || msg.content.PTT === true);
+    const isVideoMessage = isMediaContent && mediaMimetype.startsWith('video/');
+
+    // Get media URL — from content object first, then fallback fields
+    const mediaUrl = mediaUrlFromContent || msg.file || msg.fileUrl || msg.media || null;
     const imageCaption = msg.caption || msg.text || '';
 
-    console.log(`[Webhook] ${isFromMe ? 'SENT' : 'RECEIVED'} from ${sender}: type=${messageType}, "${(content || '').substring(0, 50)}"${isImageMessage ? ` [IMG: ${mediaUrl ? 'has URL' : 'no URL'}]` : ''}${isAudioMessage ? ` [AUDIO: ${mediaUrl ? 'has URL' : 'no URL'}]` : ''}`);
+    console.log(`[Webhook] ${isFromMe ? 'SENT' : 'RECEIVED'} from ${sender}: type=${messageType}${isMediaContent ? ` mime=${mediaMimetype}` : ''}, "${(content || '').substring(0, 80)}"${isImageMessage ? ` [IMG: ${mediaUrl ? 'YES' : 'NO URL'}]` : ''}${isAudioMessage ? ` [AUDIO: ${mediaUrl ? 'YES' : 'NO URL'}]` : ''}`);
 
     try {
         // 1. Upsert Chat

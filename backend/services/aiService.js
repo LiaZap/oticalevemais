@@ -417,15 +417,31 @@ async function analyzeImage(chatId, imageUrl, caption) {
             `${m.sender_id === 'me' ? 'Íris' : 'Cliente'}: ${m.content}`
         ).join('\n');
 
-        // Determine if image is base64 or URL
+        // Always download image and convert to base64 (WhatsApp CDN URLs are temporary)
         let imageContent;
-        if (imageUrl.startsWith('data:') || imageUrl.startsWith('/9j/') || imageUrl.length > 500) {
-            // Base64
-            const base64Data = imageUrl.startsWith('data:') ? imageUrl : `data:image/jpeg;base64,${imageUrl}`;
-            imageContent = { type: 'image_url', image_url: { url: base64Data } };
-        } else {
-            // URL
+        if (imageUrl.startsWith('data:')) {
+            // Already base64
             imageContent = { type: 'image_url', image_url: { url: imageUrl } };
+        } else if (imageUrl.startsWith('/9j/') || (imageUrl.length > 500 && !imageUrl.startsWith('http'))) {
+            // Raw base64 without prefix
+            imageContent = { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageUrl}` } };
+        } else {
+            // URL — download first and convert to base64
+            console.log(`[AI] Downloading image from: ${imageUrl.substring(0, 100)}...`);
+            try {
+                const imgResponse = await require('axios').get(imageUrl, {
+                    responseType: 'arraybuffer',
+                    timeout: 30000
+                });
+                const base64 = Buffer.from(imgResponse.data).toString('base64');
+                const mime = imgResponse.headers['content-type'] || 'image/jpeg';
+                imageContent = { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } };
+                console.log(`[AI] Image downloaded: ${imgResponse.data.length} bytes, mime=${mime}`);
+            } catch (dlErr) {
+                console.error(`[AI] Failed to download image: ${dlErr.message}`);
+                // Fallback: try sending URL directly
+                imageContent = { type: 'image_url', image_url: { url: imageUrl } };
+            }
         }
 
         const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
