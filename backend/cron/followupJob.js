@@ -169,6 +169,14 @@ ${convoText}`
 const runFollowUpCheck = async () => {
     console.log(`[Followup] Check started: ${new Date().toISOString()}`);
 
+    // Block follow-ups during night hours (22h-8h) to not disturb customers
+    const nowInDourados = new Date().toLocaleString('en-US', { timeZone: 'America/Campo_Grande' });
+    const currentHour = new Date(nowInDourados).getHours();
+    if (currentHour >= 22 || currentHour < 8) {
+        console.log(`[Followup] Skipping: night hours (${currentHour}h in Dourados). No follow-ups between 22h-8h.`);
+        return;
+    }
+
     // Check if follow-up is enabled
     try {
         const enabled = await configStore.get('FOLLOWUP_ENABLED');
