@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { socketService } from '../services/socket';
-import { Search, Send, MoreVertical, Paperclip, Phone, Smile, CheckCheck, Check, Settings, Bot, UserCheck, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { Search, Send, MoreVertical, Paperclip, Phone, Smile, CheckCheck, Check, Settings, Bot, UserCheck, RotateCcw, Volume2, VolumeX, ArrowLeft, Mic, Square, X, Image, Video, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { toast } from 'sonner';
+import logoTransparent from '../assets/logo_transparent.png';
 
 // Notification sound (short beep using Web Audio API)
 const playNotificationSound = () => {
@@ -22,6 +24,7 @@ const playNotificationSound = () => {
 };
 
 const WhatsApp = () => {
+    const navigate = useNavigate();
     const [status, setStatus] = useState('disconnected');
     const [chats, setChats] = useState([]);
     const [activeChat, setActiveChat] = useState(null);
@@ -33,7 +36,15 @@ const WhatsApp = () => {
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
     const activeChatRef = useRef(null);
+    const fileInputRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [mediaPreview, setMediaPreview] = useState(null); // { file, url, type }
+    const [mediaCaption, setMediaCaption] = useState('');
+    const [uploadingMedia, setUploadingMedia] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
+    const recordingTimerRef = useRef(null);
 
     // Keep ref in sync with state for use inside socket callback
     useEffect(() => { activeChatRef.current = activeChat; }, [activeChat]);
@@ -198,6 +209,145 @@ const WhatsApp = () => {
         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     };
 
+    // ====== MEDIA HANDLING ======
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Detect type
+        let type = 'document';
+        if (file.type.startsWith('image/')) type = 'image';
+        else if (file.type.startsWith('video/')) type = 'video';
+        else if (file.type.startsWith('audio/')) type = 'ptt';
+
+        const url = URL.createObjectURL(file);
+        setMediaPreview({ file, url, type });
+        setMediaCaption('');
+
+        // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const cancelMediaPreview = () => {
+        if (mediaPreview?.url) URL.revokeObjectURL(mediaPreview.url);
+        setMediaPreview(null);
+        setMediaCaption('');
+    };
+
+    const sendMediaMessage = async () => {
+        if (!mediaPreview || !activeChat || uploadingMedia) return;
+        setUploadingMedia(true);
+
+        try {
+            // 1. Upload file to backend
+            const formData = new FormData();
+            formData.append('file', mediaPreview.file);
+
+            const uploadRes = await api.post('/whatsapp/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            // 2. Send media via Uazapi
+            await api.post('/whatsapp/send-media', {
+                chatId: activeChat.id,
+                type: uploadRes.data.type,
+                fileUrl: uploadRes.data.url,
+                caption: mediaCaption || undefined
+            });
+
+            // 3. Add optimistic message
+            const typeLabels = { image: 'Imagem', video: 'Vídeo', ptt: 'Áudio', document: 'Arquivo' };
+            const contentText = mediaCaption
+                ? `[${typeLabels[uploadRes.data.type]}] ${mediaCaption}`
+                : `[${typeLabels[uploadRes.data.type]}]`;
+
+            setMessages(prev => [...prev, {
+                id: `temp-media-${Date.now()}`,
+                sender_id: 'me',
+                sender: 'me',
+                content: contentText,
+                timestamp: new Date().toISOString(),
+                _optimistic: true
+            }]);
+            scrollToBottom();
+
+            // Auto-switch to human mode
+            if (chatInfo?.chat?.atendimento_mode !== 'human') {
+                handleModeChange('human');
+            }
+
+            cancelMediaPreview();
+            toast.success('Mídia enviada!');
+        } catch (err) {
+            console.error('Erro ao enviar mídia:', err);
+            toast.error('Erro ao enviar mídia');
+        } finally {
+            setUploadingMedia(false);
+        }
+    };
+
+    // ====== AUDIO RECORDING ======
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+            const chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                stream.getTracks().forEach(t => t.stop());
+                const blob = new Blob(chunks, { type: 'audio/ogg' });
+                const file = new File([blob], `audio_${Date.now()}.ogg`, { type: 'audio/ogg' });
+                const url = URL.createObjectURL(blob);
+                setMediaPreview({ file, url, type: 'ptt' });
+                clearInterval(recordingTimerRef.current);
+                setRecordingTime(0);
+            };
+
+            mediaRecorderRef.current = mediaRecorder;
+            mediaRecorder.start();
+            setIsRecording(true);
+
+            // Timer
+            let seconds = 0;
+            recordingTimerRef.current = setInterval(() => {
+                seconds++;
+                setRecordingTime(seconds);
+            }, 1000);
+
+        } catch (err) {
+            console.error('Erro ao acessar microfone:', err);
+            toast.error('Não foi possível acessar o microfone');
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+        }
+        setIsRecording(false);
+    };
+
+    const cancelRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.ondataavailable = () => {}; // Ignore data
+            mediaRecorderRef.current.onstop = () => {};
+            mediaRecorderRef.current.stream?.getTracks().forEach(t => t.stop());
+            mediaRecorderRef.current.stop();
+        }
+        clearInterval(recordingTimerRef.current);
+        setIsRecording(false);
+        setRecordingTime(0);
+    };
+
+    const formatRecordingTime = (seconds) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
+
     const filteredChats = chats.filter(chat =>
         chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         chat.id.includes(searchQuery)
@@ -249,8 +399,19 @@ const WhatsApp = () => {
             <div className={`w-full md:w-1/3 lg:w-1/4 border-r border-zinc-200 flex flex-col ${activeChat ? 'hidden md:flex' : 'flex'}`}>
                 {/* Header */}
                 <div className="p-4 bg-zinc-50 border-b border-zinc-200 flex justify-between items-center">
-                    <div className="w-10 h-10 rounded-full bg-zinc-200 flex items-center justify-center">
-                        <span className="font-bold text-zinc-500">Me</span>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="w-10 h-10 rounded-full bg-white border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 transition-colors shadow-sm"
+                            title="Voltar ao Dashboard"
+                        >
+                            <ArrowLeft size={18} className="text-zinc-600" />
+                        </button>
+                        <img
+                            src={logoTransparent}
+                            alt="Ótica Leve Mais"
+                            className="h-10 w-auto object-contain"
+                        />
                     </div>
                     <div className="flex gap-4 text-zinc-500">
                         <MoreVertical size={20} />
@@ -387,38 +548,149 @@ const WhatsApp = () => {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Input Area */}
-                    <form onSubmit={handleSendMessage} className="p-3 bg-zinc-50 border-t border-zinc-200 flex items-center gap-2">
-                        <div className="flex gap-2 text-zinc-500">
-                            <Smile size={24} className="cursor-pointer hover:text-zinc-700" />
-                            <Paperclip size={24} className="cursor-pointer hover:text-zinc-700" />
+                    {/* Media Preview Overlay */}
+                    {mediaPreview && (
+                        <div className="p-4 bg-zinc-100 border-t border-zinc-200">
+                            <div className="flex items-start gap-3">
+                                {/* Preview */}
+                                <div className="relative">
+                                    {mediaPreview.type === 'image' && (
+                                        <img src={mediaPreview.url} alt="Preview" className="w-32 h-32 object-cover rounded-lg border border-zinc-300" />
+                                    )}
+                                    {mediaPreview.type === 'video' && (
+                                        <video src={mediaPreview.url} className="w-32 h-32 object-cover rounded-lg border border-zinc-300" />
+                                    )}
+                                    {mediaPreview.type === 'ptt' && (
+                                        <div className="w-32 h-20 bg-white rounded-lg border border-zinc-300 flex flex-col items-center justify-center gap-1">
+                                            <Mic size={24} className="text-[#9c0102]" />
+                                            <span className="text-xs text-zinc-500">Áudio</span>
+                                            <audio src={mediaPreview.url} controls className="w-28 h-6" />
+                                        </div>
+                                    )}
+                                    {mediaPreview.type === 'document' && (
+                                        <div className="w-32 h-20 bg-white rounded-lg border border-zinc-300 flex flex-col items-center justify-center gap-1">
+                                            <FileText size={24} className="text-zinc-500" />
+                                            <span className="text-xs text-zinc-500 truncate max-w-[7rem] px-1">{mediaPreview.file.name}</span>
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={cancelMediaPreview}
+                                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+
+                                {/* Caption + Send */}
+                                <div className="flex-1 flex flex-col gap-2">
+                                    {mediaPreview.type !== 'ptt' && (
+                                        <input
+                                            type="text"
+                                            className="w-full p-2 rounded-lg bg-white border border-zinc-300 focus:ring-1 focus:ring-[#9c0102] placeholder-zinc-400 text-zinc-900 text-sm"
+                                            placeholder="Adicionar legenda..."
+                                            value={mediaCaption}
+                                            onChange={(e) => setMediaCaption(e.target.value)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMediaMessage(); } }}
+                                        />
+                                    )}
+                                    <button
+                                        onClick={sendMediaMessage}
+                                        disabled={uploadingMedia}
+                                        className="self-end flex items-center gap-2 px-4 py-2 bg-[#9c0102] text-white rounded-lg hover:bg-[#7a0102] transition-colors disabled:opacity-50 text-sm font-medium"
+                                    >
+                                        {uploadingMedia ? (
+                                            <span className="flex items-center gap-2">
+                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                                                Enviando...
+                                            </span>
+                                        ) : (
+                                            <>
+                                                <Send size={16} />
+                                                Enviar
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            className="flex-1 p-3 rounded-lg bg-white border-none focus:ring-1 focus:ring-[#9c0102] placeholder-zinc-400 text-zinc-900"
-                            placeholder="Digite uma mensagem"
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            disabled={sending}
-                            autoFocus
-                        />
-                        {newMessage.trim() ? (
-                            <button type="submit" disabled={sending} className="p-3 bg-[#9c0102] text-white rounded-full hover:bg-[#7a0102] transition-colors disabled:opacity-50">
-                                <Send size={20} />
-                            </button>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={() => setSoundEnabled(!soundEnabled)}
-                                className={`p-3 transition-colors ${soundEnabled ? 'text-zinc-500 hover:text-zinc-700' : 'text-red-400 hover:text-red-500'}`}
-                                title={soundEnabled ? 'Som ativado' : 'Som desativado'}
-                            >
-                                {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-                            </button>
-                        )}
-                    </form>
+                    )}
+
+                    {/* Input Area */}
+                    {!mediaPreview && (
+                        <div className="p-3 bg-zinc-50 border-t border-zinc-200">
+                            {/* Recording UI */}
+                            {isRecording ? (
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={cancelRecording}
+                                        className="p-3 text-red-500 hover:text-red-700 transition-colors"
+                                        title="Cancelar gravação"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                    <div className="flex-1 flex items-center gap-3">
+                                        <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+                                        <span className="text-sm font-mono text-red-600">{formatRecordingTime(recordingTime)}</span>
+                                        <span className="text-sm text-zinc-500">Gravando áudio...</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={stopRecording}
+                                        className="p-3 bg-[#9c0102] text-white rounded-full hover:bg-[#7a0102] transition-colors"
+                                        title="Parar e enviar"
+                                    >
+                                        <Square size={20} fill="white" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                                    {/* Hidden file input */}
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                                        onChange={handleFileSelect}
+                                    />
+                                    <div className="flex gap-2 text-zinc-500">
+                                        <Smile size={24} className="cursor-pointer hover:text-zinc-700" />
+                                        <Paperclip
+                                            size={24}
+                                            className="cursor-pointer hover:text-[#9c0102] transition-colors"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            title="Anexar arquivo"
+                                        />
+                                    </div>
+                                    <input
+                                        ref={inputRef}
+                                        type="text"
+                                        className="flex-1 p-3 rounded-lg bg-white border-none focus:ring-1 focus:ring-[#9c0102] placeholder-zinc-400 text-zinc-900"
+                                        placeholder="Digite uma mensagem"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        disabled={sending}
+                                        autoFocus
+                                    />
+                                    {newMessage.trim() ? (
+                                        <button type="submit" disabled={sending} className="p-3 bg-[#9c0102] text-white rounded-full hover:bg-[#7a0102] transition-colors disabled:opacity-50">
+                                            <Send size={20} />
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={startRecording}
+                                            className="p-3 text-zinc-500 hover:text-[#9c0102] transition-colors"
+                                            title="Gravar áudio"
+                                        >
+                                            <Mic size={20} />
+                                        </button>
+                                    )}
+                                </form>
+                            )}
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-[#f0f2f5] border-b-8 border-[#9c0102]">

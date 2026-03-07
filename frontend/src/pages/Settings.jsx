@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
-import { User, Bell, Monitor, Moon, Sun, Save, Camera, Bot, Eye, EyeOff } from 'lucide-react';
+import { User, Bell, Monitor, Moon, Sun, Save, Camera, Bot, Eye, EyeOff, HeartPulse, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchSettings, saveSettings } from '../lib/api';
 
@@ -36,7 +36,11 @@ export default function Settings() {
         FOLLOWUP_TIER1_MINUTES: '30',
         FOLLOWUP_TIER2_MINUTES: '120',
         FOLLOWUP_TIER3_MINUTES: '1440',
-        FOLLOWUP_MSG: ''
+        FOLLOWUP_MSG: '',
+        CAMPANHA_SAUDE_VISUAL_ATIVA: 'false',
+        CAMPANHA_SAUDE_VISUAL_INICIO: '',
+        CAMPANHA_SAUDE_VISUAL_FIM: '',
+        CAMPANHA_SAUDE_VISUAL_DESCRICAO: 'Consulta na ótica com condições especiais para quem vai fazer os óculos na loja.'
     });
 
     useEffect(() => {
@@ -50,7 +54,8 @@ export default function Settings() {
         try {
             if (activeTab === 'automation') {
                 const keys = ['AI_ENABLED', 'OPENAI_API_KEY', 'OPENAI_MODEL', 'FOLLOWUP_ENABLED',
-                    'FOLLOWUP_TIER1_MINUTES', 'FOLLOWUP_TIER2_MINUTES', 'FOLLOWUP_TIER3_MINUTES', 'FOLLOWUP_MSG'];
+                    'FOLLOWUP_TIER1_MINUTES', 'FOLLOWUP_TIER2_MINUTES', 'FOLLOWUP_TIER3_MINUTES', 'FOLLOWUP_MSG',
+                    'CAMPANHA_SAUDE_VISUAL_ATIVA', 'CAMPANHA_SAUDE_VISUAL_INICIO', 'CAMPANHA_SAUDE_VISUAL_FIM', 'CAMPANHA_SAUDE_VISUAL_DESCRICAO'];
                 for (const key of keys) {
                     if (config[key] !== undefined && config[key] !== '') {
                         await saveSettings(key, config[key]);
@@ -271,6 +276,79 @@ export default function Settings() {
                                                 <strong>Como funciona:</strong> A IA gera mensagens contextuais baseadas na conversa que o cliente teve. Se a IA não estiver disponível, usa mensagens padrão de fallback.
                                             </p>
                                         </div>
+                                    </div>
+                                </div>
+
+                                {/* Campanha Saúde Visual */}
+                                <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
+                                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1 flex items-center gap-2">
+                                        <HeartPulse size={20} className="text-green-600" />
+                                        Campanha Saúde Visual
+                                    </h2>
+                                    <p className="text-sm text-zinc-500 mb-6">Quando ativa, a Íris oferece a consulta na ótica como terceira opção de consulta para os clientes.</p>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                            <div>
+                                                <h3 className="font-medium text-zinc-900 dark:text-white">Campanha Ativa</h3>
+                                                <p className="text-sm text-zinc-500">Quando ativada, a Íris menciona a campanha Saúde Visual nas conversas.</p>
+                                            </div>
+                                            <ToggleSwitch
+                                                checked={config.CAMPANHA_SAUDE_VISUAL_ATIVA === 'true'}
+                                                onChange={() => setConfig({ ...config, CAMPANHA_SAUDE_VISUAL_ATIVA: config.CAMPANHA_SAUDE_VISUAL_ATIVA === 'true' ? 'false' : 'true' })}
+                                            />
+                                        </div>
+
+                                        {config.CAMPANHA_SAUDE_VISUAL_ATIVA === 'true' && (
+                                            <>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1 flex items-center gap-1">
+                                                            <Calendar size={14} />
+                                                            Data Início
+                                                        </label>
+                                                        <input
+                                                            type="date"
+                                                            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                                            value={config.CAMPANHA_SAUDE_VISUAL_INICIO || ''}
+                                                            onChange={(e) => setConfig({ ...config, CAMPANHA_SAUDE_VISUAL_INICIO: e.target.value })}
+                                                        />
+                                                        <p className="text-xs text-zinc-400 mt-1">Deixe vazio para ativar sem data limite</p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1 flex items-center gap-1">
+                                                            <Calendar size={14} />
+                                                            Data Fim
+                                                        </label>
+                                                        <input
+                                                            type="date"
+                                                            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                                            value={config.CAMPANHA_SAUDE_VISUAL_FIM || ''}
+                                                            onChange={(e) => setConfig({ ...config, CAMPANHA_SAUDE_VISUAL_FIM: e.target.value })}
+                                                        />
+                                                        <p className="text-xs text-zinc-400 mt-1">Deixe vazio para ativar sem data limite</p>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Descrição da Campanha (para a IA)</label>
+                                                    <textarea
+                                                        className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 bg-transparent text-zinc-900 dark:text-white"
+                                                        rows={3}
+                                                        value={config.CAMPANHA_SAUDE_VISUAL_DESCRICAO || ''}
+                                                        onChange={(e) => setConfig({ ...config, CAMPANHA_SAUDE_VISUAL_DESCRICAO: e.target.value })}
+                                                        placeholder="Ex: Consulta na ótica com condições especiais..."
+                                                    />
+                                                    <p className="text-xs text-zinc-400 mt-1">Essa descrição é enviada para a IA. Descreva o que a campanha oferece.</p>
+                                                </div>
+
+                                                <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 p-4 rounded-lg">
+                                                    <p className="text-sm text-green-700 dark:text-green-400">
+                                                        <strong>🟢 Campanha ativa!</strong> A Íris vai oferecer a Campanha Saúde Visual como opção quando clientes perguntarem sobre consulta ou exame de vista.
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 

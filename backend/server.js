@@ -17,6 +17,10 @@ app.use(cors({
 
 app.use(express.json());
 
+// Servir uploads como arquivos estáticos (para Uazapi baixar as mídias)
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Socket.io Setup
 const io = new Server(server, {
     cors: {

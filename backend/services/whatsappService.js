@@ -33,10 +33,15 @@ const sendMessage = async (jid, text) => {
 
     const number = jid.replace('@s.whatsapp.net', '');
 
+    // Calcula delay dinâmico baseado no tamanho da mensagem para simular digitação
+    // Mínimo 2s, máximo 5s — ~30ms por caractere
+    const dynamicDelay = Math.min(Math.max(text.length * 30, 2000), 5000);
+
     try {
         await axios.post(`${config.url}/send/text`, {
             number: number,
-            text: text
+            text: text,
+            delay: dynamicDelay
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -48,6 +53,39 @@ const sendMessage = async (jid, text) => {
     } catch (err) {
         console.error("Erro ao enviar mensagem Uazapi:", err.response?.data || err.message);
         throw new Error("Falha no envio Uazapi");
+    }
+};
+
+// Send media (image, audio/ptt, video) via Uazapi
+const sendMedia = async (jid, type, fileUrl, caption) => {
+    const config = getApiConfig();
+    if (!config) throw new Error("WhatsApp nao configurado (UAZAPI)");
+
+    const number = jid.replace('@s.whatsapp.net', '');
+
+    // Delay para simular digitação antes de enviar mídia
+    const dynamicDelay = Math.min(Math.max(2000), 4000);
+
+    const body = {
+        number: number,
+        type: type,       // "image", "ptt", "video", "audio", "document"
+        file: fileUrl,
+        delay: dynamicDelay
+    };
+    if (caption) body.text = caption;
+
+    try {
+        await axios.post(`${config.url}/send/media`, body, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'token': config.token
+            }
+        });
+        return true;
+    } catch (err) {
+        console.error("Erro ao enviar media Uazapi:", err.response?.data || err.message);
+        throw new Error("Falha no envio de media Uazapi");
     }
 };
 
@@ -286,6 +324,6 @@ const getChatInfo = async (chatId) => {
 };
 
 module.exports = {
-    initialize, sendMessage, processWebhook, getContacts,
+    initialize, sendMessage, sendMedia, processWebhook, getContacts,
     getMessages, getStatus, setChatMode, getChatInfo
 };

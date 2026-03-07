@@ -10,7 +10,11 @@ const DEFAULTS = {
     FOLLOWUP_ENABLED: "true",
     FOLLOWUP_TIER1_MINUTES: "30",
     FOLLOWUP_TIER2_MINUTES: "120",
-    FOLLOWUP_TIER3_MINUTES: "1440"
+    FOLLOWUP_TIER3_MINUTES: "1440",
+    CAMPANHA_SAUDE_VISUAL_ATIVA: "false",
+    CAMPANHA_SAUDE_VISUAL_INICIO: "",
+    CAMPANHA_SAUDE_VISUAL_FIM: "",
+    CAMPANHA_SAUDE_VISUAL_DESCRICAO: "Consulta na ótica com condições especiais para quem vai fazer os óculos na loja."
 };
 
 // Helper to ensure file exists
