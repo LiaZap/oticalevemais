@@ -29,21 +29,20 @@ const getStatus = async () => {
 
 const sendMessage = async (jid, text) => {
     const config = getApiConfig();
-    if (!config) throw new Error("WhatsApp não configurado (UAZAPI)");
+    if (!config) throw new Error("WhatsApp nao configurado (UAZAPI)");
 
     const number = jid.replace('@s.whatsapp.net', '');
 
     try {
-        await axios.post(`${config.url}/message/sendText`, {
+        await axios.post(`${config.url}/send/text`, {
             number: number,
-            text: text,
-            options: {
-                delay: 1200,
-                presence: "composing",
-                linkPreview: false
-            }
+            text: text
         }, {
-            headers: { 'apikey': config.token }
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'token': config.token
+            }
         });
         return true;
     } catch (err) {

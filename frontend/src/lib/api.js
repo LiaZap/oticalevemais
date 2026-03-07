@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+// VITE_API_URL deve ser a URL base do backend (ex: https://mult-backotica.leyiy3.easypanel.host)
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+    baseURL: BASE.endsWith('/api') ? BASE : `${BASE}/api`,
 });
 
 // Interceptor para adicionar o token JWT em todas as requisicoes
