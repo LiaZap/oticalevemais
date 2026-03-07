@@ -528,10 +528,71 @@ const WhatsApp = () => {
                     <div className="flex-1 overflow-y-auto p-4 space-y-3">
                         {messages.map((msg, index) => {
                             const isMe = msg.sender_id === 'me' || msg.sender === 'me';
+                            const content = msg.content || '';
+
+                            // Detect media content
+                            const isImage = content.startsWith('[Imagem]') || content === '[Midia]' && msg.media_type === 'image';
+                            const isAudio = content.startsWith('[Áudio]') || content.startsWith('🎤 ');
+                            const isVideo = content.startsWith('[Vídeo]');
+                            const isDocument = content.startsWith('[Arquivo]');
+
+                            // Check if content contains image URL (uploads)
+                            const imageUrlMatch = content.match(/https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp)/i);
+                            const hasImageUrl = imageUrlMatch !== null;
+
                             return (
                                 <div key={msg.id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`max-w-[70%] p-3 rounded-lg shadow-sm relative ${isMe ? 'bg-[#d9fdd3] text-zinc-900' : 'bg-white text-zinc-900'}`}>
-                                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+
+                                        {/* Image message */}
+                                        {(isImage || hasImageUrl) && (
+                                            <div className="mb-2">
+                                                <img
+                                                    src={imageUrlMatch ? imageUrlMatch[0] : ''}
+                                                    alt="Imagem"
+                                                    className="rounded-lg max-w-full max-h-64 cursor-pointer"
+                                                    onClick={(e) => window.open(e.target.src, '_blank')}
+                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                />
+                                                {content.replace(/\[Imagem\]\s?/, '').replace(imageUrlMatch?.[0] || '', '').trim() && (
+                                                    <p className="text-sm mt-1 whitespace-pre-wrap">
+                                                        {content.replace(/\[Imagem\]\s?/, '').replace(imageUrlMatch?.[0] || '', '').trim()}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Audio/voice message */}
+                                        {isAudio && (
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                    <Mic size={14} className="text-white" />
+                                                </div>
+                                                <p className="text-sm whitespace-pre-wrap">{content.replace('🎤 ', '')}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Video message */}
+                                        {isVideo && (
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Video size={16} className="text-zinc-500" />
+                                                <p className="text-sm text-zinc-500 italic">Vídeo</p>
+                                            </div>
+                                        )}
+
+                                        {/* Document message */}
+                                        {isDocument && (
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <FileText size={16} className="text-zinc-500" />
+                                                <p className="text-sm text-zinc-500 italic">Arquivo</p>
+                                            </div>
+                                        )}
+
+                                        {/* Regular text message */}
+                                        {!isImage && !hasImageUrl && !isAudio && !isVideo && !isDocument && (
+                                            <p className="text-sm whitespace-pre-wrap">{content}</p>
+                                        )}
+
                                         <div className="flex justify-end items-center gap-1 mt-1">
                                             <span className="text-[10px] text-zinc-500">
                                                 {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}

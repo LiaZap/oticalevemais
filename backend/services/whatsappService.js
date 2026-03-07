@@ -252,12 +252,13 @@ const processWebhook = async (data) => {
     // Detect message types
     const isTextMessage = messageType === 'text' || messageType === 'Conversation' || messageType === 'extendedText';
     const isImageMessage = messageType === 'image' || messageType === 'ImageMessage';
+    const isAudioMessage = messageType === 'audio' || messageType === 'ptt' || messageType === 'AudioMessage' || messageType === 'PttMessage';
 
-    // Get image URL if it's an image message (Uazapi sends base64 or file URL)
-    const imageUrl = msg.file || msg.fileUrl || msg.media || msg.base64 || null;
+    // Get media URL (Uazapi sends file URL or base64)
+    const mediaUrl = msg.file || msg.fileUrl || msg.media || msg.base64 || null;
     const imageCaption = msg.caption || msg.text || '';
 
-    console.log(`[Webhook] ${isFromMe ? 'SENT' : 'RECEIVED'} from ${sender}: type=${messageType}, "${content.substring(0, 50)}"${isImageMessage ? ` [IMG: ${imageUrl ? 'has URL' : 'no URL'}]` : ''}`);
+    console.log(`[Webhook] ${isFromMe ? 'SENT' : 'RECEIVED'} from ${sender}: type=${messageType}, "${content.substring(0, 50)}"${isImageMessage ? ` [IMG: ${mediaUrl ? 'has URL' : 'no URL'}]` : ''}${isAudioMessage ? ` [AUDIO: ${mediaUrl ? 'has URL' : 'no URL'}]` : ''}`);
 
     try {
         // 1. Upsert Chat
@@ -294,11 +295,16 @@ const processWebhook = async (data) => {
                 // Texto: usa buffer para acumular mensagens antes de responder (15s)
                 markAsRead(sender);
                 bufferMessage(sender, content, contactName);
-            } else if (isImageMessage && imageUrl) {
+            } else if (isImageMessage && mediaUrl) {
                 // Imagem: analisa com Vision API (pode ser receita)
                 markAsRead(sender);
                 console.log(`[Webhook] Image received from ${sender}, analyzing...`);
-                handleIncomingImage(sender, imageUrl, imageCaption, contactName);
+                handleIncomingImage(sender, mediaUrl, imageCaption, contactName);
+            } else if (isAudioMessage && mediaUrl) {
+                // Áudio: transcreve com Whisper e processa como texto
+                markAsRead(sender);
+                console.log(`[Webhook] Audio received from ${sender}, transcribing...`);
+                handleIncomingAudio(sender, mediaUrl, contactName);
             }
         }
 
@@ -517,6 +523,70 @@ async function handleIncomingImage(chatId, imageUrl, caption, contactName) {
 
     } catch (err) {
         console.error('[AI] Error handling incoming image:', err);
+    }
+}
+
+// Handle incoming AUDIO — transcribe with Whisper and process as text
+async function handleIncomingAudio(chatId, audioUrl, contactName) {
+    try {
+        // Get chat mode
+        const chatRes = await db.query(
+            'SELECT atendimento_mode FROM tb_whatsapp_chats WHERE id = $1',
+            [chatId]
+        );
+        const mode = chatRes.rows[0]?.atendimento_mode || 'auto';
+
+        await aiService.resetFollowupOnResponse(chatId);
+
+        let shouldRespond = false;
+        if (mode === 'human') {
+            console.log(`[AI] Chat ${chatId} is in HUMAN mode, skipping audio`);
+            return;
+        } else if (mode === 'ai') {
+            shouldRespond = true;
+        } else {
+            const inHours = isBusinessHours();
+            shouldRespond = !inHours;
+        }
+
+        if (!shouldRespond) return;
+
+        // Transcribe audio
+        console.log(`[AI] Transcribing audio for ${chatId}...`);
+        const transcription = await aiService.transcribeAudio(audioUrl);
+
+        if (!transcription) {
+            console.log('[AI] Could not transcribe audio');
+            // Send a friendly message asking to type instead
+            const fallbackMsg = 'Oi! Recebi seu áudio mas não consegui entender bem. Pode me enviar por escrito? Assim consigo te ajudar melhor 😊';
+            await sendMessage(chatId, fallbackMsg);
+
+            await db.query(`
+                INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
+                VALUES ($1, $2, 'me', $3, NOW())
+                ON CONFLICT (whatsapp_id) DO NOTHING
+            `, [`ai_audio_fail_${Date.now()}`, chatId, fallbackMsg]);
+
+            if (io) {
+                io.emit('wa.message', { chatId, content: fallbackMsg, sender: 'me', timestamp: new Date() });
+            }
+            return;
+        }
+
+        console.log(`[AI] Audio transcribed: "${transcription.substring(0, 100)}..."`);
+
+        // Save transcription as message (so it appears in history)
+        await db.query(`
+            INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
+            VALUES ($1, $2, $3, $4, NOW())
+            ON CONFLICT (whatsapp_id) DO NOTHING
+        `, [`audio_transcript_${Date.now()}`, chatId, chatId, `🎤 ${transcription}`]);
+
+        // Process transcribed text as a normal message
+        await handleIncomingMessage(chatId, transcription, contactName);
+
+    } catch (err) {
+        console.error('[AI] Error handling incoming audio:', err);
     }
 }
 

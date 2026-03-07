@@ -553,4 +553,58 @@ Formato:
     }
 }
 
-module.exports = { initialize, generateResponse, analyzeImage, upsertAtendimento, resetFollowupOnResponse };
+// =============================================
+// TRANSCRIBE AUDIO — Whisper API
+// =============================================
+async function transcribeAudio(audioUrl) {
+    if (!openai) {
+        console.warn('[AI] OpenAI not initialized, skipping transcription');
+        return null;
+    }
+
+    try {
+        // Download the audio file
+        const response = await require('axios').get(audioUrl, {
+            responseType: 'arraybuffer',
+            timeout: 30000
+        });
+
+        // Create a file-like object for the API
+        const audioBuffer = Buffer.from(response.data);
+
+        // Detect format from URL or content-type
+        let ext = 'ogg';
+        if (audioUrl.includes('.mp3')) ext = 'mp3';
+        else if (audioUrl.includes('.m4a')) ext = 'm4a';
+        else if (audioUrl.includes('.wav')) ext = 'wav';
+        else if (audioUrl.includes('.webm')) ext = 'webm';
+
+        // Use OpenAI Whisper to transcribe
+        const file = new File([audioBuffer], `audio.${ext}`, {
+            type: ext === 'ogg' ? 'audio/ogg' : ext === 'mp3' ? 'audio/mpeg' : `audio/${ext}`
+        });
+
+        const transcription = await openai.audio.transcriptions.create({
+            file: file,
+            model: 'whisper-1',
+            language: 'pt',
+            response_format: 'text'
+        });
+
+        const text = typeof transcription === 'string' ? transcription.trim() : transcription.text?.trim();
+
+        if (!text || text.length < 2) {
+            console.log('[AI] Transcription empty or too short');
+            return null;
+        }
+
+        console.log(`[AI] Whisper transcription (${audioBuffer.length} bytes): "${text.substring(0, 100)}"`);
+        return text;
+
+    } catch (err) {
+        console.error('[AI] Error transcribing audio:', err.message);
+        return null;
+    }
+}
+
+module.exports = { initialize, generateResponse, analyzeImage, transcribeAudio, upsertAtendimento, resetFollowupOnResponse };
