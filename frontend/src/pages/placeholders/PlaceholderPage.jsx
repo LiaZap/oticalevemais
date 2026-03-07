@@ -1,16 +1,18 @@
 import React from 'react';
 import { Sidebar } from '../../components/Sidebar';
+import { Construction } from 'lucide-react';
 
 export default function PlaceholderPage({ title }) {
     return (
-        <div className="flex bg-zinc-50 dark:bg-zinc-950">
-            <Sidebar />
-            <div className="flex-1 p-8 h-screen overflow-y-auto">
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-4">{title}</h1>
-                <div className="bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 text-center">
-                    <p className="text-zinc-500 text-lg">Esta página está em construção.</p>
+        <Sidebar>
+            <div className="space-y-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-zinc-900">{title}</h1>
+                <div className="bg-white p-12 rounded-xl shadow-sm border border-zinc-200 text-center">
+                    <Construction className="mx-auto h-12 w-12 text-zinc-300 mb-4" />
+                    <p className="text-zinc-500 text-lg">Esta pagina esta em construcao.</p>
+                    <p className="text-zinc-400 text-sm mt-2">Em breve estara disponivel.</p>
                 </div>
             </div>
-        </div>
+        </Sidebar>
     );
 }

@@ -1,22 +1,10 @@
 import axios from 'axios';
-import { 
-    mockLogin, 
-    mockFetchKPIs, 
-    mockFetchAtendimentos, 
-    mockFetchRelatorios, 
-    mockFetchTeam,
-    addMockAtendimento,
-    updateMockAtendimentoStatus 
-} from './mockData';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', 
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
 });
 
-// Flag to force mock mode if backend is down
-const USE_MOCK = false;
-
-// Interceptor para adicionar o token JWT em todas as requisições
+// Interceptor para adicionar o token JWT em todas as requisicoes
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -27,128 +15,92 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Mock wrapper
 export const loginUser = async (credentials) => {
-    if (USE_MOCK) return mockLogin(credentials);
-    try {
-        const response = await api.post('/auth/login', credentials);
-        return response.data;
-    } catch (error) {
-        console.warn("Backend failed, falling back to mock");
-        return mockLogin(credentials);
-    }
+    const response = await api.post('/auth/login', credentials);
+    return response.data;
 };
-  
+
 export const fetchDashboardKPIs = async () => {
-    if (USE_MOCK) return mockFetchKPIs();
     try {
         const response = await api.get('/dashboard/kpis');
         return response.data;
     } catch (error) {
-        console.warn("Backend failed, falling back to mock");
-        return mockFetchKPIs();
+        console.error("Erro ao buscar KPIs:", error);
+        return {
+            volume: [],
+            intencao: [],
+            followup: { taxa_conversao_followup_percentual: 0, enviados: 0, respondidos: 0 },
+            conversao: { taxa_conversao_geral_percentual: 0, total: 0, agendados: 0 },
+            retencao: [],
+            vendas_por_tipo: []
+        };
     }
 };
 
 export const fetchAtendimentos = async () => {
-    try {
-        const response = await api.get('/atendimentos');
-        return response.data;
-    } catch (error) {
-        console.error("Backend failed to fetch atendimentos", error);
-        throw error;
-    }
+    const response = await api.get('/atendimentos');
+    return response.data;
 };
 
 export const createAtendimento = async (atendimento) => {
-    try {
-        const response = await api.post('/atendimentos', atendimento);
-        return response.data;
-    } catch (error) {
-        console.error("Backend failed to create atendimento", error);
-        throw error;
-    }
-}
+    const response = await api.post('/atendimentos', atendimento);
+    return response.data;
+};
 
 export const updateAtendimentoStatus = async (id, status) => {
-    try {
-        const response = await api.put(`/atendimentos/${id}`, { status });
-        return response.data;
-    } catch (error) {
-        console.error("Backend failed to update status", error);
-        throw error;
-    }
-}
+    const response = await api.put(`/atendimentos/${id}`, { status });
+    return response.data;
+};
 
-export const fetchRelatorios = async () => {
-    if (USE_MOCK) return mockFetchRelatorios();
+export const fetchRelatorios = async (periodo = '7days') => {
     try {
-        const response = await api.get('/relatorios');
+        const response = await api.get(`/relatorios?periodo=${periodo}`);
         return response.data;
     } catch (error) {
-        console.warn("Backend failed, falling back to mock");
-        return mockFetchRelatorios();
+        console.error("Erro ao buscar relatorios:", error);
+        return {
+            evolucao: [],
+            canais: [],
+            vendas_por_tipo: [],
+            funil: []
+        };
     }
 };
 
 // Settings API
 export const fetchSettings = async () => {
-    // Note: Config API doesn't use mock data to ensure persistence
     try {
         const response = await api.get('/settings');
         return response.data;
     } catch (error) {
-        console.warn("Backend failed to fetch settings");
+        console.warn("Erro ao buscar settings");
         return { FOLLOWUP_MSG: '' };
     }
 };
 
 export const saveSettings = async (key, value) => {
-    try {
-        const response = await api.post('/settings', { key, value });
-        return response.data;
-    } catch (error) {
-        console.error("Backend failed to save settings");
-        throw error;
-    }
+    const response = await api.post('/settings', { key, value });
+    return response.data;
 };
 
 export const fetchTeam = async () => {
-    // if (USE_MOCK) return mockFetchTeam(); // Disable mock for real user management
-    try {
-        const response = await api.get('/users'); // Changed from /team to /users
-        return response.data;
-    } catch (error) {
-        console.warn("Backend failed, falling back to mock");
-        return mockFetchTeam();
-    }
+    const response = await api.get('/users');
+    return response.data;
 };
 
 export const createUser = async (userData) => {
-    try {
-        const response = await api.post('/users', userData);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await api.post('/users', userData);
+    return response.data;
 };
 
 export const updateUser = async (id, userData) => {
-    try {
-        const response = await api.put(`/users/${id}`, userData);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await api.put(`/users/${id}`, userData);
+    return response.data;
 };
 
 export const deleteUser = async (id) => {
-    try {
-        const response = await api.delete(`/users/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
 };
 
 export default api;

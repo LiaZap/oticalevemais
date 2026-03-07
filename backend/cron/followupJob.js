@@ -1,18 +1,41 @@
 const cron = require('node-cron');
 const db = require('../db');
 const OpenAI = require('openai');
+const configStore = require('../configStore');
 
 // Run every 5 minutes
 const SCHEDULE = '*/5 * * * *';
 
-// Follow-up tier configuration (in minutes)
-const TIERS = [
-    { tier: 1, delayMinutes: 30, fallbackMsg: 'Oi 😊 estou por aqui acompanhando seu atendimento e posso te ajudar. Me chama quando puder pra gente continuar, tá?' },
-    { tier: 2, delayMinutes: 120, fallbackMsg: 'Olá!! Seu atendimento segue aberto por aqui 😊 posso continuar te ajudando e esclarecer tudo que precisar?' },
-    { tier: 3, delayMinutes: 1440, fallbackMsg: 'Como não tivemos retorno, vou encerrar este atendimento por enquanto. Mas se você ainda quiser aproveitar nossas condições exclusivas, chama aqui que já te atendo!' }
-];
+// Fallback messages for each tier
+const FALLBACK_MESSAGES = {
+    1: 'Oi, estou por aqui acompanhando seu atendimento e posso te ajudar. Me chama quando puder pra gente continuar, ta?',
+    2: 'Ola!! Seu atendimento segue aberto por aqui, posso continuar te ajudando e esclarecer tudo que precisar?',
+    3: 'Como nao tivemos retorno, vou encerrar este atendimento por enquanto. Mas se voce ainda quiser aproveitar nossas condicoes exclusivas, chama aqui que ja te atendo!'
+};
 
 let whatsappService = null;
+
+// Get configurable tier delays from settings
+async function getTierConfig() {
+    try {
+        const tier1 = await configStore.get('FOLLOWUP_TIER1_MINUTES');
+        const tier2 = await configStore.get('FOLLOWUP_TIER2_MINUTES');
+        const tier3 = await configStore.get('FOLLOWUP_TIER3_MINUTES');
+
+        return [
+            { tier: 1, delayMinutes: parseInt(tier1) || 30 },
+            { tier: 2, delayMinutes: parseInt(tier2) || 120 },
+            { tier: 3, delayMinutes: parseInt(tier3) || 1440 }
+        ];
+    } catch (err) {
+        console.error('[Followup] Error reading config, using defaults:', err.message);
+        return [
+            { tier: 1, delayMinutes: 30 },
+            { tier: 2, delayMinutes: 120 },
+            { tier: 3, delayMinutes: 1440 }
+        ];
+    }
+}
 
 // Generate contextual follow-up using AI
 async function generateContextualFollowup(chatId, tier) {
@@ -33,13 +56,13 @@ async function generateContextualFollowup(chatId, tier) {
         if (history.length === 0) return null;
 
         const convoText = history.map(m =>
-            `${m.sender_id === 'me' ? 'Íris' : 'Cliente'}: ${m.content}`
+            `${m.sender_id === 'me' ? 'Iris' : 'Cliente'}: ${m.content}`
         ).join('\n');
 
         const tierContext = {
-            1: 'O cliente parou de responder há 30 minutos. Mande uma mensagem GENTIL e curta (2-3 linhas) retomando o assunto que estavam conversando. Mostre que você lembra do contexto.',
-            2: 'O cliente não responde há 2 horas. Mande uma mensagem AMIGÁVEL (2-3 linhas) perguntando se ainda pode ajudar, mencionando brevemente o que discutiram.',
-            3: 'O cliente não responde há 24 horas. Mande uma mensagem de ENCERRAMENTO (2-3 linhas), gentil, dizendo que vai encerrar mas que ele pode voltar quando quiser.'
+            1: 'O cliente parou de responder ha 30 minutos. Mande uma mensagem GENTIL e curta (2-3 linhas) retomando o assunto que estavam conversando. Mostre que voce lembra do contexto.',
+            2: 'O cliente nao responde ha 2 horas. Mande uma mensagem AMIGAVEL (2-3 linhas) perguntando se ainda pode ajudar, mencionando brevemente o que discutiram.',
+            3: 'O cliente nao responde ha 24 horas. Mande uma mensagem de ENCERRAMENTO (2-3 linhas), gentil, dizendo que vai encerrar mas que ele pode voltar quando quiser.'
         };
 
         const completion = await openai.chat.completions.create({
@@ -47,7 +70,7 @@ async function generateContextualFollowup(chatId, tier) {
             messages: [
                 {
                     role: 'system',
-                    content: `Você é a Íris, assistente da Ótica Leve Mais (Dourados-MS).
+                    content: `Voce e a Iris, assistente da Otica Leve Mais (Dourados-MS).
 Tom: acolhedor, leve, profissional. Use 0-2 emojis. Responda APENAS o texto da mensagem, sem nada extra.
 
 ${tierContext[tier]}
@@ -70,12 +93,26 @@ ${convoText}`
 const runFollowUpCheck = async () => {
     console.log(`[Followup] Check started: ${new Date().toISOString()}`);
 
+    // Check if follow-up is enabled
+    try {
+        const enabled = await configStore.get('FOLLOWUP_ENABLED');
+        if (enabled === 'false') {
+            console.log('[Followup] Disabled via settings. Skipping.');
+            return;
+        }
+    } catch (e) {
+        // Continue if config read fails
+    }
+
     // Lazy load whatsappService to avoid circular dependency
     if (!whatsappService) {
         whatsappService = require('../services/whatsappService');
     }
 
     try {
+        // Get configurable tier delays
+        const TIERS = await getTierConfig();
+
         // Find open atendimentos with chat_id that need follow-up
         // Only consider chats NOT in 'human' mode
         const query = `
@@ -100,7 +137,6 @@ const runFollowUpCheck = async () => {
 
         let sent = 0;
         for (const atendimento of rows) {
-            // Find the next tier to send
             const currentTier = atendimento.followup_tier || 0;
 
             // Get last customer message time for this chat
@@ -118,13 +154,13 @@ const runFollowUpCheck = async () => {
 
             // Check each tier
             for (const tierConfig of TIERS) {
-                if (tierConfig.tier <= currentTier) continue; // Already sent this tier
-                if (minutesSinceLastMsg < tierConfig.delayMinutes) break; // Not time yet
+                if (tierConfig.tier <= currentTier) continue;
+                if (minutesSinceLastMsg < tierConfig.delayMinutes) break;
 
                 // Generate contextual follow-up message
                 let message = await generateContextualFollowup(atendimento.chat_id, tierConfig.tier);
                 if (!message) {
-                    message = tierConfig.fallbackMsg;
+                    message = FALLBACK_MESSAGES[tierConfig.tier];
                 }
 
                 try {

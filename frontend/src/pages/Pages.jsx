@@ -3,6 +3,7 @@ import ReportsPage from './Reports';
 import TeamPage from './Team';
 import SettingsPage from './Settings';
 import WhatsAppPage from './WhatsApp';
+import PlaceholderPage from './placeholders/PlaceholderPage';
 
 export const Atendimentos = AtendimentosPage;
 export const Reports = ReportsPage;

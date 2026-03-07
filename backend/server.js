@@ -42,6 +42,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/users', require('./routes/users'));
 app.use('/api/atendimentos', require('./routes/atendimentos'));
+app.use('/api/relatorios', require('./routes/relatorios'));
 app.use('/api/whatsapp', whatsappRoutes);
 
 app.get('/api/test-cron', async (req, res) => {
