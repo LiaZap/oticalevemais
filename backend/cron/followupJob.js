@@ -37,57 +37,126 @@ async function getTierConfig() {
     }
 }
 
-// Generate contextual follow-up using AI
-async function generateContextualFollowup(chatId, tier) {
+// Analyze conversation context and decide if follow-up should be sent
+// Returns: { shouldSend: boolean, message: string|null, reason: string }
+async function analyzeAndGenerateFollowup(chatId, tier) {
     try {
         const apiKey = process.env.OPENAI_API_KEY;
-        if (!apiKey) return null;
+        if (!apiKey) return { shouldSend: true, message: null, reason: 'no API key' };
 
         const openai = new OpenAI({ apiKey });
 
         // Get recent conversation history
         const historyRes = await db.query(
-            `SELECT sender_id, content FROM tb_whatsapp_messages
-             WHERE chat_id = $1 ORDER BY timestamp DESC LIMIT 10`,
+            `SELECT sender_id, content, timestamp FROM tb_whatsapp_messages
+             WHERE chat_id = $1 ORDER BY timestamp DESC LIMIT 15`,
             [chatId]
         );
         const history = historyRes.rows.reverse();
 
-        if (history.length === 0) return null;
+        if (history.length === 0) return { shouldSend: false, message: null, reason: 'no history' };
 
         const convoText = history.map(m =>
             `${m.sender_id === 'me' ? 'Iris' : 'Cliente'}: ${m.content}`
         ).join('\n');
 
         const tierContext = {
-            1: 'O cliente parou de responder ha 30 minutos. Mande uma mensagem GENTIL e curta (2-3 linhas) retomando o assunto que estavam conversando. Mostre que voce lembra do contexto. Voce e uma atendente que trabalha na loja em Dourados, fale como se estivesse AQUI na loja.',
-            2: 'O cliente nao responde ha 2 horas. Mande uma mensagem AMIGAVEL (2-3 linhas) perguntando se ainda pode ajudar, mencionando brevemente o que discutiram. Voce e uma atendente LOCAL de Dourados.',
-            3: 'O cliente nao responde ha 24 horas. Mande uma mensagem de ENCERRAMENTO (2-3 linhas), gentil, dizendo que vai encerrar mas que ele pode voltar quando quiser. Voce e uma atendente LOCAL de Dourados.'
+            1: 'O cliente parou de responder ha 30 minutos.',
+            2: 'O cliente nao responde ha 2 horas.',
+            3: 'O cliente nao responde ha 24 horas.'
         };
 
-        const completion = await openai.chat.completions.create({
+        // Step 1: Ask AI to ANALYZE if follow-up is appropriate
+        const analysisCompletion = await openai.chat.completions.create({
+            model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Voce e um analista de atendimento da Otica Leve Mais. Analise a conversa e decida se faz sentido enviar um follow-up.
+
+${tierContext[tier]}
+
+Responda APENAS com JSON:
+{"enviar": true/false, "motivo": "explicacao curta"}
+
+NAO enviar follow-up se:
+- Cliente ja disse "ok", "obrigado", "tchau", "valeu" ou qualquer encerramento
+- Cliente ja recebeu todas as informacoes que pediu
+- A conversa ja foi concluida naturalmente
+- O cliente ja confirmou agendamento ou compra
+- A Iris (atendente) ja respondeu e a conversa parece encerrada
+- O cliente esta apenas aguardando algo (oculos ficar pronto, etc)
+- A ultima mensagem da Iris ja foi uma despedida
+- O cliente reagiu com emoji (👍, ❤️, etc)
+
+ENVIAR follow-up se:
+- O cliente fez uma pergunta que nao foi respondida
+- O cliente estava no meio de um orcamento/agendamento e sumiu
+- O cliente mostrou interesse mas nao finalizou
+- A conversa foi interrompida sem conclusao`
+                },
+                {
+                    role: 'user',
+                    content: `Conversa:\n${convoText}`
+                }
+            ],
+            temperature: 0.3,
+            max_tokens: 100,
+            response_format: { type: 'json_object' }
+        });
+
+        const analysisText = analysisCompletion.choices[0]?.message?.content?.trim();
+        let analysis;
+        try {
+            analysis = JSON.parse(analysisText);
+        } catch {
+            analysis = { enviar: true, motivo: 'parse error' };
+        }
+
+        console.log(`[Followup] AI analysis for ${chatId}: enviar=${analysis.enviar}, motivo="${analysis.motivo}"`);
+
+        if (!analysis.enviar) {
+            return { shouldSend: false, message: null, reason: analysis.motivo };
+        }
+
+        // Step 2: Generate contextual follow-up message
+        const tierInstruction = {
+            1: 'Mande UMA mensagem GENTIL e curta (1-2 linhas) retomando o assunto. Mostre que lembra do contexto.',
+            2: 'Mande UMA mensagem AMIGAVEL (1-2 linhas) perguntando se ainda pode ajudar, mencionando o que discutiram.',
+            3: 'Mande UMA mensagem de ENCERRAMENTO (1-2 linhas), gentil, dizendo que vai encerrar mas pode voltar.'
+        };
+
+        const msgCompletion = await openai.chat.completions.create({
             model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
             messages: [
                 {
                     role: 'system',
                     content: `Voce e a Iris, atendente da Otica Leve Mais em Dourados-MS.
-Voce TRABALHA e MORA em Dourados. Fale como atendente LOCAL — use "aqui na loja", "aqui em Dourados", NUNCA "ai em Dourados" ou "ai na cidade".
-Tom: acolhedor, leve, profissional. Use 0-2 emojis. Responda APENAS o texto da mensagem, sem nada extra.
+Voce TRABALHA e MORA em Dourados. Fale como atendente LOCAL — use "aqui na loja", NUNCA "ai em Dourados".
+Tom: acolhedor, leve, profissional. Use 0-2 emojis. Responda APENAS o texto da mensagem.
 
-${tierContext[tier]}
+${tierInstruction[tier]}
+
+REGRAS IMPORTANTES:
+- NAO repita informacoes que ja foram dadas na conversa
+- NAO pergunte coisas que o cliente ja respondeu
+- Seja BREVE (maximo 2 linhas)
+- Fale sobre o CONTEXTO REAL da conversa, nao coisas genericas
 
 Conversa anterior:
 ${convoText}`
                 }
             ],
             temperature: 0.7,
-            max_tokens: 150
+            max_tokens: 120
         });
 
-        return completion.choices[0]?.message?.content?.trim() || null;
+        const message = msgCompletion.choices[0]?.message?.content?.trim() || null;
+        return { shouldSend: true, message, reason: analysis.motivo };
+
     } catch (err) {
-        console.error('[Followup] Error generating contextual message:', err.message);
-        return null;
+        console.error('[Followup] Error analyzing/generating followup:', err.message);
+        return { shouldSend: true, message: null, reason: 'error' };
     }
 }
 
@@ -218,8 +287,22 @@ const runFollowUpCheck = async () => {
                 if (tierConfig.tier <= currentTier) continue;
                 if (minutesSinceLastMsg < tierConfig.delayMinutes) break;
 
-                // Generate contextual follow-up message
-                let message = await generateContextualFollowup(atendimento.chat_id, tierConfig.tier);
+                // AI analyzes conversation context to decide if follow-up is appropriate
+                const followupResult = await analyzeAndGenerateFollowup(atendimento.chat_id, tierConfig.tier);
+
+                if (!followupResult.shouldSend) {
+                    console.log(`[Followup] AI decided NOT to send tier ${tierConfig.tier} to ${atendimento.chat_id}: ${followupResult.reason}`);
+                    // If AI says don't send, mark tier as done to avoid rechecking
+                    await db.query(
+                        `UPDATE tb_atendimentos SET followup_tier = $1,
+                         status = CASE WHEN $1 = 3 THEN 'Finalizado' ELSE status END
+                         WHERE id = $2`,
+                        [tierConfig.tier, atendimento.id]
+                    );
+                    break;
+                }
+
+                let message = followupResult.message;
                 if (!message) {
                     message = FALLBACK_MESSAGES[tierConfig.tier];
                 }
