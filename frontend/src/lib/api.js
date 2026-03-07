@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-// VITE_API_URL deve ser a URL base do backend (ex: https://mult-backotica.leyiy3.easypanel.host)
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Read API URL: runtime config (docker) > build-time env > fallback
+const RUNTIME_URL = typeof window !== 'undefined' && window.__RUNTIME_CONFIG__?.VITE_API_URL;
+const BASE = RUNTIME_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const api = axios.create({
     baseURL: BASE.endsWith('/api') ? BASE : `${BASE}/api`,
 });

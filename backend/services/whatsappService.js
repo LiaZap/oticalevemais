@@ -51,21 +51,65 @@ const sendMessage = async (jid, text) => {
     }
 };
 
+// =============================================
+// WEBHOOK — Formato Uazapi
+// =============================================
+// Uazapi envia:
+// {
+//   "wa_name": "Nome do contato",
+//   "message": {
+//     "chatid": "5567999999999@s.whatsapp.net",
+//     "content": "texto da mensagem",
+//     "text": "texto da mensagem",
+//     "fromMe": false,
+//     "senderName": "Nome",
+//     "messageid": "3EB0...",
+//     "isGroup": false,
+//     "messageType": "Conversation",
+//     "type": "text"
+//   }
+// }
 const processWebhook = async (data) => {
-    console.log("Received Webhook:", JSON.stringify(data, null, 2));
+    console.log("[Webhook] Received:", JSON.stringify(data).substring(0, 500));
 
-    const msg = data.message || data.data?.message;
-    if (!msg) return;
+    const msg = data.message;
+    if (!msg) {
+        console.log("[Webhook] No message field, ignoring");
+        return;
+    }
 
-    const sender = msg.key?.remoteJid;
-    if (!sender) return;
+    // Get sender JID from Uazapi format
+    let sender = msg.chatid || msg.sender_pn || '';
+    if (!sender) {
+        console.log("[Webhook] No chatid/sender_pn, ignoring");
+        return;
+    }
+
+    // Ensure it has @ format (Uazapi sometimes sends without @)
+    if (sender.includes('s.whatsapp.net') && !sender.includes('@')) {
+        sender = sender.replace('s.whatsapp.net', '@s.whatsapp.net');
+    }
+    if (!sender.includes('@')) {
+        sender = sender + '@s.whatsapp.net';
+    }
 
     // Ignore group messages
-    if (sender.includes('@g.us')) return;
+    if (msg.isGroup === true || sender.includes('@g.us')) {
+        console.log("[Webhook] Group message, ignoring");
+        return;
+    }
 
-    const isFromMe = msg.key?.fromMe;
-    const contactName = msg.pushName || sender.split('@')[0];
-    const content = msg.conversation || msg.extendedTextMessage?.text || "[Mídia]";
+    // Parse message fields from Uazapi format
+    const isFromMe = msg.fromMe === true || msg.fromMe === 'true' || data.wasSentByApi === true;
+    const contactName = msg.senderName || data.wa_name || sender.split('@')[0];
+    const content = msg.content || msg.text || msg.caption || '[Midia]';
+    const messageId = msg.messageid || msg.id || `uaz_${Date.now()}`;
+    const messageType = msg.type || msg.messageType || 'text';
+
+    // Skip non-text messages for AI processing (but still save them)
+    const isTextMessage = messageType === 'text' || messageType === 'Conversation' || messageType === 'extendedText';
+
+    console.log(`[Webhook] ${isFromMe ? 'SENT' : 'RECEIVED'} from ${sender}: "${content.substring(0, 50)}"`);
 
     try {
         // 1. Upsert Chat
@@ -84,9 +128,9 @@ const processWebhook = async (data) => {
             INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
             VALUES ($1, $2, $3, $4, NOW())
             ON CONFLICT (whatsapp_id) DO NOTHING
-        `, [msg.key.id, sender, isFromMe ? 'me' : sender, content]);
+        `, [messageId, sender, isFromMe ? 'me' : sender, content]);
 
-        // 3. Emit to Frontend
+        // 3. Emit to Frontend via Socket.IO
         if (io) {
             io.emit('wa.message', {
                 chatId: sender,
@@ -96,13 +140,13 @@ const processWebhook = async (data) => {
             });
         }
 
-        // 4. AI Handling — only for incoming customer messages (not fromMe, not media-only)
-        if (!isFromMe && content !== '[Mídia]') {
+        // 4. AI Handling — only for incoming customer TEXT messages
+        if (!isFromMe && isTextMessage && content !== '[Midia]') {
             await handleIncomingMessage(sender, content, contactName);
         }
 
     } catch (err) {
-        console.error("Erro ao processar webhook:", err);
+        console.error("[Webhook] Error processing:", err);
     }
 };
 
@@ -122,37 +166,66 @@ async function handleIncomingMessage(chatId, message, contactName) {
         // Decide whether AI should respond
         let shouldRespond = false;
         if (mode === 'human') {
-            // Vendedor is handling — AI stays quiet
+            console.log(`[AI] Chat ${chatId} is in HUMAN mode, skipping`);
             return;
         } else if (mode === 'ai') {
-            // AI always responds
             shouldRespond = true;
         } else {
             // Auto mode: AI responds only outside business hours
-            shouldRespond = !isBusinessHours();
+            const inHours = isBusinessHours();
+            shouldRespond = !inHours;
+            console.log(`[AI] Auto mode - business hours: ${inHours}, should respond: ${shouldRespond}`);
         }
 
         if (!shouldRespond) return;
 
         // Generate AI response
+        console.log(`[AI] Generating response for ${chatId}...`);
         const result = await aiService.generateResponse(chatId, message);
-        if (!result || !result.reply) return;
+        if (!result || !result.reply) {
+            console.log('[AI] No response generated');
+            return;
+        }
 
         // Check if AI detected handoff need
         if (result.data?.handoff === true) {
-            // Switch to human mode
             await db.query(
                 "UPDATE tb_whatsapp_chats SET atendimento_mode = 'human' WHERE id = $1",
                 [chatId]
             );
-            // Notify frontend
             if (io) {
                 io.emit('wa.handoff', { chatId, reason: 'AI detected handoff trigger' });
             }
+            console.log(`[AI] Handoff triggered for ${chatId}`);
         }
 
         // Send the AI response via WhatsApp
         await sendMessage(chatId, result.reply);
+
+        // Save the AI response as a message too
+        await db.query(`
+            INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
+            VALUES ($1, $2, 'me', $3, NOW())
+            ON CONFLICT (whatsapp_id) DO NOTHING
+        `, [`ai_${Date.now()}`, chatId, result.reply]);
+
+        // Update chat last message
+        await db.query(`
+            UPDATE tb_whatsapp_chats SET
+                last_message_content = $1,
+                last_message_timestamp = NOW()
+            WHERE id = $2
+        `, [result.reply, chatId]);
+
+        // Emit AI response to frontend
+        if (io) {
+            io.emit('wa.message', {
+                chatId,
+                content: result.reply,
+                sender: 'me',
+                timestamp: new Date()
+            });
+        }
 
         // Update/create atendimento with extracted data
         const telefone = chatId.replace('@s.whatsapp.net', '');
@@ -183,7 +256,6 @@ const getMessages = async (chatId) => {
     return res.rows;
 };
 
-// Update chat mode (auto/human/ai)
 const setChatMode = async (chatId, mode) => {
     if (!['auto', 'human', 'ai'].includes(mode)) {
         throw new Error('Invalid mode. Must be: auto, human, ai');
@@ -195,7 +267,6 @@ const setChatMode = async (chatId, mode) => {
     return { chatId, mode };
 };
 
-// Get chat info with mode and linked atendimento
 const getChatInfo = async (chatId) => {
     const chatRes = await db.query(
         'SELECT id, name, atendimento_mode, assigned_to FROM tb_whatsapp_chats WHERE id = $1',
@@ -203,7 +274,6 @@ const getChatInfo = async (chatId) => {
     );
     const chat = chatRes.rows[0] || null;
 
-    // Get linked atendimento
     const atendRes = await db.query(
         `SELECT id, cliente, intencao_detectada, status, classificacao_lente, tem_receita, cidade, followup_tier
          FROM tb_atendimentos WHERE chat_id = $1 AND status NOT IN ('Finalizado', 'Cancelado')

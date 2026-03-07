@@ -6,8 +6,12 @@ class SocketService {
   connect() {
     if (this.socket) return;
 
-    const URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    this.socket = io(URL);
+    // Runtime config (docker) > build-time env > fallback
+    const RUNTIME_URL = typeof window !== 'undefined' && window.__RUNTIME_CONFIG__?.VITE_API_URL;
+    let BASE = RUNTIME_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    // Socket.IO needs the base URL without /api
+    if (BASE.endsWith('/api')) BASE = BASE.slice(0, -4);
+    this.socket = io(BASE);
 
     this.socket.on('connect', () => {
       console.log('Socket connected');
