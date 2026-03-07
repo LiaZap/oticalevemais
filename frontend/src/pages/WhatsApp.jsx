@@ -581,14 +581,36 @@ const WhatsApp = () => {
                                         )}
 
                                         {/* Audio/voice message */}
-                                        {isAudio && (
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                                                    <Mic size={14} className="text-white" />
+                                        {isAudio && (() => {
+                                            // Extract audio URL and transcription from content
+                                            // Format: "[Áudio] URL 🎤 transcription" or "[Áudio] URL" or "🎤 transcription"
+                                            const audioUrlMatch = content.match(/https?:\/\/[^\s]+/);
+                                            const audioUrl = audioUrlMatch ? audioUrlMatch[0] : null;
+                                            const transcriptMatch = content.match(/🎤\s*(.+)/);
+                                            const transcript = transcriptMatch ? transcriptMatch[1].trim() : null;
+
+                                            return (
+                                                <div className="space-y-2 mb-1">
+                                                    {audioUrl && (
+                                                        <audio controls className="w-full max-w-[250px] h-10" preload="none">
+                                                            <source src={audioUrl} type="audio/ogg" />
+                                                            <source src={audioUrl} type="audio/mpeg" />
+                                                        </audio>
+                                                    )}
+                                                    {!audioUrl && (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                                <Mic size={14} className="text-white" />
+                                                            </div>
+                                                            <span className="text-sm text-zinc-500 italic">Áudio</span>
+                                                        </div>
+                                                    )}
+                                                    {transcript && (
+                                                        <p className="text-xs text-zinc-500 italic">🎤 {transcript}</p>
+                                                    )}
                                                 </div>
-                                                <p className="text-sm whitespace-pre-wrap">{content.replace('🎤 ', '')}</p>
-                                            </div>
-                                        )}
+                                            );
+                                        })()}
 
                                         {/* Video message */}
                                         {isVideo && (

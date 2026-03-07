@@ -1,4 +1,6 @@
 const OpenAI = require('openai');
+const path = require('path');
+const fs = require('fs');
 const db = require('../db');
 const configStore = require('../configStore');
 
@@ -353,28 +355,33 @@ async function upsertAtendimento(chatId, telefone, extractedData) {
         if (existing.rows.length > 0) {
             // Update existing — never overwrite non-null with null
             const row = existing.rows[0];
-            await db.query(
-                `UPDATE tb_atendimentos SET
-                    cliente = COALESCE($1, cliente),
-                    cidade = COALESCE($2, cidade),
-                    intencao_detectada = COALESCE($3, intencao_detectada),
-                    tem_receita = COALESCE($4, tem_receita),
+            const updateQuery = receitaDados
+                ? `UPDATE tb_atendimentos SET
+                    cliente = COALESCE($1, cliente), cidade = COALESCE($2, cidade),
+                    intencao_detectada = COALESCE($3, intencao_detectada), tem_receita = COALESCE($4, tem_receita),
                     classificacao_lente = COALESCE($5, classificacao_lente),
                     seguiu_fluxo_agendamento = CASE WHEN $6 = true THEN true ELSE seguiu_fluxo_agendamento END,
-                    ultima_interacao = NOW(),
-                    followup_tier = 0,
-                    receita_dados = COALESCE($8, receita_dados)
-                 WHERE id = $7`,
-                [nome, cidade, intencao, temReceita, tipoLente, agendou, row.id, receitaDados]
-            );
+                    ultima_interacao = NOW(), followup_tier = 0, receita_dados = COALESCE($8, receita_dados)
+                   WHERE id = $7`
+                : `UPDATE tb_atendimentos SET
+                    cliente = COALESCE($1, cliente), cidade = COALESCE($2, cidade),
+                    intencao_detectada = COALESCE($3, intencao_detectada), tem_receita = COALESCE($4, tem_receita),
+                    classificacao_lente = COALESCE($5, classificacao_lente),
+                    seguiu_fluxo_agendamento = CASE WHEN $6 = true THEN true ELSE seguiu_fluxo_agendamento END,
+                    ultima_interacao = NOW(), followup_tier = 0
+                   WHERE id = $7`;
+            const updateParams = receitaDados
+                ? [nome, cidade, intencao, temReceita, tipoLente, agendou, row.id, receitaDados]
+                : [nome, cidade, intencao, temReceita, tipoLente, agendou, row.id];
+            await db.query(updateQuery, updateParams);
         } else {
             // Create new atendimento
             await db.query(
                 `INSERT INTO tb_atendimentos
                     (telefone_cliente, cliente, cidade, intencao_detectada, tem_receita,
-                     classificacao_lente, chat_id, canal_entrada, status, ultima_interacao, receita_dados)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'WhatsApp', 'Pendente', NOW(), $8)`,
-                [telefone, nome, cidade, intencao, temReceita, tipoLente, chatId, receitaDados]
+                     classificacao_lente, chat_id, canal_entrada, status, ultima_interacao)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'WhatsApp', 'Pendente', NOW())`,
+                [telefone, nome, cidade, intencao, temReceita, tipoLente, chatId]
             );
         }
     } catch (err) {

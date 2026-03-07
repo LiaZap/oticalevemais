@@ -535,25 +535,27 @@ async function handleIncomingImage(chatId, messageId, caption, contactName) {
             return;
         }
 
-        // Extract base64 from response
-        let base64Image = null;
-        if (mediaData.base64) {
-            base64Image = mediaData.base64;
-        } else if (mediaData.data) {
-            base64Image = typeof mediaData.data === 'string' ? mediaData.data : null;
-        } else if (typeof mediaData === 'string' && mediaData.length > 100) {
-            base64Image = mediaData;
-        }
+        // Extract image from Uazapi response
+        // Uazapi returns: { base64Data, fileURL, mimetype }
+        const base64Image = mediaData.base64Data || mediaData.base64 || mediaData.data || null;
+        const fileURL = mediaData.fileURL || mediaData.fileUrl || mediaData.url || null;
+        const mimetype = mediaData.mimetype || 'image/jpeg';
 
-        console.log(`[Uazapi] Image download result: base64=${base64Image ? `${base64Image.length} chars` : 'null'}, keys=${Object.keys(mediaData).join(',')}`);
+        console.log(`[Uazapi] Image result: base64=${base64Image ? `${base64Image.length} chars` : 'null'}, fileURL=${fileURL ? 'yes' : 'null'}, mime=${mimetype}`);
 
-        if (!base64Image) {
-            console.log('[AI] No base64 data in Uazapi response');
+        let imageUrl;
+        if (base64Image && base64Image.length > 100) {
+            // Use base64 data directly
+            const prefix = base64Image.startsWith('data:') ? '' : `data:${mimetype};base64,`;
+            imageUrl = `${prefix}${base64Image}`;
+        } else if (fileURL) {
+            // Use the file URL from Uazapi (this is a Uazapi-hosted URL, not WhatsApp CDN)
+            imageUrl = fileURL;
+            console.log(`[AI] Using Uazapi fileURL: ${fileURL.substring(0, 100)}`);
+        } else {
+            console.log('[AI] No image data in Uazapi response');
             return;
         }
-
-        // Ensure proper data URI format
-        const imageUrl = base64Image.startsWith('data:') ? base64Image : `data:image/jpeg;base64,${base64Image}`;
 
         // Analyze with Vision API
         const result = await aiService.analyzeImage(chatId, imageUrl, caption);
@@ -637,19 +639,27 @@ async function handleIncomingAudio(chatId, messageId, contactName) {
             return;
         }
 
-        // Extract transcription from response
-        let transcription = null;
-        if (mediaData.transcription) {
-            transcription = mediaData.transcription;
-        } else if (mediaData.text) {
-            transcription = mediaData.text;
-        } else if (mediaData.transcribe) {
-            transcription = mediaData.transcribe;
-        } else if (typeof mediaData === 'string' && mediaData.length > 2) {
+        // Extract transcription and file URL from response
+        let transcription = mediaData.transcription || mediaData.text || mediaData.transcribe || null;
+        const audioFileURL = mediaData.fileURL || mediaData.fileUrl || null;
+
+        if (typeof mediaData === 'string' && mediaData.length > 2 && !transcription) {
             transcription = mediaData;
         }
 
-        console.log(`[Uazapi] Audio transcription result: text=${transcription ? `"${transcription.substring(0, 100)}"` : 'null'}, keys=${typeof mediaData === 'object' ? Object.keys(mediaData).join(',') : 'string'}`);
+        console.log(`[Uazapi] Audio result: text=${transcription ? `"${transcription.substring(0, 80)}"` : 'null'}, fileURL=${audioFileURL ? 'yes' : 'null'}, keys=${typeof mediaData === 'object' ? Object.keys(mediaData).join(',') : 'string'}`);
+
+        // Update original audio message with file URL for playback in frontend
+        if (audioFileURL) {
+            const audioContent = transcription ? `[Áudio] ${audioFileURL} 🎤 ${transcription}` : `[Áudio] ${audioFileURL}`;
+            await db.query(`
+                UPDATE tb_whatsapp_messages SET content = $1 WHERE whatsapp_id = $2
+            `, [audioContent, messageId]);
+            // Emit updated message to frontend
+            if (io) {
+                io.emit('wa.message.update', { chatId, messageId, content: audioContent });
+            }
+        }
 
         if (!transcription || transcription.length < 2) {
             console.log('[AI] Could not transcribe audio');
@@ -658,13 +668,6 @@ async function handleIncomingAudio(chatId, messageId, contactName) {
         }
 
         console.log(`[AI] Audio transcribed: "${transcription.substring(0, 100)}"`);
-
-        // Save transcription as message (so it appears in history)
-        await db.query(`
-            INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
-            VALUES ($1, $2, $3, $4, NOW())
-            ON CONFLICT (whatsapp_id) DO NOTHING
-        `, [`audio_transcript_${Date.now()}`, chatId, chatId, `🎤 ${transcription}`]);
 
         // Process transcribed text as a normal message
         await handleIncomingMessage(chatId, transcription, contactName);
