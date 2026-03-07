@@ -157,7 +157,8 @@ const markAsRead = async (jid) => {
     const number = jid.replace('@s.whatsapp.net', '');
 
     try {
-        await axios.post(`${config.url}/chat/markread`, {
+        // Uazapi endpoint: POST /chat/readMessages
+        await axios.post(`${config.url}/chat/readMessages`, {
             number: number
         }, {
             headers: {
@@ -169,7 +170,7 @@ const markAsRead = async (jid) => {
         console.log(`[WhatsApp] Marked as read: ${number}`);
     } catch (err) {
         // Silently fail — não é crítico
-        console.warn('[WhatsApp] markAsRead failed:', err.response?.data?.message || err.message);
+        console.warn('[WhatsApp] markAsRead failed:', err.response?.status, err.response?.data?.message || err.message);
     }
 };
 
@@ -348,14 +349,28 @@ async function handleIncomingMessage(chatId, message, contactName) {
 
         // Check if AI detected handoff need
         if (result.data?.handoff === true) {
-            await db.query(
-                "UPDATE tb_whatsapp_chats SET atendimento_mode = 'human' WHERE id = $1",
-                [chatId]
-            );
-            if (io) {
-                io.emit('wa.handoff', { chatId, reason: 'AI detected handoff trigger' });
+            const inHours = isBusinessHours();
+            if (inHours) {
+                // Dentro do horário: transfere para humano (tem gente na loja)
+                await db.query(
+                    "UPDATE tb_whatsapp_chats SET atendimento_mode = 'human' WHERE id = $1",
+                    [chatId]
+                );
+                if (io) {
+                    io.emit('wa.handoff', { chatId, reason: 'AI detected handoff trigger' });
+                }
+                console.log(`[AI] Handoff triggered for ${chatId} (business hours)`);
+            } else {
+                // Fora do horário: NÃO transfere — não tem ninguém para atender
+                // A IA continua atendendo, mas registra que precisa de humano
+                console.log(`[AI] Handoff requested for ${chatId} but OUTSIDE business hours — AI continues`);
+                if (io) {
+                    io.emit('wa.handoff_pending', {
+                        chatId,
+                        reason: 'Handoff requested outside business hours — queued for next day'
+                    });
+                }
             }
-            console.log(`[AI] Handoff triggered for ${chatId}`);
         }
 
         // Split AI response into multiple human-like messages
