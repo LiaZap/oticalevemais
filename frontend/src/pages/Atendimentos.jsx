@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
-import { fetchAtendimentos, createAtendimento } from '../lib/api';
-import { Search, Filter, Plus, Phone, Calendar, User, MessageCircle } from 'lucide-react';
+import { fetchAtendimentos, createAtendimento, deleteAtendimento } from '../lib/api';
+import { Search, Filter, Plus, Phone, Calendar, User, MessageCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { KanbanBoard } from '../components/KanbanBoard';
@@ -72,6 +72,20 @@ export default function Atendimentos() {
         const matchesLens = lensFilter === 'Todos' || atendimento.classificacao_lente === lensFilter;
         return matchesSearch && matchesStatus && matchesLens;
     });
+
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, cliente }
+
+    const handleDelete = async (id) => {
+        try {
+            await deleteAtendimento(id);
+            setAtendimentos(atendimentos.filter(a => a.id !== id));
+            setDeleteConfirm(null);
+            toast.success('Atendimento excluído com sucesso!');
+        } catch (error) {
+            console.error('Erro ao excluir atendimento:', error);
+            toast.error('Erro ao excluir atendimento.');
+        }
+    };
 
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
@@ -213,16 +227,17 @@ export default function Atendimentos() {
                                         <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Lente</th>
                                         <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Data</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                                     {loading ? (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-8 text-center text-zinc-500">Carregando...</td>
+                                            <td colSpan="7" className="px-6 py-8 text-center text-zinc-500">Carregando...</td>
                                         </tr>
                                     ) : filteredAtendimentos.length === 0 ? (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-8 text-center text-zinc-500">Nenhum atendimento encontrado.</td>
+                                            <td colSpan="7" className="px-6 py-8 text-center text-zinc-500">Nenhum atendimento encontrado.</td>
                                         </tr>
                                     ) : (
                                         filteredAtendimentos.map((atendimento) => (
@@ -275,9 +290,19 @@ export default function Atendimentos() {
                                                         </span>
                                                     )}
                                                 </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-400">
+                                                    {atendimento.data_inicio ? new Date(atendimento.data_inicio).toLocaleDateString('pt-BR') : '-'}
+                                                </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <button className="text-zinc-400 hover:text-red-600 transition-colors">
-                                                        Editar
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setDeleteConfirm({ id: atendimento.id, cliente: atendimento.cliente });
+                                                        }}
+                                                        className="text-zinc-400 hover:text-red-600 transition-colors p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                        title="Excluir atendimento"
+                                                    >
+                                                        <Trash2 size={16} />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -294,6 +319,37 @@ export default function Atendimentos() {
                 atendimento={selectedCustomer} 
                 onClose={() => setSelectedCustomer(null)} 
             />
+
+            {/* Modal Confirmar Exclusão */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+                                <Trash2 className="text-red-600 dark:text-red-400" size={24} />
+                            </div>
+                            <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Excluir Atendimento</h3>
+                            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">
+                                Tem certeza que deseja excluir o atendimento de <strong className="text-zinc-700 dark:text-zinc-200">{deleteConfirm.cliente}</strong>? Esta ação não pode ser desfeita.
+                            </p>
+                            <div className="flex gap-3 w-full">
+                                <button
+                                    onClick={() => setDeleteConfirm(null)}
+                                    className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(deleteConfirm.id)}
+                                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                                >
+                                    Excluir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Novo Atendimento */}
             {showModal && (

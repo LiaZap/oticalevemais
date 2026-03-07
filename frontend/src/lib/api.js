@@ -55,6 +55,11 @@ export const updateAtendimentoStatus = async (id, status) => {
     return response.data;
 };
 
+export const deleteAtendimento = async (id) => {
+    const response = await api.delete(`/atendimentos/${id}`);
+    return response.data;
+};
+
 export const fetchRelatorios = async (periodo = '7days') => {
     try {
         const response = await api.get(`/relatorios?periodo=${periodo}`);
