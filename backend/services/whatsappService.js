@@ -12,6 +12,63 @@ let io;
 const messageBuffer = new Map(); // chatId → { messages: [], timer: null }
 const BUFFER_WAIT_MS = 15000; // 15 segundos de espera
 
+// =============================================
+// MESSAGE SPLITTER — Divide resposta da IA em múltiplas mensagens
+// Simula comportamento humano de enviar mensagens curtas
+// =============================================
+function splitMessageForHumanLike(text) {
+    // Se é curta (até 120 chars), envia como uma só
+    if (text.length <= 120) return [text];
+
+    const parts = [];
+
+    // 1. Primeiro tenta dividir por quebras de linha dupla (parágrafos)
+    const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+    if (paragraphs.length > 1) {
+        for (const p of paragraphs) {
+            // Se o parágrafo é muito grande, divide por frases
+            if (p.length > 200) {
+                parts.push(...splitBySentences(p));
+            } else {
+                parts.push(p.trim());
+            }
+        }
+        return parts.filter(p => p.length > 0);
+    }
+
+    // 2. Se não tem parágrafos, divide por frases
+    return splitBySentences(text);
+}
+
+function splitBySentences(text) {
+    const parts = [];
+    // Divide por pontos finais, interrogações ou exclamações seguidas de espaço
+    // Preserva o delimitador na parte anterior
+    const sentences = text.match(/[^.!?]*[.!?]+[\s]*/g) || [text];
+
+    let current = '';
+    for (const sentence of sentences) {
+        // Se adicionar essa frase ultrapassa ~150 chars, fecha o bloco atual
+        if (current.length + sentence.length > 150 && current.length > 0) {
+            parts.push(current.trim());
+            current = sentence;
+        } else {
+            current += sentence;
+        }
+    }
+    if (current.trim()) {
+        parts.push(current.trim());
+    }
+
+    // Se ficou tudo em uma parte só, retorna como está
+    return parts.length > 0 ? parts : [text];
+}
+
+// Helper: aguarda um tempo (ms)
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function bufferMessage(chatId, message, contactName) {
     if (!messageBuffer.has(chatId)) {
         messageBuffer.set(chatId, { messages: [], timer: null });
@@ -301,33 +358,48 @@ async function handleIncomingMessage(chatId, message, contactName) {
             console.log(`[AI] Handoff triggered for ${chatId}`);
         }
 
-        // Send the AI response via WhatsApp
-        await sendMessage(chatId, result.reply);
+        // Split AI response into multiple human-like messages
+        const messageParts = splitMessageForHumanLike(result.reply);
+        console.log(`[AI] Splitting response into ${messageParts.length} part(s)`);
 
-        // Save the AI response as a message too
-        await db.query(`
-            INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
-            VALUES ($1, $2, 'me', $3, NOW())
-            ON CONFLICT (whatsapp_id) DO NOTHING
-        `, [`ai_${Date.now()}`, chatId, result.reply]);
+        for (let i = 0; i < messageParts.length; i++) {
+            const part = messageParts[i];
 
-        // Update chat last message
+            // Delay entre partes (simula digitação entre mensagens)
+            if (i > 0) {
+                const interDelay = Math.min(Math.max(part.length * 35, 2000), 6000);
+                await sleep(interDelay);
+            }
+
+            // Send via WhatsApp
+            await sendMessage(chatId, part);
+
+            // Save each part as a message in DB
+            await db.query(`
+                INSERT INTO tb_whatsapp_messages (whatsapp_id, chat_id, sender_id, content, timestamp)
+                VALUES ($1, $2, 'me', $3, NOW())
+                ON CONFLICT (whatsapp_id) DO NOTHING
+            `, [`ai_${Date.now()}_${i}`, chatId, part]);
+
+            // Emit each part to frontend via Socket.IO
+            if (io) {
+                io.emit('wa.message', {
+                    chatId,
+                    content: part,
+                    sender: 'me',
+                    timestamp: new Date()
+                });
+            }
+        }
+
+        // Update chat last message with the final part
+        const lastPart = messageParts[messageParts.length - 1];
         await db.query(`
             UPDATE tb_whatsapp_chats SET
                 last_message_content = $1,
                 last_message_timestamp = NOW()
             WHERE id = $2
-        `, [result.reply, chatId]);
-
-        // Emit AI response to frontend
-        if (io) {
-            io.emit('wa.message', {
-                chatId,
-                content: result.reply,
-                sender: 'me',
-                timestamp: new Date()
-            });
-        }
+        `, [lastPart, chatId]);
 
         // Update/create atendimento with extracted data
         const telefone = chatId.replace('@s.whatsapp.net', '');
