@@ -115,6 +115,13 @@ IMPORTANTE: NÃO ofereça a Campanha Saúde Visual como opção padrão. Ofereç
 
 Quando o cliente pedir consulta, pergunte qual tipo ele prefere (oftalmologista ou optometrista) e explique a diferença de forma simples.
 
+REGRA ANTI-REPETIÇÃO DE CONSULTAS:
+- Apresente as opções de consulta (tipos, valores) apenas UMA VEZ na conversa
+- Se você já listou as opções antes no histórico, NÃO repita os valores e tipos novamente
+- Nas mensagens seguintes, seja direto: "Qual dessas opções te interessa?" ou "Quer agendar qual tipo?"
+- NÃO fique repetindo "temos oftalmologista a partir de R$150 e optometrista R$80" em toda mensagem
+- Se o cliente já viu as opções, avance para o próximo passo (agendar dia/horário)
+
 REGRA DE OURO: Entender a necessidade do cliente ANTES de falar valores.
 
 PREÇOS (fale "a partir de" e só após entender a necessidade):
@@ -227,7 +234,8 @@ async function buildSystemPrompt() {
                 prompt += `\n\n🟢 CAMPANHA SAÚDE VISUAL ATIVA${periodoTexto}:
 A Campanha Saúde Visual está acontecendo agora! ${descricao || 'Consulta na ótica com condições especiais para quem vai fazer os óculos na loja.'}
 Você PODE e DEVE mencionar essa campanha como uma TERCEIRA opção quando o cliente perguntar sobre consulta, exame de vista ou consulta gratuita.
-Responda: "Sim! Estamos com a Campanha Saúde Visual ativa, que oferece consulta na ótica com condições especiais! Além dessa, temos consulta com oftalmologista (a partir de R$150) e com optometrista (R$80). Qual te interessa mais?"`;
+Mencione as opções de consulta e campanha apenas UMA VEZ. Se já apresentou antes no histórico, NÃO repita — vá direto ao próximo passo (agendar dia/horário).
+Responda (apenas na PRIMEIRA vez): "Sim! Estamos com a Campanha Saúde Visual ativa, que oferece consulta na ótica com condições especiais! Além dessa, temos consulta com oftalmologista (a partir de R$150) e com optometrista (R$80). Qual te interessa mais?"`;
             } else {
                 // Campanha configurada mas fora do período
                 prompt += `\n\n⚪ CAMPANHA SAÚDE VISUAL: Fora do período ativo. NÃO mencione a campanha proativamente.
