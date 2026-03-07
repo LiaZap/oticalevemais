@@ -134,7 +134,9 @@ const sendMessage = async (jid, text) => {
         await axios.post(`${config.url}/send/text`, {
             number: number,
             text: text,
-            delay: dynamicDelay
+            delay: dynamicDelay,
+            readchat: true,
+            readmessages: true
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -149,29 +151,14 @@ const sendMessage = async (jid, text) => {
     }
 };
 
-// Mark messages as read (visualizar mensagem) via Uazapi
+// Mark messages as read via Uazapi (usando send/text com readchat + readmessages)
+// Nota: readchat/readmessages já são enviados junto com cada sendMessage
+// Esta função é usada para marcar como lido SEM enviar mensagem (quando IA não vai responder)
 const markAsRead = async (jid) => {
-    const config = getApiConfig();
-    if (!config) return;
-
-    const number = jid.replace('@s.whatsapp.net', '');
-
-    try {
-        // Uazapi endpoint: POST /chat/readMessages
-        await axios.post(`${config.url}/chat/readMessages`, {
-            number: number
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'token': config.token
-            }
-        });
-        console.log(`[WhatsApp] Marked as read: ${number}`);
-    } catch (err) {
-        // Silently fail — não é crítico
-        console.warn('[WhatsApp] markAsRead failed:', err.response?.status, err.response?.data?.message || err.message);
-    }
+    // O read é feito automaticamente no sendMessage via readchat: true
+    // Quando a IA não responde (modo human ou horário comercial),
+    // não marcamos como lido pois o vendedor verá como não lido
+    console.log(`[WhatsApp] Read will be marked on next sendMessage to ${jid}`);
 };
 
 // Send media (image, audio/ptt, video) via Uazapi
