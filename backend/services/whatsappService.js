@@ -356,7 +356,10 @@ const processWebhook = async (data) => {
         if (mediaMimetype.startsWith('audio/') || msg.content.PTT) {
             content = '[Áudio]';
         } else if (mediaMimetype.startsWith('image/')) {
-            content = msg.caption || msg.text || `[Imagem] ${mediaUrlFromContent}`;
+            // Save initially as [Imagem] with optional caption
+            // The Uazapi fileURL will be added later by handleIncomingImage
+            const imgCaption = msg.caption || msg.text || '';
+            content = imgCaption ? `[Imagem] ${imgCaption}` : '[Imagem]';
         } else if (mediaMimetype.startsWith('video/')) {
             content = '[Vídeo]';
         } else {
@@ -612,6 +615,27 @@ async function handleIncomingImage(chatId, messageId, caption, contactName) {
         } else {
             console.log('[AI] No image data in Uazapi response');
             return;
+        }
+
+        // Update original image message with Uazapi fileURL for frontend display
+        if (fileURL) {
+            const updatedImageContent = caption
+                ? `[Imagem] ${fileURL} ${caption}`
+                : `[Imagem] ${fileURL}`;
+            await db.query(
+                'UPDATE tb_whatsapp_messages SET content = $1 WHERE whatsapp_id = $2',
+                [updatedImageContent, messageId]
+            );
+            // Also update chat last message
+            await db.query(
+                'UPDATE tb_whatsapp_chats SET last_message_content = $1 WHERE id = $2',
+                [updatedImageContent, chatId]
+            );
+            // Emit update to frontend so image displays in real-time
+            if (io) {
+                io.emit('wa.message.update', { chatId, messageId, content: updatedImageContent });
+            }
+            console.log(`[AI] Image message updated with Uazapi fileURL for ${chatId}`);
         }
 
         // Analyze with Vision API

@@ -82,12 +82,26 @@ const WhatsApp = () => {
             }
         };
 
+        // Handle message content updates (e.g., audio transcription added, image URL added)
+        const handleMessageUpdate = (data) => {
+            const current = activeChatRef.current;
+            if (current && (data.chatId === current.id || data.chatId === current)) {
+                setMessages(prev => prev.map(m =>
+                    (m.whatsapp_id === data.messageId)
+                        ? { ...m, content: data.content }
+                        : m
+                ));
+            }
+        };
+
         socketService.on('wa.message', handleMessage);
         socketService.on('wa.handoff', handleHandoff);
+        socketService.on('wa.message.update', handleMessageUpdate);
 
         return () => {
             socketService.off('wa.message', handleMessage);
             socketService.off('wa.handoff', handleHandoff);
+            socketService.off('wa.message.update', handleMessageUpdate);
         };
     }, [soundEnabled]);
 
@@ -533,47 +547,79 @@ const WhatsApp = () => {
                             // Handle [object Object] from old messages saved with object content
                             if (content === '[object Object]') content = '[Midia]';
 
-                            // Detect media content
+                            // Detect media content by prefix tags
                             const isImage = content.startsWith('[Imagem]');
-                            const isAudio = content.startsWith('[Áudio]') || content.startsWith('🎤 ');
-                            const isVideo = content.startsWith('[Vídeo]');
+                            const isAudio = content.startsWith('[Áudio]') || content.startsWith('[Audio]') || content.startsWith('🎤 ');
+                            const isVideo = content.startsWith('[Vídeo]') || content.startsWith('[Video]');
                             const isDocument = content.startsWith('[Arquivo]');
                             const isGenericMedia = content === '[Midia]';
 
-                            // Check if content contains image URL (mmg.whatsapp.net or direct image links)
-                            const imageUrlMatch = content.match(/https?:\/\/[^\s]+/i);
-                            const hasImageUrl = imageUrlMatch !== null && (
-                                imageUrlMatch[0].match(/\.(jpg|jpeg|png|gif|webp)/i) ||
-                                imageUrlMatch[0].includes('mmg.whatsapp.net')
-                            );
+                            // ---- Parse AUDIO content ----
+                            // Formats: "[Áudio] URL 🎤 transcript" | "[Áudio] URL transcript" | "[Áudio] URL" | "[Áudio]"
+                            let audioUrl = null;
+                            let audioTranscript = null;
+                            if (isAudio) {
+                                const body = content.replace(/^\[Áudio\]\s*/i, '').replace(/^\[Audio\]\s*/i, '').replace(/^🎤\s*/, '');
+                                const urlMatch = body.match(/^(https?:\/\/[^\s]+)/);
+                                audioUrl = urlMatch ? urlMatch[1] : null;
+                                const afterUrl = audioUrl ? body.substring(audioUrl.length).trim() : body.trim();
+                                audioTranscript = afterUrl.replace(/^🎤\s*/, '').trim() || null;
+                            }
+
+                            // ---- Parse IMAGE content ----
+                            // Formats: "[Imagem] URL caption" | "[Imagem] URL" | "[Imagem] caption" | "[Imagem]"
+                            let parsedImageUrl = null;
+                            let parsedImageCaption = '';
+                            if (isImage) {
+                                const body = content.replace(/^\[Imagem\]\s*/, '');
+                                const urlMatch = body.match(/^(https?:\/\/[^\s]+)/);
+                                parsedImageUrl = urlMatch ? urlMatch[1] : null;
+                                parsedImageCaption = parsedImageUrl ? body.substring(parsedImageUrl.length).trim() : '';
+                            }
+
+                            // Legacy: detect image URL in non-tagged content (old messages with direct URLs)
+                            if (!isImage && !isAudio && !isVideo && !isDocument && !isGenericMedia) {
+                                const legacyUrlMatch = content.match(/https?:\/\/[^\s]+/i);
+                                if (legacyUrlMatch && (
+                                    legacyUrlMatch[0].match(/\.(jpg|jpeg|png|gif|webp)/i) ||
+                                    legacyUrlMatch[0].includes('mmg.whatsapp.net')
+                                )) {
+                                    parsedImageUrl = legacyUrlMatch[0];
+                                }
+                            }
+                            const hasLegacyImageUrl = !isImage && parsedImageUrl !== null;
 
                             return (
                                 <div key={msg.id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`max-w-[70%] p-3 rounded-lg shadow-sm relative ${isMe ? 'bg-[#d9fdd3] text-zinc-900' : 'bg-white text-zinc-900'}`}>
 
                                         {/* Image message */}
-                                        {(isImage || hasImageUrl) && (
+                                        {(isImage || hasLegacyImageUrl) && (
                                             <div className="mb-2">
-                                                {imageUrlMatch && (
+                                                {parsedImageUrl ? (
                                                     <img
-                                                        src={imageUrlMatch[0]}
+                                                        src={parsedImageUrl}
                                                         alt="Imagem"
                                                         className="rounded-lg max-w-full max-h-64 cursor-pointer"
-                                                        onClick={(e) => window.open(e.target.src, '_blank')}
-                                                        onError={(e) => { e.target.parentNode.innerHTML = '<div class="flex items-center gap-2 p-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span class="text-sm text-zinc-500">📷 Imagem</span></div>'; }}
+                                                        onClick={() => window.open(parsedImageUrl, '_blank')}
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextSibling && (e.target.nextSibling.style.display = 'flex');
+                                                        }}
                                                     />
-                                                )}
-                                                {!imageUrlMatch && (
-                                                    <div className="flex items-center gap-2">
-                                                        <Image size={16} className="text-zinc-500" />
-                                                        <p className="text-sm text-zinc-500">📷 Imagem recebida</p>
-                                                    </div>
+                                                ) : null}
+                                                <div className={`items-center gap-2 ${parsedImageUrl ? 'hidden' : 'flex'}`}>
+                                                    <Image size={16} className="text-zinc-500" />
+                                                    <p className="text-sm text-zinc-500">Imagem recebida</p>
+                                                </div>
+                                                {parsedImageCaption && (
+                                                    <p className="text-sm mt-2">{parsedImageCaption}</p>
                                                 )}
                                             </div>
                                         )}
 
                                         {/* Generic media (old [object Object] or [Midia]) */}
-                                        {isGenericMedia && !isImage && !hasImageUrl && (
+                                        {isGenericMedia && !isImage && !hasLegacyImageUrl && (
                                             <div className="flex items-center gap-2 mb-1">
                                                 <Image size={16} className="text-zinc-500" />
                                                 <p className="text-sm text-zinc-500 italic">Mídia recebida</p>
@@ -581,36 +627,32 @@ const WhatsApp = () => {
                                         )}
 
                                         {/* Audio/voice message */}
-                                        {isAudio && (() => {
-                                            // Extract audio URL and transcription from content
-                                            // Format: "[Áudio] URL 🎤 transcription" or "[Áudio] URL" or "🎤 transcription"
-                                            const audioUrlMatch = content.match(/https?:\/\/[^\s]+/);
-                                            const audioUrl = audioUrlMatch ? audioUrlMatch[0] : null;
-                                            const transcriptMatch = content.match(/🎤\s*(.+)/);
-                                            const transcript = transcriptMatch ? transcriptMatch[1].trim() : null;
-
-                                            return (
-                                                <div className="space-y-2 mb-1">
-                                                    {audioUrl && (
-                                                        <audio controls className="w-full max-w-[250px] h-10" preload="none">
+                                        {isAudio && (
+                                            <div className="space-y-2 mb-1">
+                                                {audioUrl ? (
+                                                    <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-2">
+                                                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex-shrink-0 flex items-center justify-center">
+                                                            <Mic size={14} className="text-white" />
+                                                        </div>
+                                                        <audio controls className="w-full max-w-[220px] h-8" preload="metadata">
                                                             <source src={audioUrl} type="audio/ogg" />
                                                             <source src={audioUrl} type="audio/mpeg" />
+                                                            <source src={audioUrl} type="audio/mp4" />
                                                         </audio>
-                                                    )}
-                                                    {!audioUrl && (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                                                                <Mic size={14} className="text-white" />
-                                                            </div>
-                                                            <span className="text-sm text-zinc-500 italic">Áudio</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                            <Mic size={14} className="text-white" />
                                                         </div>
-                                                    )}
-                                                    {transcript && (
-                                                        <p className="text-xs text-zinc-500 italic">🎤 {transcript}</p>
-                                                    )}
-                                                </div>
-                                            );
-                                        })()}
+                                                        <span className="text-sm text-zinc-500 italic">Áudio</span>
+                                                    </div>
+                                                )}
+                                                {audioTranscript && (
+                                                    <p className="text-xs text-zinc-500 italic mt-1">🎤 {audioTranscript}</p>
+                                                )}
+                                            </div>
+                                        )}
 
                                         {/* Video message */}
                                         {isVideo && (
@@ -629,7 +671,7 @@ const WhatsApp = () => {
                                         )}
 
                                         {/* Regular text message */}
-                                        {!isImage && !hasImageUrl && !isAudio && !isVideo && !isDocument && !isGenericMedia && (
+                                        {!isImage && !hasLegacyImageUrl && !isAudio && !isVideo && !isDocument && !isGenericMedia && (
                                             <p className="text-sm whitespace-pre-wrap">{content}</p>
                                         )}
 
